@@ -1,0 +1,468 @@
+{
+  "name": "python-debugger",
+  "displayName": "Python Debugger",
+  "description": "Python Debugger",
+  "serverInfo": {
+    "name": "Python Debugger",
+    "module": "python-debugger"
+  },
+  "version": "0.0.1",
+  "publisher": "ms-python",
+  "license": "MIT",
+  "homepage": "https://github.com/Microsoft/vscode-python-debugger",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/vscode-python-debugger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-python-debugger/issues"
+  },
+  "keywords": [
+    "python",
+    "debugger"
+  ],
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Debuggers"
+  ],
+  "activationEvents": [
+    "onDebugInitialConfigurations",
+    "onDebugDynamicConfigurations:python-debugger",
+    "onDebugResolve:python-debugger",
+    "onLanguage:python"
+  ],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "contributes": {
+    "commands": [
+      {
+        "command": "python-debugger.helloWorld",
+        "title": "Python Debugger: Hello World"
+      },
+      {
+        "category": "Python",
+        "command": "python-debugger.debugInTerminal",
+        "icon": "$(debug-alt)",
+        "title": "Debug in Terminal"
+      }
+    ],
+    "debuggers": [
+      {
+        "configurationAttributes": {
+          "attach": {
+            "properties": {
+              "connect": {
+                "label": "Attach by connecting to debugpy over a socket.",
+                "properties": {
+                  "host": {
+                    "default": "127.0.0.1",
+                    "description": "Hostname or IP address to connect to.",
+                    "type": "string"
+                  },
+                  "port": {
+                    "description": "Port to connect to.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "port"
+                ],
+                "type": "object"
+              },
+              "debugAdapterPath": {
+                "description": "Path (fully qualified) to the python debug adapter executable.",
+                "type": "string"
+              },
+              "django": {
+                "default": false,
+                "description": "Django debugging.",
+                "type": "boolean"
+              },
+              "host": {
+                "default": "127.0.0.1",
+                "description": "Hostname or IP address to connect to.",
+                "type": "string"
+              },
+              "jinja": {
+                "default": null,
+                "description": "Jinja template debugging (e.g. Flask).",
+                "enum": [
+                  false,
+                  null,
+                  true
+                ]
+              },
+              "justMyCode": {
+                "default": true,
+                "description": "If true, show and debug only user-written code. If false, show and debug all code, including library calls.",
+                "type": "boolean"
+              },
+              "listen": {
+                "label": "Attach by listening for incoming socket connection from debugpy",
+                "properties": {
+                  "host": {
+                    "default": "127.0.0.1",
+                    "description": "Hostname or IP address of the interface to listen on.",
+                    "type": "string"
+                  },
+                  "port": {
+                    "description": "Port to listen on.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "port"
+                ],
+                "type": "object"
+              },
+              "logToFile": {
+                "default": false,
+                "description": "Enable logging of debugger events to a log file.",
+                "type": "boolean"
+              },
+              "pathMappings": {
+                "default": [],
+                "items": {
+                  "label": "Path mapping",
+                  "properties": {
+                    "localRoot": {
+                      "default": "${workspaceFolder}",
+                      "label": "Local source root.",
+                      "type": "string"
+                    },
+                    "remoteRoot": {
+                      "default": "",
+                      "label": "Remote source root.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "localRoot",
+                    "remoteRoot"
+                  ],
+                  "type": "object"
+                },
+                "label": "Path mappings.",
+                "type": "array"
+              },
+              "port": {
+                "description": "Port to connect to.",
+                "type": "number"
+              },
+              "processId": {
+                "anyOf": [
+                  {
+                    "default": "${command:pickProcess}",
+                    "description": "Use process picker to select a process to attach, or Process ID as integer.",
+                    "enum": [
+                      "${command:pickProcess}"
+                    ]
+                  },
+                  {
+                    "description": "ID of the local process to attach to.",
+                    "type": "integer"
+                  }
+                ]
+              },
+              "redirectOutput": {
+                "default": true,
+                "description": "Redirect output.",
+                "type": "boolean"
+              },
+              "showReturnValue": {
+                "default": true,
+                "description": "Show return value of functions when stepping.",
+                "type": "boolean"
+              },
+              "subProcess": {
+                "default": false,
+                "description": "Whether to enable Sub Process debugging",
+                "type": "boolean"
+              }
+            }
+          },
+          "launch": {
+            "properties": {
+              "args": {
+                "default": [],
+                "description": "Command line arguments passed to the program.",
+                "items": {
+                  "type": "string"
+                },
+                "type": [
+                  "array",
+                  "string"
+                ]
+              },
+              "autoReload": {
+                "default": {},
+                "description": "Configures automatic reload of code on edit.",
+                "properties": {
+                  "enable": {
+                    "default": false,
+                    "description": "Automatically reload code on edit.",
+                    "type": "boolean"
+                  },
+                  "exclude": {
+                    "default": [
+                      "**/.git/**",
+                      "**/.metadata/**",
+                      "**/__pycache__/**",
+                      "**/node_modules/**",
+                      "**/site-packages/**"
+                    ],
+                    "description": "Glob patterns of paths to exclude from auto reload.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "include": {
+                    "default": [
+                      "**/*.py",
+                      "**/*.pyw"
+                    ],
+                    "description": "Glob patterns of paths to include in auto reload.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "console": {
+                "default": "integratedTerminal",
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "enum": [
+                  "externalTerminal",
+                  "integratedTerminal",
+                  "internalConsole"
+                ]
+              },
+              "cwd": {
+                "default": "${workspaceFolder}",
+                "description": "Absolute path to the working directory of the program being debugged. Default is the root directory of the file (leave empty).",
+                "type": "string"
+              },
+              "debugAdapterPath": {
+                "description": "Path (fully qualified) to the python debug adapter executable.",
+                "type": "string"
+              },
+              "django": {
+                "default": false,
+                "description": "Django debugging.",
+                "type": "boolean"
+              },
+              "env": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {},
+                "description": "Environment variables defined as a key value pair. Property ends up being the Environment Variable and the value of the property ends up being the value of the Env Variable.",
+                "type": "object"
+              },
+              "envFile": {
+                "default": "${workspaceFolder}/.env",
+                "description": "Absolute path to a file containing environment variable definitions.",
+                "type": "string"
+              },
+              "gevent": {
+                "default": false,
+                "description": "Enable debugging of gevent monkey-patched code.",
+                "type": "boolean"
+              },
+              "host": {
+                "default": "localhost",
+                "description": "IP address of the of the local debug server (default is localhost).",
+                "type": "string"
+              },
+              "jinja": {
+                "default": null,
+                "description": "Jinja template debugging (e.g. Flask).",
+                "enum": [
+                  false,
+                  null,
+                  true
+                ]
+              },
+              "justMyCode": {
+                "default": true,
+                "description": "Debug only user-written code.",
+                "type": "boolean"
+              },
+              "logToFile": {
+                "default": false,
+                "description": "Enable logging of debugger events to a log file.",
+                "type": "boolean"
+              },
+              "module": {
+                "default": "",
+                "description": "Name of the module to be debugged.",
+                "type": "string"
+              },
+              "pathMappings": {
+                "default": [],
+                "items": {
+                  "label": "Path mapping",
+                  "properties": {
+                    "localRoot": {
+                      "default": "${workspaceFolder}",
+                      "label": "Local source root.",
+                      "type": "string"
+                    },
+                    "remoteRoot": {
+                      "default": "",
+                      "label": "Remote source root.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "localRoot",
+                    "remoteRoot"
+                  ],
+                  "type": "object"
+                },
+                "label": "Path mappings.",
+                "type": "array"
+              },
+              "port": {
+                "default": 0,
+                "description": "Debug port (default is 0, resulting in the use of a dynamic port).",
+                "type": "number"
+              },
+              "program": {
+                "default": "${file}",
+                "description": "Absolute path to the program.",
+                "type": "string"
+              },
+              "purpose": {
+                "default": [],
+                "description": "Tells extension to use this configuration for test debugging, or when using debug-in-terminal command.",
+                "items": {
+                  "enum": [
+                    "debug-test",
+                    "debug-in-terminal"
+                  ],
+                  "enumDescriptions": [
+                    "Use this configuration while debugging tests using test view or test debug commands.",
+                    "Use this configuration while debugging a file using debug in terminal button in the editor."
+                  ]
+                },
+                "type": "array"
+              },
+              "pyramid": {
+                "default": false,
+                "description": "Whether debugging Pyramid applications",
+                "type": "boolean"
+              },
+              "python": {
+                "default": "${command:python.interpreterPath}",
+                "description": "Absolute path to the Python interpreter executable; overrides workspace configuration if set.",
+                "type": "string"
+              },
+              "pythonArgs": {
+                "default": [],
+                "description": "Command-line arguments passed to the Python interpreter. To pass arguments to the debug target, use \"args\".",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "redirectOutput": {
+                "default": true,
+                "description": "Redirect output.",
+                "type": "boolean"
+              },
+              "showReturnValue": {
+                "default": true,
+                "description": "Show return value of functions when stepping.",
+                "type": "boolean"
+              },
+              "stopOnEntry": {
+                "default": false,
+                "description": "Automatically stop after launch.",
+                "type": "boolean"
+              },
+              "subProcess": {
+                "default": false,
+                "description": "Whether to enable Sub Process debugging",
+                "type": "boolean"
+              },
+              "sudo": {
+                "default": false,
+                "description": "Running debug program under elevated permissions (on Unix).",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "configurationSnippets": [],
+        "label": "Python Debugger",
+        "languages": [
+          "python"
+        ],
+        "type": "python-debugger",
+        "variables": {
+          "pickProcess": "python.pickLocalProcess"
+        },
+        "when": "!virtualWorkspace && shellExecutionSupported"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "vsce-package": "vsce package -o pyhton-debugger.vsix"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/fs-extra": "^11.0.1",
+    "@types/glob": "^7.2.0",
+    "@types/lodash": "^4.14.191",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/sinon": "^10.0.13",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/test-electron": "^2.1.5",
+    "chai": "^4.3.7",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "prettier": "^2.7.1",
+    "sinon": "^15.0.2",
+    "ts-loader": "^9.3.1",
+    "ts-mockito": "^2.6.1",
+    "typemoq": "^2.1.0",
+    "typescript": "^4.7.4",
+    "vscode": "^1.1.37",
+    "vscode-nls-dev": "^4.0.1",
+    "vscode-test": "^1.6.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "@vscode/extension-telemetry": "^0.7.4-preview",
+    "fs-extra": "^11.1.0",
+    "inversify": "^6.0.1",
+    "jsonc-parser": "^3.2.0",
+    "lodash": "^4.17.21",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.5.4",
+    "rxjs-compat": "^6.5.4",
+    "vscode-debugadapter": "^1.51.0",
+    "vscode-debugprotocol": "^1.51.0",
+    "vscode-languageclient": "^8.0.2"
+  }
+}
