@@ -130,7 +130,6 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
         const interpreter = await getInterpreterDetails(resourceUri);
-        let b = await getInterpreterDetails(resourceUri);
 
         if (interpreter) {
             traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreter.path}'`);
