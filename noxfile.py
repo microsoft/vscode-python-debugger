@@ -25,8 +25,7 @@ def _install_bundle(session: nox.Session) -> None:
         "./requirements.txt",
     )
     session.install("packaging")
-
-    _install_debugpy(f"{os.getcwd()}/bundled/libs", "debugpy")
+    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy")
 
 
 def _check_files(names: List[str]) -> None:
@@ -38,14 +37,14 @@ def _check_files(names: List[str]) -> None:
             raise Exception(f"Please update {os.fspath(file_path)}.")
 
 
-# def _update_pip_packages(session: nox.Session) -> None:
-#     session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
-#     session.run(
-#         "pip-compile",
-#         "--generate-hashes",
-#         "--upgrade",
-#         "./src/test/python_tests/requirements.in",
-#     )
+def _update_pip_packages(session: nox.Session) -> None:
+    session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
+    session.run(
+        "pip-compile",
+        "--generate-hashes",
+        "--upgrade",
+        "./src/test/python_tests/requirements.in",
+    )
 
 
 def _get_package_data(package):
@@ -96,7 +95,7 @@ def _update_npm_packages(session: nox.Session) -> None:
 
 def _setup_template_environment(session: nox.Session) -> None:
     session.install("wheel", "pip-tools")
-    # _update_pip_packages(session)
+    _update_pip_packages(session)
     _install_bundle(session)
 
 
@@ -113,84 +112,84 @@ def setup(session: nox.Session) -> None:
     _setup_template_environment(session)
 
 
-# @nox.session()
-# def tests(session: nox.Session) -> None:
-#     """Runs all the tests for the extension."""
-#     session.install("-r", "src/test/python_tests/requirements.txt")
-#     session.run("pytest", "src/test/python_tests")
+@nox.session()
+def tests(session: nox.Session) -> None:
+    """Runs all the tests for the extension."""
+    session.install("-r", "src/test/python_tests/requirements.txt")
+    session.run("pytest", "src/test/python_tests")
 
-#     session.install("freezegun")
-#     session.run("pytest", "build")
+    session.install("freezegun")
+    session.run("pytest", "build")
 
 
 # @nox.session()
 # def lint(session: nox.Session) -> None:
-    """Runs linter and formatter checks on python files."""
-    session.install("-r", "./requirements.txt")
-    session.install("-r", "src/test/python_tests/requirements.txt")
+#     """Runs linter and formatter checks on python files."""
+#     session.install("-r", "./requirements.txt")
+#     session.install("-r", "src/test/python_tests/requirements.txt")
 
-    session.install("flake8")
-    session.run("flake8", "./bundled/tool")
-    session.run(
-        "flake8",
-        "--extend-exclude",
-        "./src/test/python_tests/test_data",
-        "./src/test/python_tests",
-    )
-    session.run("flake8", "noxfile.py")
+#     session.install("flake8")
+#     session.run("flake8", "./bundled/tool")
+#     session.run(
+#         "flake8",
+#         "--extend-exclude",
+#         "./src/test/python_tests/test_data",
+#         "./src/test/python_tests",
+#     )
+#     session.run("flake8", "noxfile.py")
 
-    # check formatting using black
-    session.install("black")
-    session.run("black", "--check", "./bundled/tool")
-    session.run("black", "--check", "./src/test/python_tests")
-    session.run("black", "--check", "noxfile.py")
+#     # check formatting using black
+#     session.install("black")
+#     session.run("black", "--check", "./bundled/tool")
+#     session.run("black", "--check", "./src/test/python_tests")
+#     session.run("black", "--check", "noxfile.py")
 
-    # check import sorting using isort
-    session.install("isort")
-    session.run("isort", "--check", "./bundled/tool")
-    session.run("isort", "--check", "./src/test/python_tests")
-    session.run("isort", "--check", "noxfile.py")
+#     # check import sorting using isort
+#     session.install("isort")
+#     session.run("isort", "--check", "./bundled/tool")
+#     session.run("isort", "--check", "./src/test/python_tests")
+#     session.run("isort", "--check", "noxfile.py")
 
-    # check typescript code
-    session.run("npm", "run", "lint", external=True)
-
-
-@nox.session()
-def build_package(session: nox.Session) -> None:
-    """Builds VSIX package for publishing."""
-    _check_files(["README.md", "LICENSE", "SECURITY.md", "SUPPORT.md"])
-    _setup_template_environment(session)
-    session.run("npm", "install", external=True)
-    session.run("npm", "run", "vsce-package", external=True)
+#     # check typescript code
+#     session.run("npm", "run", "lint", external=True)
 
 
-@nox.session()
-def update_build_number(session: nox.Session) -> None:
-    """Updates build number for the extension."""
-    if len(session.posargs) == 0:
-        session.log("No updates to package version")
-        return
-
-    package_json_path = pathlib.Path(__file__).parent / "package.json"
-    session.log(f"Reading package.json at: {package_json_path}")
-
-    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-
-    parts = re.split("\\.|-", package_json["version"])
-    major, minor = parts[:2]
-
-    version = f"{major}.{minor}.{session.posargs[0]}"
-    version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
-
-    session.log(f"Updating version from {package_json['version']} to {version}")
-    package_json["version"] = version
-    package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
+# @nox.session()
+# def build_package(session: nox.Session) -> None:
+#     """Builds VSIX package for publishing."""
+#     _check_files(["README.md", "LICENSE", "SECURITY.md", "SUPPORT.md"])
+#     _setup_template_environment(session)
+#     session.run("npm", "install", external=True)
+#     session.run("npm", "run", "vsce-package", external=True)
 
 
-def _get_module_name() -> str:
-    package_json_path = pathlib.Path(__file__).parent / "package.json"
-    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-    return package_json["serverInfo"]["module"]
+# @nox.session()
+# def update_build_number(session: nox.Session) -> None:
+#     """Updates build number for the extension."""
+#     if len(session.posargs) == 0:
+#         session.log("No updates to package version")
+#         return
+
+#     package_json_path = pathlib.Path(__file__).parent / "package.json"
+#     session.log(f"Reading package.json at: {package_json_path}")
+
+#     package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
+
+#     parts = re.split("\\.|-", package_json["version"])
+#     major, minor = parts[:2]
+
+#     version = f"{major}.{minor}.{session.posargs[0]}"
+#     version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
+
+#     session.log(f"Updating version from {package_json['version']} to {version}")
+#     package_json["version"] = version
+#     package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
+
+
+# def _get_module_name() -> str:
+#     package_json_path = pathlib.Path(__file__).parent / "package.json"
+#     package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
+#     return package_json["serverInfo"]["module"]
 
 
 @nox.session()
@@ -225,13 +224,16 @@ def _update_readme() -> None:
     content = readme_file.write_text(result, encoding="utf-8")
 
 
-# @nox.session()
-# def update_packages(session: nox.Session) -> None:
-#     """Update pip and npm packages."""
-#     session.install("wheel", "pip-tools")
-#     _update_pip_packages(session)
-#     _update_npm_packages(session)
-#     _update_readme()
+@nox.session()
+def update_packages(session: nox.Session) -> None:
+    """Update pip and npm packages."""
+    session.install("wheel", "pip-tools")
+    _update_pip_packages(session)
+    _update_npm_packages(session)
+    _update_readme()
+
+def _contains(s, parts=()):
+    return any(p for p in parts if p in s)
 
 def _get_pypi_package_data(package_name):
     json_uri = "https://pypi.org/pypi/{0}/json".format(package_name)
@@ -240,14 +242,10 @@ def _get_pypi_package_data(package_name):
     with url_lib.urlopen(json_uri) as response:
         return json.loads(response.read())
 
-def _get_wheel_urls(data, version):
-    # urls = []
-    # for r in data["releases"][version]:
-    #     if "url" in r and "python_version" in r and r["python_version"] == "cp39":
-    #         urls.append(r['url'])
-    # return urls
-    return [r['url'] for r in data["releases"][version] if "url" in r and "python_version" in r and r["python_version"] == "cp39"]
-
+def _get_urls(data, version):
+    return list(
+        r["url"] for r in data["releases"][version] if _contains(r["url"], ("cp37",))
+    )
 
 
 def _download_and_extract(root, url, version):
@@ -262,7 +260,7 @@ def _download_and_extract(root, url, version):
                 print("\t" + zip_info.filename)
                 wheel.extract(zip_info.filename, root)
 
-def _install_debugpy(root, package_name, version="latest"):
+def _install_package(root, package_name, version="latest"):
     from packaging.version import parse as version_parser
 
     data = _get_pypi_package_data(package_name)
@@ -272,5 +270,5 @@ def _install_debugpy(root, package_name, version="latest"):
     else:
         use_version = version
 
-    for url in _get_wheel_urls(data, use_version):
+    for url in _get_urls(data, use_version):
         _download_and_extract(root, url, use_version)

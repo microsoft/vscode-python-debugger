@@ -80,9 +80,9 @@ function getTelemetryReporter() {
     return telemetryReporter;
 }
 
-// export function clearTelemetryReporter(): void {
-//     telemetryReporter = undefined;
-// }
+export function clearTelemetryReporter(): void {
+    telemetryReporter = undefined;
+}
 
 export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extends keyof P>(
     eventName: E,

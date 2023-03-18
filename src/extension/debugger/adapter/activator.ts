@@ -34,7 +34,6 @@ export class DebugAdapterActivator implements IExtensionSingleActivationService 
         this.disposables.push(
             this.debugService.registerDebugAdapterTrackerFactory(DebuggerTypeName, this.debuggerPromptFactory),
         );
-
         this.disposables.push(
             this.debugService.registerDebugAdapterDescriptorFactory(DebuggerTypeName, this.descriptorFactory),
         );

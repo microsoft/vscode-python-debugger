@@ -5,6 +5,12 @@
 
 import { EnvironmentVariables } from "./variables/types";
 
+export enum Architecture {
+    Unknown = 1,
+    x86 = 2,
+    x64 = 3,
+}
+
 export enum OSType {
     Unknown = 'Unknown',
     Windows = 'Windows',
