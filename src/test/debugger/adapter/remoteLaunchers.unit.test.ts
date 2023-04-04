@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import * as path from 'path';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import '../../../extension/common/extensions';
-import * as launchers from '../../../extension/debugger/extension/adapter/remoteLaunchers';
+import * as launchers from '../../../extension/debugger/adapter/remoteLaunchers';
 
 suite('External debugpy Debugger Launcher', () => {
     [

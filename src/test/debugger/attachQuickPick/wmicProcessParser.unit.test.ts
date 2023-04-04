@@ -4,8 +4,8 @@
 'use strict';
 
 import * as assert from 'assert';
-import { IAttachItem } from '../../../extension/debugger/extension/attachQuickPick/types';
-import { WmicProcessParser } from '../../../extension/debugger/extension/attachQuickPick/wmicProcessParser';
+import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
+import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 
 suite('Attach to process - wmic process parser (Windows)', () => {
     test('Processes should be parsed correctly if it is valid input', () => {

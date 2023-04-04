@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -5,7 +6,7 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { anything, instance, mock, verify, when } from 'ts-mockito';
 import { DebugSession, WorkspaceFolder } from 'vscode';
@@ -80,21 +81,21 @@ suite('Debugging - Session Logging', () => {
         const filePath = path.join(EXTENSION_ROOT_DIR, `debugger.vscode_${session.id}.log`);
 
         await loggerFactory.createDebugAdapterTracker(session);
-        createWriteStreamStub.neverCalledWith(filePath);
+        sinon.assert.neverCalledWith(createWriteStreamStub, filePath);
     });
 
     test('Create logger using session with logToFile set to false', async () => {
         const session = createSessionWithLogging('test2', false);
         const filePath = path.join(EXTENSION_ROOT_DIR, `debugger.vscode_${session.id}.log`);
         
-        createWriteStreamStub.withArgs(filePath).resolves(instance(writeStream));
+        createWriteStreamStub.withArgs(filePath).returns(instance(writeStream));
         when(writeStream.write(anything())).thenReturn(true);
         const logger = await loggerFactory.createDebugAdapterTracker(session);
         if (logger) {
             logger.onWillStartSession!();
         }
 
-        createWriteStreamStub.neverCalledWith(filePath);
+        sinon.assert.neverCalledWith(createWriteStreamStub, filePath);
         verify(writeStream.write(anything())).never();
     });
 
@@ -103,7 +104,7 @@ suite('Debugging - Session Logging', () => {
         const filePath = path.join(EXTENSION_ROOT_DIR, `debugger.vscode_${session.id}.log`);
         const logs: string[] = [];
 
-        createWriteStreamStub.withArgs(filePath).resolves(instance(writeStream));
+        createWriteStreamStub.withArgs(filePath).returns(instance(writeStream));
 
         when(writeStream.write(anything())).thenCall((msg) => logs.push(msg));
 

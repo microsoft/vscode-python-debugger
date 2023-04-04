@@ -5,17 +5,15 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { anyString, anything, mock, when } from 'ts-mockito';
+import { anyString, anything} from 'ts-mockito';
 import { DebugSession, WorkspaceFolder } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { ConfigurationService } from '../../../extension/common/configuration/service';
-import { createDeferred, sleep } from '../../../extension/common/utils/async';
+import { createDeferred } from '../../../extension/common/utils/async';
 import { Common } from '../../../extension/common/utils/localize';
-import { OutdatedDebuggerPromptFactory } from '../../../extension/debugger/extension/adapter/outdatedDebuggerPrompt';
+import { OutdatedDebuggerPromptFactory } from '../../../extension/debugger/adapter/outdatedDebuggerPrompt';
 import { clearTelemetryReporter } from '../../../extension/telemetry';
-import * as browserApis from '../../../extension/common/vscodeApis/browserApis';
-import * as windowApis from '../../../extension/common/vscodeApis/windowApis';
-import { IPythonSettings } from '../../../extension/common/types';
+import * as vscodeapi from '../../../extension/common/vscodeapi';
+import { sleep } from '../../core';
 
 suite('Debugging - Outdated Debugger Prompt tests.', () => {
     let promptFactory: OutdatedDebuggerPromptFactory;
@@ -37,14 +35,13 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
     };
 
     setup(() => {
-        const configurationService = mock(ConfigurationService);
-        when(configurationService.getSettings(undefined)).thenReturn(({
-            experiments: { enabled: true },
-        } as any) as IPythonSettings);
+        // const configurationService = mock(ConfigurationService);
+        // when(configurationService.getSettings(undefined)).thenReturn(({
+        //     experiments: { enabled: true },
+        // } as any) as IPythonSettings);
 
-        showInformationMessageStub = sinon.stub(windowApis, 'showInformationMessage');
-        browserLaunchStub = sinon.stub(browserApis, 'launch');
-
+        showInformationMessageStub = sinon.stub(vscodeapi, 'showInformationMessage');
+        browserLaunchStub = sinon.stub(vscodeapi, 'launch');
         promptFactory = new OutdatedDebuggerPromptFactory();
     });
 
@@ -77,7 +74,7 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
             prompter.onDidSendMessage!(ptvsdOutputEvent);
         }
 
-        browserLaunchStub.neverCalledWith(anyString());
+        sinon.assert.neverCalledWith(browserLaunchStub,anyString())
 
         // First call should show info once
 
@@ -88,7 +85,7 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
         // Can't use deferred promise here
         await sleep(1);
 
-        browserLaunchStub.neverCalledWith(anyString());
+        sinon.assert.neverCalledWith(browserLaunchStub);
         // Second time it should not be called, so overall count is one.
         sinon.assert.calledOnce(showInformationMessageStub);
     });
@@ -136,7 +133,7 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
         // Can't use deferred promise here
         await sleep(1);
 
-        showInformationMessageStub.neverCalledWith(anything(), anything());
+        sinon.assert.neverCalledWith(showInformationMessageStub);
     });
 
     const someRequest: DebugProtocol.RunInTerminalRequest = {
@@ -174,7 +171,7 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
             // Can't use deferred promise here
             await sleep(1);
 
-            showInformationMessageStub.neverCalledWith(anything(), anything());
+            sinon.assert.neverCalledWith(showInformationMessageStub)
         });
     });
 });

@@ -10,14 +10,11 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import rewiremock from 'rewiremock';
 import { SemVer } from 'semver';
-import { anything, instance, mock, verify, when } from 'ts-mockito';
+import { instance, mock, when } from 'ts-mockito';
 import { DebugAdapterExecutable, DebugAdapterServer, DebugConfiguration, DebugSession, WorkspaceFolder } from 'vscode';
-// import { ConfigurationService } from '../../../extension/common/configuration/service';
 import { IPersistentStateFactory } from '../../../extension/common/types';
 import { DebugAdapterDescriptorFactory, debugStateKeys } from '../../../extension/debugger/adapter/factory';
 import { IDebugAdapterDescriptorFactory } from '../../../extension/debugger/types';
-// import { IInterpreterService } from '../../../extension/interpreter/contracts';
-// import { InterpreterService } from '../../../extension/interpreter/interpreterService';
 import { clearTelemetryReporter } from '../../../extension/telemetry';
 import { EventName } from '../../../extension/telemetry/constants';
 import { PersistentState, PersistentStateFactory } from '../../../extension/common/persistentState';
@@ -25,8 +22,6 @@ import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { Architecture } from '../../../extension/common/platform';
 import * as pythonApi from '../../../extension/common/python';
-// import { ICommandManager } from '../../../extension/common/application/types';
-// import { CommandManager } from '../../../extension/common/application/commandManager';
 
 use(chaiAsPromised);
 
@@ -36,9 +31,12 @@ suite('Debugging - Adapter Factory', () => {
     let state: PersistentState<boolean | undefined>;
     let showErrorMessageStub: sinon.SinonStub;
     let resolveEnvironmentStub: sinon.SinonStub;
+    let getInterpretersStub: sinon.SinonStub;
+    let getActiveEnvironmentPathStub: sinon.SinonStub;
+    let hasInterpretersStub: sinon.SinonStub;
 
     const nodeExecutable = undefined;
-    const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'pythonFiles', 'lib', 'python', 'debugpy', 'adapter');
+    const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
     const pythonPath = path.join('path', 'to', 'python', 'interpreter');
     const interpreter = {
         architecture: Architecture.Unknown,
@@ -71,23 +69,16 @@ suite('Debugging - Adapter Factory', () => {
         state = mock(PersistentState) as PersistentState<boolean | undefined>;
         showErrorMessageStub = sinon.stub(vscodeApi, 'showErrorMessage');
         resolveEnvironmentStub = sinon.stub(pythonApi, 'resolveEnvironment');
+        getInterpretersStub = sinon.stub(pythonApi, 'getInterpreters');
+        getActiveEnvironmentPathStub = sinon.stub(pythonApi, 'getActiveEnvironmentPath');
+        hasInterpretersStub = sinon.stub(pythonApi, 'hasInterpreters');
 
         when(
             stateFactory.createGlobalPersistentState<boolean | undefined>(debugStateKeys.doNotShowAgain, false),
         ).thenReturn(instance(state));
 
-        // const configurationService = mock(ConfigurationService);
-        // when(configurationService.getSettings(undefined)).thenReturn(({
-        //     experiments: { enabled: true },
-        // } as any) as IPythonSettings);
-
-        // interpreterService = mock(InterpreterService);
-
-        // when(interpreterService.getInterpreterDetails(pythonPath)).thenResolve(interpreter);
-        resolveEnvironmentStub.withArgs(pythonPath).resolves(interpreter);
-        
-        // when(interpreterService.getInterpreters(anything())).thenReturn([interpreter]);
-
+        getInterpretersStub.returns([interpreter]);
+        hasInterpretersStub.returns(true);
         factory = new DebugAdapterDescriptorFactory(
             instance(stateFactory),
         );
@@ -119,7 +110,8 @@ suite('Debugging - Adapter Factory', () => {
     test('Return the value of configuration.pythonPath as the current python path if it exists', async () => {
         const session = createSession({ pythonPath });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-
+       
+        resolveEnvironmentStub.withArgs(pythonPath).resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         assert.deepStrictEqual(descriptor, debugExecutable);
@@ -128,9 +120,8 @@ suite('Debugging - Adapter Factory', () => {
     test('Return the path of the active interpreter as the current python path, it exists and configuration.pythonPath is not defined', async () => {
         const session = createSession({});
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve(interpreter);
-
+        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        resolveEnvironmentStub.resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         assert.deepStrictEqual(descriptor, debugExecutable);
@@ -146,7 +137,7 @@ suite('Debugging - Adapter Factory', () => {
     });
 
     test('Display a message if no python interpreter is set', async () => {
-        // when(interpreterService.getInterpreters(anything())).thenReturn([]);
+        getInterpretersStub.returns([]);
         const session = createSession({});
 
         const promise = factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -156,7 +147,7 @@ suite('Debugging - Adapter Factory', () => {
     });
 
     test('Display a message if python version is less than 3.7', async () => {
-        // when(interpreterService.getInterpreters(anything())).thenReturn([]);
+        getInterpretersStub.returns([]);
         const session = createSession({});
         const deprecatedInterpreter = {
             architecture: Architecture.Unknown,
@@ -167,7 +158,8 @@ suite('Debugging - Adapter Factory', () => {
             version: new SemVer('3.6.12-test'),
         };
         when(state.value).thenReturn(false);
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve(deprecatedInterpreter);
+        getActiveEnvironmentPathStub.resolves(deprecatedInterpreter.path);
+        resolveEnvironmentStub.resolves(deprecatedInterpreter);
 
         await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -177,11 +169,11 @@ suite('Debugging - Adapter Factory', () => {
     test('Return Debug Adapter server if request is "attach", and port is specified directly', async () => {
         const session = createSession({ request: 'attach', port: 5678, host: 'localhost' });
         const debugServer = new DebugAdapterServer(session.configuration.port, session.configuration.host);
-
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         // Interpreter not needed for host/port
-        // verify(interpreterService.getInterpreters(anything())).never();
+        sinon.assert.neverCalledWith(getInterpretersStub);
+
         assert.deepStrictEqual(descriptor, debugServer);
     });
 
@@ -195,7 +187,7 @@ suite('Debugging - Adapter Factory', () => {
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         // Interpreter not needed for connect
-        // verify(interpreterService.getInterpreters(anything())).never();
+        sinon.assert.neverCalledWith(getInterpretersStub);        
         assert.deepStrictEqual(descriptor, debugServer);
     });
 
@@ -203,7 +195,8 @@ suite('Debugging - Adapter Factory', () => {
         const session = createSession({ request: 'attach', listen: { port: 5678, host: 'localhost' } });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve(interpreter);
+        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        resolveEnvironmentStub.resolves(interpreter);
 
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
         assert.deepStrictEqual(descriptor, debugExecutable);
@@ -294,8 +287,6 @@ suite('Debugging - Adapter Factory', () => {
         };
 
         resolveEnvironmentStub.withArgs('/bin/custompy').resolves(customInterpreter);
-        // when(interpreterService.getInterpreterDetails('/bin/custompy')).thenResolve(customInterpreter);
-
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         assert.deepStrictEqual(descriptor, debugExecutable);

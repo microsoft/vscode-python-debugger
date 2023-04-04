@@ -4,8 +4,8 @@
 'use strict';
 
 import * as assert from 'assert';
-import { PsProcessParser } from '../../../extension/debugger/extension/attachQuickPick/psProcessParser';
-import { IAttachItem } from '../../../extension/debugger/extension/attachQuickPick/types';
+import { PsProcessParser } from '../../../extension/debugger/attachQuickPick/psProcessParser';
+import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 
 suite('Attach to process - ps process parser (POSIX)', () => {
     test('Processes should be parsed correctly if it is valid input', () => {

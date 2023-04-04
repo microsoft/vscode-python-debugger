@@ -4,38 +4,29 @@
 'use strict';
 
 import * as assert from 'assert';
-import { anything, instance, mock, verify } from 'ts-mockito';
+import * as sinon from 'sinon';
+import { instance, mock } from 'ts-mockito';
 import { Disposable } from 'vscode';
-import { ApplicationShell } from '../../../extension/common/application/applicationShell';
-import { CommandManager } from '../../../extension/common/application/commandManager';
 import { Commands } from '../../../extension/common/constants';
-import { PlatformService } from '../../../extension/common/platform/platformService';
-import { IPlatformService } from '../../../extension/common/platform/types';
 import { ProcessServiceFactory } from '../../../extension/common/process/processFactory';
 import { IProcessServiceFactory } from '../../../extension/common/process/types';
 import { IDisposableRegistry } from '../../../extension/common/types';
-import { AttachProcessProviderFactory } from '../../../extension/debugger/extension/attachQuickPick/factory';
+import { AttachProcessProviderFactory } from '../../../extension/debugger/attachQuickPick/factory';
+import * as vscodeapi from '../../../extension/common/vscodeapi';
 
 suite('Attach to process - attach process provider factory', () => {
-    let applicationShell: IApplicationShell;
-    let commandManager: ICommandManager;
-    let platformService: IPlatformService;
     let processServiceFactory: IProcessServiceFactory;
     let disposableRegistry: IDisposableRegistry;
-
     let factory: AttachProcessProviderFactory;
+    let registerCommandStub: sinon.SinonStub;
 
     setup(() => {
-        applicationShell = mock(ApplicationShell);
-        commandManager = mock(CommandManager);
-        platformService = mock(PlatformService);
         processServiceFactory = mock(ProcessServiceFactory);
         disposableRegistry = [];
+        registerCommandStub = sinon.stub(vscodeapi, 'registerCommand');
+    
 
         factory = new AttachProcessProviderFactory(
-            instance(applicationShell),
-            instance(commandManager),
-            instance(platformService),
             instance(processServiceFactory),
             disposableRegistry,
         );
@@ -43,8 +34,7 @@ suite('Attach to process - attach process provider factory', () => {
 
     test('Register commands should not fail', () => {
         factory.registerCommands();
-
-        verify(commandManager.registerCommand(Commands.PickLocalProcess, anything(), anything())).once();
+        sinon.assert.calledOnceWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any, sinon.match.any);
         assert.strictEqual((disposableRegistry as Disposable[]).length, 1);
     });
 });

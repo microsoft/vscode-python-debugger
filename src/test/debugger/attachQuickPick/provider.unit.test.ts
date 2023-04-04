@@ -4,38 +4,38 @@
 'use strict';
 
 import * as assert from 'assert';
+import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { anything, instance, mock, verify, when } from 'ts-mockito';
-import { PlatformService } from '../../../extension/common/platform/platformService';
-import { IPlatformService } from '../../../extension/common/platform/types';
 import { ProcessService } from '../../../extension/common/process/proc';
 import { ProcessServiceFactory } from '../../../extension/common/process/processFactory';
 import { IProcessService, IProcessServiceFactory } from '../../../extension/common/process/types';
-import { OSType } from '../../../extension/common/utils/platform';
-import { AttachProcessProvider } from '../../../extension/debugger/extension/attachQuickPick/provider';
-import { PsProcessParser } from '../../../extension/debugger/extension/attachQuickPick/psProcessParser';
-import { IAttachItem } from '../../../extension/debugger/extension/attachQuickPick/types';
-import { WmicProcessParser } from '../../../extension/debugger/extension/attachQuickPick/wmicProcessParser';
+import { AttachProcessProvider } from '../../../extension/debugger/attachQuickPick/provider';
+import { PsProcessParser } from '../../../extension/debugger/attachQuickPick/psProcessParser';
+import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
+import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
+import * as platform from '../../../extension/common/platform';
 
 suite('Attach to process - process provider', () => {
-    let platformService: IPlatformService;
     let processService: IProcessService;
     let processServiceFactory: IProcessServiceFactory;
-
     let provider: AttachProcessProvider;
+    let getOSTypeStub: sinon.SinonStub;
 
     setup(() => {
-        platformService = mock(PlatformService);
         processService = mock(ProcessService);
         processServiceFactory = mock(ProcessServiceFactory);
         when(processServiceFactory.create()).thenResolve(instance(processService));
+        provider = new AttachProcessProvider(instance(processServiceFactory));
+        getOSTypeStub = sinon.stub(platform, 'getOSType');
+    });
 
-        provider = new AttachProcessProvider(instance(platformService), instance(processServiceFactory));
+    teardown(() => {
+        sinon.restore();
     });
 
     test('The Linux process list command should be called if the platform is Linux', async () => {
-        when(platformService.isMac).thenReturn(false);
-        when(platformService.isLinux).thenReturn(true);
+        getOSTypeStub.returns(platform.OSType.Linux);
         const psOutput = `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 1 launchd                                            launchd
 41 syslogd                                            syslogd
@@ -84,7 +84,7 @@ suite('Attach to process - process provider', () => {
     });
 
     test('The macOS process list command should be called if the platform is macOS', async () => {
-        when(platformService.isMac).thenReturn(true);
+        getOSTypeStub.returns(platform.OSType.OSX);
         const psOutput = `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 1 launchd                                            launchd
 41 syslogd                                            syslogd
@@ -173,9 +173,8 @@ ProcessId=5912\r
                 commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
             },
         ];
-        when(platformService.isMac).thenReturn(false);
-        when(platformService.isLinux).thenReturn(false);
-        when(platformService.isWindows).thenReturn(true);
+        getOSTypeStub.returns(platform.OSType.Windows);
+
         when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
             stdout: windowsOutput,
         });
@@ -189,20 +188,15 @@ ProcessId=5912\r
     });
 
     test('An error should be thrown if the platform is neither Linux, macOS or Windows', async () => {
-        when(platformService.isMac).thenReturn(false);
-        when(platformService.isLinux).thenReturn(false);
-        when(platformService.isWindows).thenReturn(false);
-        when(platformService.osType).thenReturn(OSType.Unknown);
-
+        getOSTypeStub.returns(platform.OSType.Unknown);
         const promise = provider._getInternalProcessEntries();
 
-        await expect(promise).to.eventually.be.rejectedWith(`Operating system '${OSType.Unknown}' not supported.`);
+        await expect(promise).to.eventually.be.rejectedWith(`Operating system '${platform.OSType.Unknown}' not supported.`);
     });
 
     suite('POSIX getAttachItems (Linux)', () => {
         setup(() => {
-            when(platformService.isMac).thenReturn(false);
-            when(platformService.isLinux).thenReturn(true);
+            getOSTypeStub.returns(platform.OSType.Linux);
         });
 
         test('Items returned by getAttachItems should be sorted alphabetically', async () => {
@@ -308,9 +302,8 @@ ProcessId=5912\r
 
     suite('Windows getAttachItems', () => {
         setup(() => {
-            when(platformService.isMac).thenReturn(false);
-            when(platformService.isLinux).thenReturn(false);
-            when(platformService.isWindows).thenReturn(true);
+            getOSTypeStub.returns(platform.OSType.Windows);
+
         });
 
         test('Items returned by getAttachItems should be sorted alphabetically', async () => {

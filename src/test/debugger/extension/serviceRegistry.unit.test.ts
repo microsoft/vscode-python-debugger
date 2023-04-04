@@ -41,7 +41,7 @@ suite('Debugging - Service Registry', () => {
     setup(() => {
         serviceManager = mock(ServiceManager);
     });
-    test.only('Registrations', () => {
+    test('Registrations', () => {
         registerTypes(instance(serviceManager));
 
         verify(
