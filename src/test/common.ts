@@ -7,6 +7,8 @@
 import * as fs from 'fs-extra';
 import { ConfigurationTarget, Uri } from 'vscode';
 import { IS_MULTI_ROOT_TEST } from './constants';
+import { IExtensionApi } from '../extension/apiTypes';
+import { IServiceContainer, IServiceManager } from '../extension/debugger/ioc/types';
 
 export const PYTHON_PATH = getPythonPath();
 
@@ -81,4 +83,10 @@ function getPythonPath(): string {
     // TODO: Change this to python3.
     // See https://github.com/microsoft/vscode-python/issues/10910.
     return 'python';
+}
+
+
+export interface IExtensionTestApi extends IExtensionApi {
+    serviceContainer: IServiceContainer;
+    serviceManager: IServiceManager;
 }
