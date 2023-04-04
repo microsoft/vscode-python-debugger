@@ -96,8 +96,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             const args = command.concat([debuggerAdapterPathToUse, ...logArgs]);
             traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
             sendTelemetryEvent(EventName.DEBUG_ADAPTER_USING_WHEELS_PATH, undefined, { usingWheels: true });
-            const a = new DebugAdapterExecutable(executable, args);
-            return a;
+            return new DebugAdapterExecutable(executable, args);
         }
 
         // Unlikely scenario.

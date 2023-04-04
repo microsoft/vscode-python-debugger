@@ -122,19 +122,6 @@ async function activateUnsafe(
     startupDurations.totalActivateTime = startupStopWatch.elapsedTime - startupDurations.startActivateTime;
     activationDeferred.resolve();
 
-    // setTimeout(async () => {
-    //     if (activatedServiceContainer) {
-    //         if (workspace.isTrusted) {
-    //         //     const interpreterManager = activatedServiceContainer.get<IInterpreterService>(IInterpreterService);
-    //         //     const workspaces = workspace.workspaceFolders ?? [];
-    //         //     await interpreterManager
-    //         //         .refresh(workspaces.length > 0 ? workspaces[0].uri : undefined)
-    //         //         .catch((ex) => traceError('Python Extension: interpreterManager.refresh', ex));
-    //         }
-    //     }
-    //     // runAfterActivation();
-    // });
-
     const api = buildApi(activationPromise, ext.legacyIOC.serviceManager, ext.legacyIOC.serviceContainer);
 
     return [api, activationPromise, ext.legacyIOC.serviceContainer];

@@ -400,7 +400,7 @@
         "languages": [
           "python"
         ],
-        "type": "python-debugger",
+        "type": "debugpy",
         "variables": {
           "pickProcess": "python.pickLocalProcess"
         },
