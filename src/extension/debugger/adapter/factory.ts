@@ -126,6 +126,10 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             return this.getExecutableCommand(
                 (await resolveEnvironment(configuration.debugAdapterPython)),
             );
+        } else if (configuration.pythonPath) {
+            return this.getExecutableCommand(
+                await resolveEnvironment(configuration.pythonPath),
+            );
         }
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
