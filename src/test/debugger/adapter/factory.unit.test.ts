@@ -79,9 +79,7 @@ suite('Debugging - Adapter Factory', () => {
 
         getInterpretersStub.returns([interpreter]);
         hasInterpretersStub.returns(true);
-        factory = new DebugAdapterDescriptorFactory(
-            instance(stateFactory),
-        );
+        factory = new DebugAdapterDescriptorFactory(instance(stateFactory));
     });
 
     teardown(() => {
@@ -110,7 +108,7 @@ suite('Debugging - Adapter Factory', () => {
     test('Return the value of configuration.pythonPath as the current python path if it exists', async () => {
         const session = createSession({ pythonPath });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-       
+
         resolveEnvironmentStub.withArgs(pythonPath).resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -187,7 +185,7 @@ suite('Debugging - Adapter Factory', () => {
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         // Interpreter not needed for connect
-        sinon.assert.neverCalledWith(getInterpretersStub);        
+        sinon.assert.neverCalledWith(getInterpretersStub);
         assert.deepStrictEqual(descriptor, debugServer);
     });
 

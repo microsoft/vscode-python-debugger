@@ -12,7 +12,7 @@ import { getInfoPerOS } from './common';
 import { AttachRequestArguments, DebugOptions } from '../../../../extension/types';
 import { AttachConfigurationResolver } from '../../../../extension/debugger/configuration/resolvers/attach';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
-import * as platform  from '../../../../extension/common/platform';
+import * as platform from '../../../../extension/common/platform';
 
 getInfoPerOS().forEach(([osName, osType, path]) => {
     if (osType === platform.OSType.Unknown) {

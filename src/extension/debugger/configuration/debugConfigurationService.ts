@@ -7,11 +7,7 @@ import { inject, injectable, named } from 'inversify';
 import { cloneDeep } from 'lodash';
 import { CancellationToken, DebugConfiguration, QuickPickItem, WorkspaceFolder } from 'vscode';
 import { DebugConfigStrings } from '../../common/utils/localize';
-import { 
-    IMultiStepInputFactory,
-    InputStep,
-    IQuickPickParameters,
-    MultiStepInput} from '../../common/multiStepInput';
+import { IMultiStepInputFactory, InputStep, IQuickPickParameters, MultiStepInput } from '../../common/multiStepInput';
 import { AttachRequestArguments, DebugConfigurationArguments, LaunchRequestArguments } from '../../types';
 import { DebugConfigurationState, DebugConfigurationType, IDebugConfigurationService } from '../types';
 import { buildDjangoLaunchDebugConfiguration } from './providers/djangoLaunch';

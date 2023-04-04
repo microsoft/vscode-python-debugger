@@ -4,7 +4,15 @@
 'use strict';
 
 import { Container } from 'inversify';
-import { debug, DebugConfigurationProvider, DebugConfigurationProviderTriggerKind, Disposable, ExtensionContext, Memento, workspace } from 'vscode';
+import {
+    debug,
+    DebugConfigurationProvider,
+    DebugConfigurationProviderTriggerKind,
+    Disposable,
+    ExtensionContext,
+    Memento,
+    workspace,
+} from 'vscode';
 import { ServiceContainer } from './debugger/ioc/container';
 import { ServiceManager } from './debugger/ioc/serviceManager';
 import { IServiceContainer, IServiceManager } from './debugger/ioc/types';
@@ -13,7 +21,11 @@ import { registerTypes as debugConfigurationRegisterTypes } from './debugger/ser
 import { registerTypes as appRegisterTypes } from './application/serviceRegistry';
 import { getLoggingLevel, setLoggingLevel } from './common/log/logging';
 import { createOutputChannel, isVirtualWorkspace } from './common/vscodeapi';
-import { IDebugConfigurationService, IDebugSessionEventHandlers, IDynamicDebugConfigurationService } from './debugger/types';
+import {
+    IDebugConfigurationService,
+    IDebugSessionEventHandlers,
+    IDynamicDebugConfigurationService,
+} from './debugger/types';
 import { DebugSessionEventDispatcher } from './debugger/hooks/eventHandlerDispatcher';
 import { DebugService } from './common/application/debugService';
 import { DebuggerTypeName } from './constants';
@@ -26,8 +38,6 @@ import { ActivationResult } from './components';
 import { IExtensionActivationManager } from './activation/types';
 import { registerTypes as activationRegisterTypes } from './activation/serviceRegistry';
 import { registerTypes as processRegisterTypes } from './common/process/serviceRegistry';
-
-
 
 // The code in this module should do nothing more complex than register
 // objects to DI and simple init (e.g. no side effects).  That implies
@@ -46,7 +56,7 @@ export function initializeGlobals(
     serviceManager.addSingletonInstance<IServiceContainer>(IServiceContainer, serviceContainer);
     serviceManager.addSingletonInstance<IServiceManager>(IServiceManager, serviceManager);
     serviceManager.addSingletonInstance<Disposable[]>(IDisposableRegistry, disposables);
-    
+
     serviceManager.addSingletonInstance<Memento>(IMemento, context.globalState, GLOBAL_MEMENTO);
     serviceManager.addSingletonInstance<Memento>(IMemento, context.workspaceState, WORKSPACE_MEMENTO);
     serviceManager.addSingletonInstance<IExtensionContext>(IExtensionContext, context);
@@ -74,7 +84,6 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
     // directly queries VSCode API.
     setLoggingLevel(getLoggingLevel());
 
-
     // Language feature registrations.
     appRegisterTypes(serviceManager);
     activationRegisterTypes(serviceManager);
@@ -83,7 +92,7 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
 
     const disposables = serviceManager.get<IDisposableRegistry>(IDisposableRegistry);
 
-    const outputChannel = createOutputChannel("Python Debugger");
+    const outputChannel = createOutputChannel('Python Debugger');
     context.subscriptions.push(outputChannel);
 
     if (workspace.isTrusted) {
@@ -93,7 +102,6 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
             dispatcher.registerEventHandlers();
 
             serviceContainer.get<IApplicationDiagnostics>(IApplicationDiagnostics).register();
-
 
             serviceContainer
                 .getAll<DebugConfigurationProvider>(IDebugConfigurationService)

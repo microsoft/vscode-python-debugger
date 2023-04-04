@@ -26,7 +26,6 @@ initializeFileLogging(process.env.VSC_PYTHON_DEBUGGER_LOG_FILE, logDispose);
 // Do not move this line of code (used to measure extension load times).
 const stopWatch = new StopWatch();
 
-
 //===============================================
 // loading starts here
 
@@ -52,7 +51,6 @@ let activatedServiceContainer: IServiceContainer | undefined;
 
 /////////////////////////////
 // public functions
-
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -100,7 +98,6 @@ async function activateUnsafe(
     displayProgress(activationDeferred.promise);
     startupDurations.startActivateTime = startupStopWatch.elapsedTime;
 
-
     //===============================================
     // activation starts here
 
@@ -114,12 +111,11 @@ async function activateUnsafe(
     // Then we finish activating.
     const componentsActivated = await activateComponents(ext);
 
-
     const nonBlocking = componentsActivated.map((r) => r.fullyReady);
     const activationPromise = (async () => {
         await Promise.all(nonBlocking);
     })();
-   
+
     //===============================================
     // activation ends here
 
@@ -145,7 +141,6 @@ async function handleError(ex: Error) {
     );
     traceError('extension activation failed', ex);
 }
-
 
 export async function activateComponents(
     // `ext` is passed to any extra activation funcs.

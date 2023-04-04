@@ -14,13 +14,9 @@ import { ISourceMapSupportService } from './types';
 
 @injectable()
 export class SourceMapSupportService implements ISourceMapSupportService {
-    constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-    ) {}
+    constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry) {}
     public register(): void {
-        this.disposables.push(
-            registerCommand(Commands.Enable_SourceMap_Support, this.onEnable, this),
-        );
+        this.disposables.push(registerCommand(Commands.Enable_SourceMap_Support, this.onEnable, this));
     }
     public async enable(): Promise<void> {
         await updateSetting(

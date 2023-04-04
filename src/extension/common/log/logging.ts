@@ -13,7 +13,6 @@ import { argsToLogString, returnValueToLogString } from './util';
 
 const DEFAULT_OPTS: TraceOptions = TraceOptions.Arguments | TraceOptions.ReturnValue;
 
-
 let loggers: ILogging[] = [];
 export function registerLogger(logger: ILogging): Disposable {
     loggers.push(logger);
@@ -43,7 +42,7 @@ export function getLoggingLevel(): LoggingLevelSettingType | 'off' {
 }
 
 export function initializeFileLogging(filePath: string | undefined, disposables: Disposable[]): unknown {
-    if (filePath){
+    if (filePath) {
         try {
             const fileLogger = new FileLogger(createWriteStream(filePath));
             disposables.push(fileLogger);
@@ -97,7 +96,6 @@ export function traceDecoratorInfo(message: string): TraceDecoratorType {
 export function traceDecoratorWarn(message: string): TraceDecoratorType {
     return createTracingDecorator({ message, opts: DEFAULT_OPTS, level: LogLevel.warn });
 }
-
 
 // Information about a function/method call.
 type CallInfo = {
@@ -156,7 +154,7 @@ function tracing<T>(log: (t: TraceInfo) => void, run: () => T): T {
 
         // If method being wrapped returns a promise then wait for it.
         if (isPromise(result)) {
-            ((result as unknown) as Promise<void>)
+            (result as unknown as Promise<void>)
                 .then((data) => {
                     log({ elapsed: timer.elapsedTime, returnValue: data });
                     return data;
@@ -221,10 +219,9 @@ function logResult(logInfo: LogInfo, traced: TraceInfo, call?: CallInfo) {
         }
     } else {
         logTo(LogLevel.error, [formatted, traced.err]);
-        sendTelemetryEvent(('ERROR' as unknown) as EventName, undefined, undefined, traced.err);
+        sendTelemetryEvent('ERROR' as unknown as EventName, undefined, undefined, traced.err);
     }
 }
-
 
 export function logTo(logLevel: LogLevel, ...args: Arguments): void {
     switch (logLevel) {

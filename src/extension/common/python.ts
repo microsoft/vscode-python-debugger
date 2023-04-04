@@ -5,7 +5,15 @@
 import { commands, Disposable, Event, EventEmitter, extensions, Uri } from 'vscode';
 import { traceError, traceLog } from './log/logging';
 import { EnvironmentVariables } from './variables/types';
-import { ActiveEnvironmentPathChangeEvent, Environment, EnvironmentPath, EnvironmentsChangeEvent, RefreshOptions, ResolvedEnvironment, Resource } from './pythonTypes';
+import {
+    ActiveEnvironmentPathChangeEvent,
+    Environment,
+    EnvironmentPath,
+    EnvironmentsChangeEvent,
+    RefreshOptions,
+    ResolvedEnvironment,
+    Resource,
+} from './pythonTypes';
 import { createDeferred } from './utils/async';
 
 interface IExtensionApi {
@@ -23,11 +31,11 @@ interface IExtensionApi {
         readonly onDidChangeActiveEnvironmentPath: Event<ActiveEnvironmentPathChangeEvent>;
         getEnvironmentVariables(resource?: Resource): EnvironmentVariables;
         refreshEnvironments(options?: RefreshOptions): Promise<void>;
-        readonly onDidChangeEnvironments: Event<EnvironmentsChangeEvent>
+        readonly onDidChangeEnvironments: Event<EnvironmentsChangeEvent>;
     };
     settings: {
         getExecutionDetails(resource?: Resource): { execCommand: string[] | undefined };
-    }
+    };
 }
 
 export interface IInterpreterDetails {
@@ -74,7 +82,9 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
 
 export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
     const api = await getPythonExtensionAPI();
-    const environment = await api?.environments.resolveEnvironment(api?.environments.getActiveEnvironmentPath(resource));
+    const environment = await api?.environments.resolveEnvironment(
+        api?.environments.getActiveEnvironmentPath(resource),
+    );
     if (environment?.executable.uri) {
         return { path: [environment?.executable.uri.fsPath], resource };
     }
@@ -96,7 +106,7 @@ export async function getSettingsPythonPath(resource?: Uri): Promise<string[] | 
     return api?.settings.getExecutionDetails(resource).execCommand;
 }
 
-export async function getEnvironmentVariables(resource?:Resource) {
+export async function getEnvironmentVariables(resource?: Resource) {
     const api = await getPythonExtensionAPI();
     return api?.environments.getEnvironmentVariables(resource);
 }
@@ -111,7 +121,7 @@ export async function getActiveEnvironmentPath(resource?: Resource) {
     return api?.environments.getActiveEnvironmentPath(resource);
 }
 
-export async function hasInterpreters(){
+export async function hasInterpreters() {
     const api = await getPythonExtensionAPI();
     if (api) {
         const onAddedToCollection = createDeferred();
@@ -130,7 +140,7 @@ export async function hasInterpreters(){
     }
 }
 
-export async function getInterpreters(){
+export async function getInterpreters() {
     const api = await getPythonExtensionAPI();
     return api?.environments.known || [];
 }

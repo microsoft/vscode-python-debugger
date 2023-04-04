@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IDisposableRegistry, IExtensionContext } from "./common/types";
-import { IServiceContainer, IServiceManager } from "./debugger/ioc/types";
-
+import { IDisposableRegistry, IExtensionContext } from './common/types';
+import { IServiceContainer, IServiceManager } from './debugger/ioc/types';
 
 /**
  * The global extension state needed by components.

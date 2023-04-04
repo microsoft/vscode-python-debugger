@@ -16,10 +16,7 @@ import { DebugSessionLoggingFactory } from '../../../extension/debugger/adapter/
 import { OutdatedDebuggerPromptFactory } from '../../../extension/debugger/adapter/outdatedDebuggerPrompt';
 import { AttachProcessProviderFactory } from '../../../extension/debugger/attachQuickPick/factory';
 import { IAttachProcessProviderFactory } from '../../../extension/debugger/attachQuickPick/types';
-import {
-    IDebugAdapterDescriptorFactory,
-    IOutdatedDebuggerPromptFactory,
-} from '../../../extension/debugger/types';
+import { IDebugAdapterDescriptorFactory, IOutdatedDebuggerPromptFactory } from '../../../extension/debugger/types';
 import { IDebugSessionLoggingFactory } from '../../../extension/debugger/types';
 import { clearTelemetryReporter } from '../../../extension/telemetry';
 import { noop } from '../../core';
@@ -66,8 +63,12 @@ suite('Debugging - Adapter Factory and logger Registration', () => {
         await activator.activate();
 
         verify(debugService.registerDebugAdapterTrackerFactory('python-debugger', instance(loggingFactory))).once();
-        verify(debugService.registerDebugAdapterTrackerFactory('python-debugger', instance(debuggerPromptFactory))).once();
-        verify(debugService.registerDebugAdapterDescriptorFactory('python-debugger', instance(descriptorFactory))).once();
+        verify(
+            debugService.registerDebugAdapterTrackerFactory('python-debugger', instance(debuggerPromptFactory)),
+        ).once();
+        verify(
+            debugService.registerDebugAdapterDescriptorFactory('python-debugger', instance(descriptorFactory)),
+        ).once();
     });
 
     test('Register a disposable item', async () => {

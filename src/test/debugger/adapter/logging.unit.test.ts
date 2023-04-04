@@ -87,7 +87,7 @@ suite('Debugging - Session Logging', () => {
     test('Create logger using session with logToFile set to false', async () => {
         const session = createSessionWithLogging('test2', false);
         const filePath = path.join(EXTENSION_ROOT_DIR, `debugger.vscode_${session.id}.log`);
-        
+
         createWriteStreamStub.withArgs(filePath).returns(instance(writeStream));
         when(writeStream.write(anything())).thenReturn(true);
         const logger = await loggerFactory.createDebugAdapterTracker(session);

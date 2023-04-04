@@ -11,10 +11,7 @@ import { IDiagnostic } from '../types';
 import { BaseDiagnosticCommand } from './base';
 
 export class ExecuteVSCCommand extends BaseDiagnosticCommand {
-    constructor(
-        diagnostic: IDiagnostic,
-        private commandName: CommandsWithoutArgs,
-    ) {
+    constructor(diagnostic: IDiagnostic, private commandName: CommandsWithoutArgs) {
         super(diagnostic);
     }
     public async invoke(): Promise<void> {

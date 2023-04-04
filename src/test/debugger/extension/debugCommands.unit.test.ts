@@ -24,8 +24,8 @@ suite('Debugging - commands', () => {
         // interpreterService
         //     .setup((i) => i.getActiveInterpreter(typemoq.It.isAny()))
         //     .returns(() => Promise.resolve(({ path: 'ps' } as unknown) as PythonEnvironment));
-        registerCommandStub = sinon.stub(vscodeapi,'registerCommand');
-        startDebuggingStub = sinon.stub(vscodeapi,'startDebugging');
+        registerCommandStub = sinon.stub(vscodeapi, 'registerCommand');
+        startDebuggingStub = sinon.stub(vscodeapi, 'startDebugging');
         sinon.stub(telemetry, 'sendTelemetryEvent').callsFake(() => {
             /** noop */
         });
@@ -34,9 +34,11 @@ suite('Debugging - commands', () => {
         sinon.restore();
     });
     test('Test registering debug file command', async () => {
-        registerCommandStub.withArgs(Commands.Debug_In_Terminal, sinon.match.any).returns(
-            () => ({ dispose: () => {/* noop */},})
-        );
+        registerCommandStub.withArgs(Commands.Debug_In_Terminal, sinon.match.any).returns(() => ({
+            dispose: () => {
+                /* noop */
+            },
+        }));
         // commandManager
         //     .setup((c) => c.registerCommand(Commands.Debug_In_Terminal, typemoq.It.isAny()))
         //     .returns(() => ({
@@ -57,17 +59,15 @@ suite('Debugging - commands', () => {
         //     .callback((_name, cb) => {
         //         callback = cb;
         //     });
-        registerCommandStub.withArgs(Commands.Debug_In_Terminal, sinon.match.any).callsFake(
-            (_name, cb)=>{callback = cb;}
-        );
+        registerCommandStub.withArgs(Commands.Debug_In_Terminal, sinon.match.any).callsFake((_name, cb) => {
+            callback = cb;
+        });
         // debugService
         //     .setup((d) => d.startDebugging(undefined, typemoq.It.isAny()))
         //     .returns(() => Promise.resolve(true))
         //     .verifiable(typemoq.Times.once());
 
-        debugCommands = new DebugCommands(
-            disposables.object,
-        );
+        debugCommands = new DebugCommands(disposables.object);
         await debugCommands.activate();
 
         await callback(Uri.file(path.join(EXTENSION_ROOT_DIR_FOR_TESTS, 'test.py')));

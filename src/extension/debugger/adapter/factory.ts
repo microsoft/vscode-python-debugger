@@ -19,7 +19,13 @@ import { showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getActiveEnvironmentPath, getInterpreters, hasInterpreters, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
+import {
+    getActiveEnvironmentPath,
+    getInterpreters,
+    hasInterpreters,
+    resolveEnvironment,
+    runPythonExtensionCommand,
+} from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
@@ -32,9 +38,7 @@ export enum debugStateKeys {
 
 @injectable()
 export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFactory {
-    constructor(
-        @inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory,
-    ) {}
+    constructor(@inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory) {}
 
     public async createDebugAdapterDescriptor(
         session: DebugSession,
@@ -87,13 +91,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
                 return new DebugAdapterExecutable(executable, args);
             }
 
-            const debuggerAdapterPathToUse = path.join(
-                EXTENSION_ROOT_DIR,
-                'bundled',
-                'libs',
-                'debugpy',
-                'adapter',
-            );
+            const debuggerAdapterPathToUse = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
 
             const args = command.concat([debuggerAdapterPathToUse, ...logArgs]);
             traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
@@ -123,13 +121,9 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         workspaceFolder?: WorkspaceFolder,
     ): Promise<string[]> {
         if (configuration.debugAdapterPython !== undefined) {
-            return this.getExecutableCommand(
-                (await resolveEnvironment(configuration.debugAdapterPython)),
-            );
+            return this.getExecutableCommand(await resolveEnvironment(configuration.debugAdapterPython));
         } else if (configuration.pythonPath) {
-            return this.getExecutableCommand(
-                await resolveEnvironment(configuration.pythonPath),
-            );
+            return this.getExecutableCommand(await resolveEnvironment(configuration.pythonPath));
         }
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
@@ -137,9 +131,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
 
         if (interpreterPath) {
             traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreterPath}'`);
-            return this.getExecutableCommand(
-                (await resolveEnvironment(interpreterPath)),
-            );
+            return this.getExecutableCommand(await resolveEnvironment(interpreterPath));
         }
 
         await hasInterpreters(); // Wait until we know whether we have an interpreter
@@ -180,7 +172,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
                 .updateValue(true);
         }
     }
-  
+
     private async getExecutableCommand(interpreter: Environment | undefined): Promise<string[]> {
         if (interpreter) {
             if ((interpreter.version?.major ?? 0) < 3 || (interpreter.version?.minor ?? 0) <= 6) {

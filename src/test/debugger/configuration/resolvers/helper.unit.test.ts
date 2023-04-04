@@ -11,7 +11,6 @@ import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
 import { getProgram } from '../../../../extension/debugger/configuration/resolvers/helper';
 
-
 suite('Debugging - Helpers', () => {
     let getActiveTextEditorStub: sinon.SinonStub;
 

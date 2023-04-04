@@ -4,11 +4,7 @@
 
 'use strict';
 
-import {
-    ExtensionContext,
-    Memento,
-    Uri,
-} from 'vscode';
+import { ExtensionContext, Memento, Uri } from 'vscode';
 import { EnvironmentVariables } from './variables/types';
 
 export interface IDisposable {

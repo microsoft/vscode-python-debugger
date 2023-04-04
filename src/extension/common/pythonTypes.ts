@@ -91,13 +91,13 @@ export type ResolvedEnvironment = Environment & {
      * Carries complete Python version information.
      */
     readonly version:
-    | (ResolvedVersionInfo & {
-        /**
-         * Value of `sys.version` in sys module if known at this moment.
-         */
-        readonly sysVersion: string;
-    })
-  | undefined;
+        | (ResolvedVersionInfo & {
+              /**
+               * Value of `sys.version` in sys module if known at this moment.
+               */
+              readonly sysVersion: string;
+          })
+        | undefined;
 };
 
 export type ActiveEnvironmentPathChangeEvent = EnvironmentPath & {
@@ -113,11 +113,11 @@ export type ActiveEnvironmentPathChangeEvent = EnvironmentPath & {
 export type Resource = Uri | WorkspaceFolder;
 
 export type EnvironmentDetails = {
-    interpreterPath: string,
-    envFolderPath: string,
-    version:{},
-    environmentType: string,
-    metadata: {}
+    interpreterPath: string;
+    envFolderPath: string;
+    version: {};
+    environmentType: string;
+    metadata: {};
 };
 
 export type EnvironmentPath = {

@@ -61,9 +61,7 @@ export class ExtensionActivationManager implements IExtensionActivationManager {
 
         // Activate all activation services together.
 
-        await Promise.all([
-            ...this.singleActivationServices.map((item) => item.activate()),
-        ]);
+        await Promise.all([...this.singleActivationServices.map((item) => item.activate())]);
     }
 
     @traceDecoratorError('Failed to activate a workspace')

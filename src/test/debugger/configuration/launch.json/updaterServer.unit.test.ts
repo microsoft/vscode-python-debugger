@@ -27,7 +27,7 @@ suite('Debugging - launch.json Updater Service', () => {
             registerCommandStub,
             'python.SelectAndInsertDebugConfiguration',
             helper.selectAndInsertDebugConfig,
-            helper
+            helper,
         );
     });
 });

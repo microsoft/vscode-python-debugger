@@ -3,13 +3,12 @@
 
 'use strict';
 
-
 import { inject, injectable } from 'inversify';
-import { PYTHON_LANGUAGE } from "../../../common/constants";
+import { PYTHON_LANGUAGE } from '../../../common/constants';
 import { getSearchPathEnvVarNames } from '../../../common/utils/exec';
-import { EnvironmentVariables, IEnvironmentVariablesService } from "../../../common/variables/types";
-import { getActiveTextEditor } from "../../../common/vscodeapi";
-import { LaunchRequestArguments } from "../../../types";
+import { EnvironmentVariables, IEnvironmentVariablesService } from '../../../common/variables/types';
+import { getActiveTextEditor } from '../../../common/vscodeapi';
+import { LaunchRequestArguments } from '../../../types';
 
 export const IDebugEnvironmentVariablesService = Symbol('IDebugEnvironmentVariablesService');
 export interface IDebugEnvironmentVariablesService {
@@ -18,9 +17,7 @@ export interface IDebugEnvironmentVariablesService {
 
 @injectable()
 export class DebugEnvironmentVariablesHelper implements IDebugEnvironmentVariablesService {
-    constructor(
-        @inject(IEnvironmentVariablesService) private envParser: IEnvironmentVariablesService,
-    ) {}
+    constructor(@inject(IEnvironmentVariablesService) private envParser: IEnvironmentVariablesService) {}
 
     public async getEnvironmentVariables(args: LaunchRequestArguments): Promise<EnvironmentVariables> {
         const pathVariableName = getSearchPathEnvVarNames()[0];

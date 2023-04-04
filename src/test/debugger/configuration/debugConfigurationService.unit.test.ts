@@ -38,9 +38,9 @@ suite('Debugging - Configuration Service', () => {
         );
     });
     test('Should use attach resolver when passing attach config', async () => {
-        const config = ({
+        const config = {
             request: 'attach',
-        } as DebugConfiguration) as AttachRequestArguments;
+        } as DebugConfiguration as AttachRequestArguments;
         const folder = { name: '1', index: 0, uri: Uri.parse('1234') };
         const expectedConfig = { yay: 1 };
 
@@ -48,7 +48,7 @@ suite('Debugging - Configuration Service', () => {
             .setup((a) =>
                 a.resolveDebugConfiguration(typemoq.It.isValue(folder), typemoq.It.isValue(config), typemoq.It.isAny()),
             )
-            .returns(() => Promise.resolve((expectedConfig as unknown) as AttachRequestArguments))
+            .returns(() => Promise.resolve(expectedConfig as unknown as AttachRequestArguments))
             .verifiable(typemoq.Times.once());
         launchResolver
             .setup((a) => a.resolveDebugConfiguration(typemoq.It.isAny(), typemoq.It.isAny(), typemoq.It.isAny()))
@@ -69,11 +69,11 @@ suite('Debugging - Configuration Service', () => {
                 .setup((a) =>
                     a.resolveDebugConfiguration(
                         typemoq.It.isValue(folder),
-                        typemoq.It.isValue((config as DebugConfiguration) as LaunchRequestArguments),
+                        typemoq.It.isValue(config as DebugConfiguration as LaunchRequestArguments),
                         typemoq.It.isAny(),
                     ),
                 )
-                .returns(() => Promise.resolve((expectedConfig as unknown) as LaunchRequestArguments))
+                .returns(() => Promise.resolve(expectedConfig as unknown as LaunchRequestArguments))
                 .verifiable(typemoq.Times.once());
             attachResolver
                 .setup((a) => a.resolveDebugConfiguration(typemoq.It.isAny(), typemoq.It.isAny(), typemoq.It.isAny()))
@@ -87,7 +87,7 @@ suite('Debugging - Configuration Service', () => {
         });
     });
     test('Picker should be displayed', async () => {
-        const state = ({ configs: [], folder: {}, token: undefined } as unknown) as DebugConfigurationState;
+        const state = { configs: [], folder: {}, token: undefined } as unknown as DebugConfigurationState;
         const multiStepInput = typemoq.Mock.ofType<MultiStepInput<DebugConfigurationState>>();
         multiStepInput
             .setup((i) => i.showQuickPick(typemoq.It.isAny()))
@@ -99,7 +99,7 @@ suite('Debugging - Configuration Service', () => {
         multiStepInput.verifyAll();
     });
     test('Existing Configuration items must be removed before displaying picker', async () => {
-        const state = ({ configs: [1, 2, 3], folder: {}, token: undefined } as unknown) as DebugConfigurationState;
+        const state = { configs: [1, 2, 3], folder: {}, token: undefined } as unknown as DebugConfigurationState;
         const multiStepInput = typemoq.Mock.ofType<MultiStepInput<DebugConfigurationState>>();
         multiStepInput
             .setup((i) => i.showQuickPick(typemoq.It.isAny()))
@@ -127,7 +127,7 @@ suite('Debugging - Configuration Service', () => {
             Object.assign(state.config, expectedConfig);
             return Promise.resolve();
         };
-        const config = await configService.provideDebugConfigurations!(({} as unknown) as undefined);
+        const config = await configService.provideDebugConfigurations!({} as unknown as undefined);
 
         multiStepFactory.verifyAll();
         expect(config).to.deep.equal([expectedConfig]);

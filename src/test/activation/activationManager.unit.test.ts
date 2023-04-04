@@ -36,7 +36,7 @@ suite('Activation Manager', () => {
         }
         let managerTest: ExtensionActivationManagerTest;
         let appDiagnostics: typemoq.IMock<IApplicationDiagnostics>;
-        let isVirtualWorkspaceStub : sinon.SinonStub;
+        let isVirtualWorkspaceStub: sinon.SinonStub;
         let isTrustedStub: sinon.SinonStub;
         let onDidChangeWorkspaceFoldersStub: sinon.SinonStub;
         let getWorkspaceFoldersStub: sinon.SinonStub;
@@ -48,10 +48,7 @@ suite('Activation Manager', () => {
             // activeResourceService = mock(ActiveResourceService);
             appDiagnostics = typemoq.Mock.ofType<IApplicationDiagnostics>();
             // autoSelection = typemoq.Mock.ofType<IInterpreterAutoSelectionService>();
-            managerTest = new ExtensionActivationManagerTest(
-                [],
-                appDiagnostics.object,
-            );
+            managerTest = new ExtensionActivationManagerTest([], appDiagnostics.object);
             isVirtualWorkspaceStub = sinon.stub(vscodeapi, 'isVirtualWorkspace');
             isTrustedStub = sinon.stub(vscode.workspace, 'isTrusted');
             onDidChangeWorkspaceFoldersStub = sinon.stub(vscode.workspace, 'onDidChangeWorkspaceFolders');
@@ -63,7 +60,7 @@ suite('Activation Manager', () => {
         teardown(() => {
             sinon.restore();
         });
-        
+
         test('If running in a virtual workspace, do not activate services that do not support it', async () => {
             isVirtualWorkspaceStub.returns(true);
             const resource = Uri.parse('two');
@@ -77,10 +74,7 @@ suite('Activation Manager', () => {
                 .returns(() => Promise.resolve())
                 .verifiable(typemoq.Times.once());
 
-            managerTest = new ExtensionActivationManagerTest(
-                [],
-                appDiagnostics.object
-            );
+            managerTest = new ExtensionActivationManagerTest([], appDiagnostics.object);
             await managerTest.activateWorkspace(resource);
 
             // autoSelection.verifyAll();
@@ -90,7 +84,7 @@ suite('Activation Manager', () => {
         test('If running in a untrusted workspace, do not activate services that do not support it', async () => {
             // when(workspaceService.isTrusted).thenReturn(false);
             isTrustedStub.returns(false);
-            
+
             const resource = Uri.parse('two');
 
             // autoSelection
@@ -102,10 +96,7 @@ suite('Activation Manager', () => {
                 .returns(() => Promise.resolve())
                 .verifiable(typemoq.Times.once());
 
-            managerTest = new ExtensionActivationManagerTest(
-                [],
-                appDiagnostics.object
-            );
+            managerTest = new ExtensionActivationManagerTest([], appDiagnostics.object);
             await managerTest.activateWorkspace(resource);
 
             appDiagnostics.verifyAll();
@@ -135,10 +126,10 @@ suite('Activation Manager', () => {
 
             onDidChangeWorkspaceFoldersStub.returns(() => disposable.object);
             // when(workspaceService.onDidChangeWorkspaceFolders).thenReturn(() => disposable.object);
-            
+
             getWorkspaceFoldersStub.returns([
-                (1 as unknown) as vscode.WorkspaceFolder,
-                (2 as unknown) as vscode.WorkspaceFolder,
+                1 as unknown as vscode.WorkspaceFolder,
+                2 as unknown as vscode.WorkspaceFolder,
             ]);
             // when(workspaceService.workspaceFolders).thenReturn([
             //     (1 as unknown) as WorkspaceFolder,
@@ -288,7 +279,7 @@ suite('Activation Manager', () => {
                 languageId: 'NOT PYTHON',
             };
 
-            managerTest.onDocOpened((doc as unknown) as TextDocument);
+            managerTest.onDocOpened(doc as unknown as TextDocument);
             // verify(workspaceService.getWorkspaceFolderIdentifier(doc.uri, anything())).never();
         });
 
@@ -299,7 +290,7 @@ suite('Activation Manager', () => {
             };
             // when(workspaceService.getWorkspaceFolderIdentifier(doc.uri, anything())).thenReturn('');
 
-            managerTest.onDocOpened((doc as unknown) as TextDocument);
+            managerTest.onDocOpened(doc as unknown as TextDocument);
 
             // verify(workspaceService.getWorkspaceFolderIdentifier(doc.uri, anything())).once();
             // verify(workspaceService.getWorkspaceFolder(doc.uri)).once();
@@ -313,7 +304,7 @@ suite('Activation Manager', () => {
             // when(workspaceService.getWorkspaceFolderIdentifier(doc.uri, anything())).thenReturn('key');
             managerTest.activatedWorkspaces.add('key');
 
-            managerTest.onDocOpened((doc as unknown) as TextDocument);
+            managerTest.onDocOpened(doc as unknown as TextDocument);
 
             // verify(workspaceService.getWorkspaceFolderIdentifier(doc.uri, anything())).once();
             // verify(workspaceService.getWorkspaceFolder(doc.uri)).never();

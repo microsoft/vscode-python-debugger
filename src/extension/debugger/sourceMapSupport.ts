@@ -4,14 +4,13 @@
 'use strict';
 
 import * as path from 'path';
-import * as fs from 'fs-extra'
+import * as fs from 'fs-extra';
 import { WorkspaceConfiguration } from 'vscode';
 import '../common/extensions';
 import { EXTENSION_ROOT_DIR } from '../common/constants';
 import { traceError } from '../common/log/logging';
 
 type VSCode = typeof import('vscode');
-
 
 const setting = 'sourceMapsEnabled';
 

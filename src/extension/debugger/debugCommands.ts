@@ -20,9 +20,7 @@ import { IDisposableRegistry } from '../common/types';
 export class DebugCommands implements IExtensionSingleActivationService {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
 
-    constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry,
-    ) {}
+    constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposableRegistry) {}
 
     public activate(): Promise<void> {
         this.disposables.push(

@@ -22,11 +22,7 @@ export class AttachProcessProviderFactory implements IAttachProcessProviderFacto
     public registerCommands() {
         const provider = new AttachProcessProvider(this.processServiceFactory);
         const picker = new AttachPicker(provider);
-        const disposable = registerCommand(
-            Commands.PickLocalProcess,
-            () => picker.showQuickPick(),
-            this,
-        );
+        const disposable = registerCommand(Commands.PickLocalProcess, () => picker.showQuickPick(), this);
         this.disposableRegistry.push(disposable);
     }
 }

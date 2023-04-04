@@ -10,7 +10,6 @@ import { IServiceContainer } from '../../debugger/ioc/types';
 import { IDiagnostic, IDiagnosticsService, ISourceMapSupportService } from './types';
 import { IApplicationDiagnostics } from '../types';
 
-
 function log(diagnostics: IDiagnostic[]): void {
     diagnostics.forEach((item) => {
         const message = `Diagnostic Code: ${item.code}, Message: ${item.message}`;

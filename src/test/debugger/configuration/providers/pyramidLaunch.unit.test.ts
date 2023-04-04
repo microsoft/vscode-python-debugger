@@ -17,7 +17,6 @@ import * as pyramidLaunch from '../../../../extension/debugger/configuration/pro
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
 
-
 suite('Debugging - Configuration Provider Pyramid', () => {
     let input: MultiStepInput<DebugConfigurationState>;
     let pathExistsStub: sinon.SinonStub;

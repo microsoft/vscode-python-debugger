@@ -5,7 +5,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { inject, injectable, named } from 'inversify';
 import * as path from 'path';
-import { DiagnosticSeverity, Uri, workspace,window, workspace as workspc, WorkspaceFolder } from 'vscode';
+import { DiagnosticSeverity, Uri, workspace, window, workspace as workspc, WorkspaceFolder } from 'vscode';
 import '../../../common/extensions';
 import { traceError } from '../../../common/log/logging';
 import { getSettingsPythonPath, resolveEnvironment } from '../../../common/python';
@@ -53,8 +53,10 @@ class InvalidPythonPathInDebuggerDiagnostic extends BaseDiagnostic {
 export const InvalidPythonPathInDebuggerServiceId = 'InvalidPythonPathInDebuggerServiceId';
 
 @injectable()
-export class InvalidPythonPathInDebuggerService extends BaseDiagnosticsService
-    implements IInvalidPythonPathInDebuggerService {
+export class InvalidPythonPathInDebuggerService
+    extends BaseDiagnosticsService
+    implements IInvalidPythonPathInDebuggerService
+{
     constructor(
         @inject(IServiceContainer) serviceContainer: IServiceContainer,
         @inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
@@ -131,7 +133,7 @@ export class InvalidPythonPathInDebuggerService extends BaseDiagnosticsService
                 return [
                     {
                         prompt: Common.selectPythonInterpreter,
-                        command: new ExecuteVSCCommand(diagnostic, 'python.setInterpreter')
+                        command: new ExecuteVSCCommand(diagnostic, 'python.setInterpreter'),
                     },
                 ];
             }

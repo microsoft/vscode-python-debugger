@@ -48,7 +48,6 @@ export function getEnvFile(namespace: string, resource: Uri): string {
     const config = getConfiguration(namespace, resource);
     const envFile = config.get<string>('envFile', '');
     return envFile;
-
 }
 
 function getPath(namespace: string, workspace: WorkspaceFolder): string[] {
@@ -117,21 +116,25 @@ export function checkIfConfigurationChanged(e: ConfigurationChangeEvent, namespa
     return changed.includes(true);
 }
 
-function getSettingsUriAndTarget(
-    resource: Uri | undefined,
-): { uri: Uri | undefined; target: ConfigurationTarget } {
+function getSettingsUriAndTarget(resource: Uri | undefined): { uri: Uri | undefined; target: ConfigurationTarget } {
     const workspaceFolder = resource ? getWorkspaceFolder(resource) : undefined;
     let workspaceFolderUri: Uri | undefined = workspaceFolder ? workspaceFolder.uri : undefined;
     const workspaceFolders = getWorkspaceFolders();
     if (!workspaceFolderUri && Array.isArray(workspaceFolders) && workspaceFolders.length > 0) {
         workspaceFolderUri = workspaceFolders[0].uri;
     }
- 
+
     const target = workspaceFolderUri ? ConfigurationTarget.WorkspaceFolder : ConfigurationTarget.Global;
     return { uri: workspaceFolderUri, target };
 }
 
-export async function updateSetting(section: string = 'python-debugger', setting: string, value?: unknown, resource?: Uri, configTarget?: ConfigurationTarget){
+export async function updateSetting(
+    section: string = 'python-debugger',
+    setting: string,
+    value?: unknown,
+    resource?: Uri,
+    configTarget?: ConfigurationTarget,
+) {
     const defaultSetting = {
         uri: resource,
         target: configTarget || ConfigurationTarget.WorkspaceFolder,
@@ -142,7 +145,7 @@ export async function updateSetting(section: string = 'python-debugger', setting
     }
 
     configTarget = configTarget || settingsInfo.target;
-    
+
     const configSection = getConfiguration(section, settingsInfo.uri);
     const currentValue = configSection.inspect(setting);
     if (
@@ -155,7 +158,6 @@ export async function updateSetting(section: string = 'python-debugger', setting
     }
     await configSection.update(setting, value, configTarget);
     await verifySetting(configSection, configTarget, setting, value);
-
 }
 
 export function isTestExecution(): boolean {

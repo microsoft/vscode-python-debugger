@@ -13,8 +13,7 @@ import { EnvironmentVariables, IEnvironmentVariablesService } from './types';
 @injectable()
 export class EnvironmentVariablesService implements IEnvironmentVariablesService {
     private _pathVariable?: 'Path' | 'PATH';
-    constructor(
-    ) {}
+    constructor() {}
 
     public async parseFile(
         filePath?: string,

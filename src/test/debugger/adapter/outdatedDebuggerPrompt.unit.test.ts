@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { anyString} from 'ts-mockito';
+import { anyString } from 'ts-mockito';
 import { DebugSession, WorkspaceFolder } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { createDeferred } from '../../../extension/common/utils/async';
@@ -35,11 +35,6 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
     };
 
     setup(() => {
-        // const configurationService = mock(ConfigurationService);
-        // when(configurationService.getSettings(undefined)).thenReturn(({
-        //     experiments: { enabled: true },
-        // } as any) as IPythonSettings);
-
         showInformationMessageStub = sinon.stub(vscodeapi, 'showInformationMessage');
         browserLaunchStub = sinon.stub(vscodeapi, 'launch');
         promptFactory = new OutdatedDebuggerPromptFactory();
@@ -74,7 +69,7 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
             prompter.onDidSendMessage!(ptvsdOutputEvent);
         }
 
-        sinon.assert.neverCalledWith(browserLaunchStub,anyString());
+        sinon.assert.neverCalledWith(browserLaunchStub, anyString());
 
         // First call should show info once
 

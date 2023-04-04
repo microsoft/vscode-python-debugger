@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { IDisposable, Resource } from "../common/types";
+import { IDisposable, Resource } from '../common/types';
 
 export const IExtensionSingleActivationService = Symbol('IExtensionSingleActivationService');
 /**
@@ -33,7 +33,6 @@ export interface IExtensionActivationService {
     supportedWorkspaceTypes: { untrustedWorkspace: boolean; virtualWorkspace: boolean };
     activate(resource: Resource): Promise<void>;
 }
-
 
 export const IExtensionActivationManager = Symbol('IExtensionActivationManager');
 /**

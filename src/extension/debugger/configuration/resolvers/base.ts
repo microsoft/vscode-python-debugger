@@ -9,7 +9,7 @@ import { CancellationToken, DebugConfiguration, Uri, WorkspaceFolder } from 'vsc
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
 import { DebuggerTelemetry } from '../../../telemetry/types';
-import { getWorkspaceFolders, getWorkspaceFolder as getVSCodeWorkspaceFolder, } from '../../../common/vscodeapi';
+import { getWorkspaceFolders, getWorkspaceFolder as getVSCodeWorkspaceFolder } from '../../../common/vscodeapi';
 import { AttachRequestArguments, DebugOptions, LaunchRequestArguments, PathMapping } from '../../../types';
 import { PythonPathSource } from '../../types';
 import { IDebugConfigurationResolver } from '../types';
@@ -20,7 +20,8 @@ import { getOSType, OSType } from '../../../common/platform';
 
 @injectable()
 export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
-    implements IDebugConfigurationResolver<T> {
+    implements IDebugConfigurationResolver<T>
+{
     protected pythonPathSource: PythonPathSource = PythonPathSource.launchJson;
 
     constructor() {}
@@ -106,9 +107,9 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         }
         if (debugConfiguration.pythonPath === '${command:python.interpreterPath}' || !debugConfiguration.pythonPath) {
             const interpreterDetail = await getInterpreterDetails(workspaceFolder);
-            const interpreterPath =
-                interpreterDetail ? interpreterDetail.path :
-                (await getSettingsPythonPath(workspaceFolder));
+            const interpreterPath = interpreterDetail
+                ? interpreterDetail.path
+                : await getSettingsPythonPath(workspaceFolder);
             debugConfiguration.pythonPath = interpreterPath ? interpreterPath[0] : interpreterPath;
         } else {
             debugConfiguration.pythonPath = resolveVariables(
@@ -121,9 +122,9 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         if (debugConfiguration.python === '${command:python.interpreterPath}') {
             this.pythonPathSource = PythonPathSource.settingsJson;
             const interpreterDetail = await getInterpreterDetails(workspaceFolder);
-            const interpreterPath =
-                interpreterDetail.path ? interpreterDetail.path :
-                (await getSettingsPythonPath(workspaceFolder));
+            const interpreterPath = interpreterDetail.path
+                ? interpreterDetail.path
+                : await getSettingsPythonPath(workspaceFolder);
             debugConfiguration.python = interpreterPath ? interpreterPath[0] : interpreterPath;
         } else if (debugConfiguration.python === undefined) {
             this.pythonPathSource = PythonPathSource.settingsJson;

@@ -142,11 +142,6 @@ suite('Debugging - Service Registry', () => {
                 DebugCommands,
             ),
         ).once();
-        verify(
-            serviceManager.addSingleton<IDebugService>(
-                IDebugService,
-                DebugService,
-            ),
-        ).once();
+        verify(serviceManager.addSingleton<IDebugService>(IDebugService, DebugService)).once();
     });
 });

@@ -17,7 +17,7 @@ suite('Debugging - Configuration Provider File', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
 
-        await buildPidAttachConfiguration((undefined as unknown) as MultiStepInput<DebugConfigurationState>, state);
+        await buildPidAttachConfiguration(undefined as unknown as MultiStepInput<DebugConfigurationState>, state);
 
         const config = {
             name: DebugConfigStrings.attachPid.snippet.name,

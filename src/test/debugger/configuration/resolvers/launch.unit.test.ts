@@ -14,7 +14,7 @@ import { LaunchConfigurationResolver } from '../../../../extension/debugger/conf
 import { PythonPathSource } from '../../../../extension/debugger/types';
 import { getInfoPerOS } from './common';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
-import * as platform  from '../../../../extension/common/platform';
+import * as platform from '../../../../extension/common/platform';
 import { ConsoleType, DebugOptions, LaunchRequestArguments } from '../../../../extension/types';
 import { DebuggerTypeName } from '../../../../extension/constants';
 import * as pythonApi from '../../../../extension/common/python';
@@ -40,9 +40,8 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getOSTypeStub = sinon.stub(platform, 'getOSType');
             getWorkspaceFolderStub = sinon.stub(vscodeapi, 'getWorkspaceFolders');
             getOSTypeStub.returns(osType);
-            getInterpreterDetailsStub =sinon.stub(pythonApi, 'getInterpreterDetails');
+            getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
             getEnvFileStub = sinon.stub(settings, 'getEnvFile');
-
         });
 
         teardown(() => {
@@ -71,11 +70,13 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             // interpreterService
             //     .setup((i) => i.getActiveInterpreter(TypeMoq.It.isAny()))
             //     .returns(() => Promise.resolve({ path: pythonPath } as any));
-            getInterpreterDetailsStub.resolves({path: [pythonPath]});
+            getInterpreterDetailsStub.resolves({ path: [pythonPath] });
 
             // settings.setup((s) => s.pythonPath).returns(() => pythonPath);
             if (workspaceFolder) {
-                getEnvFileStub.withArgs('python', sinon.match.any).returns(path.join(workspaceFolder!.uri.fsPath, '.env2'));
+                getEnvFileStub
+                    .withArgs('python', sinon.match.any)
+                    .returns(path.join(workspaceFolder!.uri.fsPath, '.env2'));
                 // getEnvFileStub.returns("hola");
             }
             // configService.setup((c) => c.getSettings(TypeMoq.It.isAny())).returns(() => settings.object);
@@ -83,10 +84,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 .setup((x) => x.getEnvironmentVariables(TypeMoq.It.isAny()))
                 .returns(() => Promise.resolve({}));
 
-            debugProvider = new LaunchConfigurationResolver(
-                diagnosticsService.object,
-                debugEnvHelper.object,
-            );
+            debugProvider = new LaunchConfigurationResolver(diagnosticsService.object, debugEnvHelper.object);
         }
 
         function setupActiveEditor(fileName: string | undefined, languageId: string) {
@@ -124,11 +122,16 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             if (config === undefined || config === null) {
                 return config;
             }
-            const interpreterPath = await pythonApi.getActiveEnvironmentPath(workspaceFolder ? workspaceFolder.uri : undefined);
+            const interpreterPath = await pythonApi.getActiveEnvironmentPath(
+                workspaceFolder ? workspaceFolder.uri : undefined,
+            );
             for (const key of Object.keys(config)) {
                 const value = config[key];
                 if (typeof value === 'string') {
-                    config[key] = value.replace('${command:python.interpreterPath}', interpreterPath? interpreterPath.path : '');
+                    config[key] = value.replace(
+                        '${command:python.interpreterPath}',
+                        interpreterPath ? interpreterPath.path : '',
+                    );
                 }
             }
 

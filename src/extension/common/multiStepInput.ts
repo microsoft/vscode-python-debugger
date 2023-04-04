@@ -7,7 +7,16 @@
 'use strict';
 
 import { injectable } from 'inversify';
-import { Disposable, QuickInput, QuickInputButton, QuickInputButtons, QuickPick, QuickPickItem, Event, window } from 'vscode';
+import {
+    Disposable,
+    QuickInput,
+    QuickInputButton,
+    QuickInputButtons,
+    QuickPick,
+    QuickPickItem,
+    Event,
+    window,
+} from 'vscode';
 
 // Borrowed from https://github.com/Microsoft/vscode-extension-samples/blob/master/quickinput-sample/src/multiStepInput.ts
 // Why re-invent the wheel :)

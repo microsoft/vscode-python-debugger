@@ -7,7 +7,6 @@ import * as path from 'path';
 import { getOSType, OSType } from '../../../../extension/common/platform';
 import { getNamesAndValues } from '../../../../extension/common/utils/enum';
 
-
 const OS_TYPE = getOSType();
 
 interface IPathModule {

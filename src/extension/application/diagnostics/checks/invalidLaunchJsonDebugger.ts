@@ -75,9 +75,7 @@ export class InvalidLaunchJsonDebuggerService extends BaseDiagnosticsService {
         if (!hasWorkspaceFolders) {
             return [];
         }
-        const workspaceFolder = resource
-            ? getWorkspaceFolder(resource)!
-            : workspaceFolders![0];
+        const workspaceFolder = resource ? getWorkspaceFolder(resource)! : workspaceFolders![0];
         return this.diagnoseWorkspace(workspaceFolder, resource);
     }
 
@@ -94,9 +92,7 @@ export class InvalidLaunchJsonDebuggerService extends BaseDiagnosticsService {
         }
 
         await Promise.all(
-            (workspaceFolders ?? []).map((workspaceFolder) =>
-                this.fixLaunchJsonInWorkspace(code, workspaceFolder),
-            ),
+            (workspaceFolders ?? []).map((workspaceFolder) => this.fixLaunchJsonInWorkspace(code, workspaceFolder)),
         );
     }
 

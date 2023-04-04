@@ -301,7 +301,7 @@ export interface IEventNamePropertyMapping {
 \         "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "luabud" },
        }
      */
-       [EventName.EDITOR_LOAD]: {};
+    [EventName.EDITOR_LOAD]: {};
     /**
      * Telemetry event sent when debug in terminal button was used to debug current file.
      */
@@ -417,7 +417,7 @@ export interface IEventNamePropertyMapping {
          */
         console?: ConsoleType;
     };
-        /**
+    /**
      * Telemetry event sent when we are checking if we can handle the diagnostic code
      */
     /* __GDPR__
@@ -425,7 +425,7 @@ export interface IEventNamePropertyMapping {
           "code" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "karthiknadig" }
        }
      */
-       [EventName.DIAGNOSTICS_MESSAGE]: {
+    [EventName.DIAGNOSTICS_MESSAGE]: {
         /**
          * Code of diagnostics message detected and displayed.
          * @type {string}
@@ -688,7 +688,7 @@ export interface IEventNamePropertyMapping {
        "debugger.configuration.prompts.in.launch.json" : { "owner": "paulacamargo25" }
      */
     [EventName.DEBUGGER_CONFIGURATION_PROMPTS_IN_LAUNCH_JSON]: never | undefined;
-        /**
+    /**
      * Telemetry event sent with details of actions when invoking a diagnostic command
      */
     /* __GDPR__
@@ -699,7 +699,7 @@ export interface IEventNamePropertyMapping {
           "action" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "karthiknadig" }
        }
      */
-       [EventName.DIAGNOSTICS_ACTION]: {
+    [EventName.DIAGNOSTICS_ACTION]: {
         /**
          * Diagnostics command executed.
          * @type {string}
@@ -721,13 +721,11 @@ export interface IEventNamePropertyMapping {
          */
         action?: 'switchToCommandPrompt';
     };
-        /**
+    /**
      * Telemetry event sent when substituting Environment variables to calculate value of variables
      */
     /* __GDPR__
        "envfile_variable_substitution" : { "owner": "karthiknadig" }
      */
-       [EventName.ENVFILE_VARIABLE_SUBSTITUTION]: never | undefined;
-    
-
+    [EventName.ENVFILE_VARIABLE_SUBSTITUTION]: never | undefined;
 }

@@ -71,7 +71,7 @@ suite('Debugging - Config Resolver', () => {
         resolver = new BaseResolver();
         getWorkspaceFoldersStub = sinon.stub(vscodeapi, 'getWorkspaceFolders');
         getWorkspaceFolderStub = sinon.stub(vscodeapi, 'getWorkspaceFolder');
-        getInterpreterDetailsStub =sinon.stub(pythonApi, 'getInterpreterDetails');
+        getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
         getProgramStub = sinon.stub(helper, 'getProgram');
     });
     teardown(() => {
@@ -151,13 +151,13 @@ suite('Debugging - Config Resolver', () => {
         expect(uri).to.be.deep.equal(undefined, 'not undefined');
     });
     test('Do nothing if debug configuration is undefined', async () => {
-        await resolver.resolveAndUpdatePythonPath(undefined, (undefined as unknown) as LaunchRequestArguments);
+        await resolver.resolveAndUpdatePythonPath(undefined, undefined as unknown as LaunchRequestArguments);
     });
     test('python in debug config must point to pythonPath in settings if pythonPath in config is not set', async () => {
         const config = {};
         const pythonPath = path.join('1', '2', '3');
 
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
 
         expect(config).to.have.property('python', pythonPath);
@@ -168,7 +168,7 @@ suite('Debugging - Config Resolver', () => {
         };
         const pythonPath = path.join('1', '2', '3');
 
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
 
@@ -182,7 +182,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -196,7 +196,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -211,7 +211,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -225,8 +225,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
-
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -240,7 +239,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -259,8 +258,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
-
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');
@@ -279,8 +277,7 @@ suite('Debugging - Config Resolver', () => {
         // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
         //     path: pythonPath,
         // } as PythonEnvironment);
-        getInterpreterDetailsStub.resolves({path: [pythonPath]} as unknown as PythonEnvironment);
-
+        getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
         expect(config).to.not.have.property('pythonPath');

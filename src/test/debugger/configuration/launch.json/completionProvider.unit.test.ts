@@ -27,15 +27,22 @@ suite('Debugging - launch.json Completion Provider', () => {
     setup(() => {
         completionProvider = new LaunchJsonCompletionProvider([]);
         registerCompletionItemProviderStub = sinon.stub(vscode.languages, 'registerCompletionItemProvider');
-
     });
     teardown(() => {
         sinon.restore();
     });
     test('Activation will register the completion provider', async () => {
         await completionProvider.activate();
-        sinon.assert.calledOnceWithExactly(registerCompletionItemProviderStub, deepEqual({ language: 'json' }), completionProvider);
-        sinon.assert.calledOnceWithExactly(registerCompletionItemProviderStub, deepEqual({ language: 'jsonc' }), completionProvider);
+        sinon.assert.calledOnceWithExactly(
+            registerCompletionItemProviderStub,
+            deepEqual({ language: 'json' }),
+            completionProvider,
+        );
+        sinon.assert.calledOnceWithExactly(
+            registerCompletionItemProviderStub,
+            deepEqual({ language: 'jsonc' }),
+            completionProvider,
+        );
     });
     test('Cannot provide completions for non launch.json files', () => {
         const document = typemoq.Mock.ofType<TextDocument>();

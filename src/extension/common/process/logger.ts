@@ -36,7 +36,7 @@ export class ProcessLogger implements IProcessLogger {
         });
     }
 
-    private getDisplayCommands(command: string ): string {
+    private getDisplayCommands(command: string): string {
         const workspaceFolders = getWorkspaceFolders();
         if (workspaceFolders && workspaceFolders.length === 1) {
             command = replaceMatchesWithCharacter(command, workspaceFolders[0].uri.fsPath, '.');
@@ -76,8 +76,9 @@ function replaceMatchesWithCharacter(original: string, match: string, character:
         const regexResult = regex.exec(chunked[i]);
         if (regexResult) {
             const regexIndex = regexResult.index;
-            if (regexIndex > 0 && isPrevioustoMatchRegexALetter(chunked[i], regexIndex - 1))
-                {regex = getRegex(match.substring(1));}
+            if (regexIndex > 0 && isPrevioustoMatchRegexALetter(chunked[i], regexIndex - 1)) {
+                regex = getRegex(match.substring(1));
+            }
             chunked[i] = chunked[i].replace(regex, character);
         }
     }

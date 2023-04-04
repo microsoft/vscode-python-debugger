@@ -94,7 +94,11 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
             debugConfiguration.cwd = workspaceFolder.fsPath;
         }
         if (typeof debugConfiguration.envFile !== 'string' && workspaceFolder) {
-            debugConfiguration.envFile = resolveVariables(getEnvFile('python', workspaceFolder), workspaceFolder.fsPath, undefined);
+            debugConfiguration.envFile = resolveVariables(
+                getEnvFile('python', workspaceFolder),
+                workspaceFolder.fsPath,
+                undefined,
+            );
         }
         // Extract environment variables from .env file in the vscode context and
         // set the "env" debug configuration argument. This expansion should be

@@ -17,10 +17,8 @@ import {
     Disposable,
     Event,
     WorkspaceFolder,
-
 } from 'vscode';
 import { Resource } from '../types';
-
 
 export const IDebugService = Symbol('IDebugManager');
 
@@ -129,9 +127,9 @@ export interface IDebugService {
 }
 
 /**
-* Wraps the `ActiveResourceService` API class. Created for injecting and mocking class methods in testing
-*/
+ * Wraps the `ActiveResourceService` API class. Created for injecting and mocking class methods in testing
+ */
 export const IActiveResourceService = Symbol('IActiveResourceService');
 export interface IActiveResourceService {
-   getActiveResource(): Resource;
+    getActiveResource(): Resource;
 }

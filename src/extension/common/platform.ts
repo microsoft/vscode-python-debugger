@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { EnvironmentVariables } from "./variables/types";
+import { EnvironmentVariables } from './variables/types';
 
 export enum Architecture {
     Unknown = 1,
@@ -36,7 +36,7 @@ export function getOSType(platform: string = process.platform): OSType {
  * Look up the requested env var value (or  undefined` if not set).
  */
 export function getEnvironmentVariable(key: string): string | undefined {
-    return ((process.env as any) as EnvironmentVariables)[key];
+    return (process.env as any as EnvironmentVariables)[key];
 }
 
 /**
@@ -50,4 +50,3 @@ export function getUserHomeDir(): string | undefined {
     }
     return getEnvironmentVariable('HOME') || getEnvironmentVariable('HOMEPATH');
 }
-

@@ -18,9 +18,6 @@ export class ActiveResourceService implements IActiveResourceService {
             return editor.document.uri;
         }
         const workspaceFolders = getWorkspaceFolders();
-        return Array.isArray(workspaceFolders) &&
-            workspaceFolders.length > 0
-            ? workspaceFolders[0].uri
-            : undefined;
+        return Array.isArray(workspaceFolders) && workspaceFolders.length > 0 ? workspaceFolders[0].uri : undefined;
     }
 }

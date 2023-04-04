@@ -273,7 +273,7 @@ suite('Debugging - launch.json Updater Service', () => {
         const textEditor = typemoq.Mock.ofType<TextEditor>();
         textEditor
             .setup((t) => t.document)
-            .returns(() => ('x' as unknown) as TextDocument)
+            .returns(() => 'x' as unknown as TextDocument)
             .verifiable(typemoq.Times.atLeastOnce());
         getActiveTextEditorStub.returns(textEditor.object);
         let debugConfigInserted = false;
@@ -308,7 +308,7 @@ suite('Debugging - launch.json Updater Service', () => {
             .verifiable(typemoq.Times.atLeastOnce());
         getActiveTextEditorStub.returns(textEditor.object);
         getWorkspaceFolderStub.returns(folder);
-        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve(([''] as unknown) as void);
+        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve([''] as unknown as void);
         let debugConfigInserted = false;
         LaunchJsonUpdaterServiceHelper.insertDebugConfiguration = async () => {
             debugConfigInserted = true;
@@ -343,7 +343,7 @@ suite('Debugging - launch.json Updater Service', () => {
         getActiveTextEditorStub.returns(textEditor.object);
         getWorkspaceFolderStub.returns(folder);
 
-        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve(([] as unknown) as void);
+        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve([] as unknown as void);
         let debugConfigInserted = false;
         LaunchJsonUpdaterServiceHelper.insertDebugConfiguration = async () => {
             debugConfigInserted = true;
@@ -376,9 +376,7 @@ suite('Debugging - launch.json Updater Service', () => {
             .verifiable(typemoq.Times.atLeastOnce());
         getActiveTextEditorStub.returns(textEditor.object);
         getWorkspaceFolderStub.withArgs(docUri).returns(folder);
-        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve(([
-            'config',
-        ] as unknown) as void);
+        when(debugConfigService.provideDebugConfigurations!(folder, token)).thenResolve(['config'] as unknown as void);
         let debugConfigInserted = false;
         LaunchJsonUpdaterServiceHelper.insertDebugConfiguration = async () => {
             debugConfigInserted = true;

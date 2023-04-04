@@ -24,17 +24,18 @@ suite('Attach to process - attach process provider factory', () => {
         processServiceFactory = mock(ProcessServiceFactory);
         disposableRegistry = [];
         registerCommandStub = sinon.stub(vscodeapi, 'registerCommand');
-    
 
-        factory = new AttachProcessProviderFactory(
-            instance(processServiceFactory),
-            disposableRegistry,
-        );
+        factory = new AttachProcessProviderFactory(instance(processServiceFactory), disposableRegistry);
     });
 
     test('Register commands should not fail', () => {
         factory.registerCommands();
-        sinon.assert.calledOnceWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any, sinon.match.any);
+        sinon.assert.calledOnceWithExactly(
+            registerCommandStub,
+            Commands.PickLocalProcess,
+            sinon.match.any,
+            sinon.match.any,
+        );
         assert.strictEqual((disposableRegistry as Disposable[]).length, 1);
     });
 });

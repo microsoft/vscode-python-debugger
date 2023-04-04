@@ -30,14 +30,10 @@ enum JsonLanguages {
 export class LaunchJsonCompletionProvider implements CompletionItemProvider, IExtensionSingleActivationService {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
 
-    constructor(
-        @inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry,
-    ) {}
+    constructor(@inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry) {}
 
     public async activate(): Promise<void> {
-        this.disposableRegistry.push(
-            languages.registerCompletionItemProvider({ language: JsonLanguages.json }, this),
-        );
+        this.disposableRegistry.push(languages.registerCompletionItemProvider({ language: JsonLanguages.json }, this));
         this.disposableRegistry.push(
             languages.registerCompletionItemProvider({ language: JsonLanguages.jsonWithComments }, this),
         );

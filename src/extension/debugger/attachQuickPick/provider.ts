@@ -13,9 +13,7 @@ import { WmicProcessParser } from './wmicProcessParser';
 
 @injectable()
 export class AttachProcessProvider implements IAttachProcessProvider {
-    constructor(
-        @inject(IProcessServiceFactory) private readonly processServiceFactory: IProcessServiceFactory,
-    ) {}
+    constructor(@inject(IProcessServiceFactory) private readonly processServiceFactory: IProcessServiceFactory) {}
 
     public getAttachItems(): Promise<IAttachItem[]> {
         return this._getInternalProcessEntries().then((processEntries) => {

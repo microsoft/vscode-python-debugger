@@ -8,7 +8,14 @@ import { Memento } from 'vscode';
 import { IExtensionSingleActivationService } from '../activation/types';
 import { Commands } from './constants';
 import { traceError, traceVerbose, traceWarn } from './log/logging';
-import { GLOBAL_MEMENTO, IExtensionContext, IMemento, IPersistentState, IPersistentStateFactory, WORKSPACE_MEMENTO } from './types';
+import {
+    GLOBAL_MEMENTO,
+    IExtensionContext,
+    IMemento,
+    IPersistentState,
+    IPersistentStateFactory,
+    WORKSPACE_MEMENTO,
+} from './types';
 import { cache } from './utils/decorators';
 import { noop } from './utils/misc';
 import { executeCommand, registerCommand } from './vscodeapi';
