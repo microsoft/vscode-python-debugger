@@ -6,6 +6,8 @@
 import {
     commands,
     ConfigurationScope,
+    debug,
+    DebugConfiguration,
     Disposable,
     DocumentFormattingEditProvider,
     DocumentSelector,
@@ -114,4 +116,8 @@ export function createQuickPick<T extends QuickPickItem>(): QuickPick<T> {
 
 export function launch(url: string): void {
     env.openExternal(Uri.parse(url));
+}
+
+export function startDebugging(folder: WorkspaceFolder | undefined, nameOrConfiguration: string | DebugConfiguration) {
+    debug.startDebugging(folder, nameOrConfiguration);
 }

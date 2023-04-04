@@ -7,46 +7,58 @@ import { IExtensionSingleActivationService } from '../activation/types';
 import { DebugService } from '../common/application/debugService';
 import { IDebugService } from '../common/application/types';
 import { AttachRequestArguments, LaunchRequestArguments } from '../types';
+import { DebugAdapterActivator } from './adapter/activator';
+import { DebugAdapterDescriptorFactory } from './adapter/factory';
+import { DebugSessionLoggingFactory } from './adapter/logging';
+import { OutdatedDebuggerPromptFactory } from './adapter/outdatedDebuggerPrompt';
+import { AttachProcessProviderFactory } from './attachQuickPick/factory';
+import { IAttachProcessProviderFactory } from './attachQuickPick/types';
 import { PythonDebugConfigurationService } from './configuration/debugConfigurationService';
 import { DynamicPythonDebugConfigurationService } from './configuration/dynamicdebugConfigurationService';
-import { DebugEnvironmentVariablesHelper, IDebugEnvironmentVariablesService } from './configuration/resolvers/helper';
+import { LaunchJsonCompletionProvider } from './configuration/launch.json/completionProvider';
+import { InterpreterPathCommand } from './configuration/launch.json/interpreterPathCommand';
+import { LaunchJsonUpdaterService } from './configuration/launch.json/updaterService';
 import { AttachConfigurationResolver } from './configuration/resolvers/attach';
+import { DebugEnvironmentVariablesHelper, IDebugEnvironmentVariablesService } from './configuration/resolvers/helper';
 import { LaunchConfigurationResolver } from './configuration/resolvers/launch';
 import { IDebugConfigurationResolver } from './configuration/types';
 import { DebugCommands } from './debugCommands';
 import { ChildProcessAttachEventHandler } from './hooks/childProcessAttachHandler';
 import { ChildProcessAttachService } from './hooks/childProcessAttachService';
-import { IChildProcessAttachService } from './hooks/types';
+import { IChildProcessAttachService, IDebugSessionEventHandlers } from './hooks/types';
 import { IServiceManager } from './ioc/types';
 import {
     IDebugAdapterDescriptorFactory,
     IDebugConfigurationService,
-    IDebugSessionEventHandlers,
     IDebugSessionLoggingFactory,
     IDynamicDebugConfigurationService,
     IOutdatedDebuggerPromptFactory,
 } from './types';
-import { DebugAdapterActivator } from './adapter/activator';
-import { DebugAdapterDescriptorFactory } from './adapter/factory';
-import { DebugSessionLoggingFactory } from './adapter/logging';
-import { OutdatedDebuggerPromptFactory } from './adapter/outdatedDebuggerPrompt';
-import { IAttachProcessProviderFactory } from './attachQuickPick/types';
-import { AttachProcessProviderFactory } from './attachQuickPick/factory';
 
 export function registerTypes(serviceManager: IServiceManager): void {
+    serviceManager.addSingleton<IExtensionSingleActivationService>(
+        IExtensionSingleActivationService,
+        LaunchJsonCompletionProvider,
+    );
     serviceManager.addSingleton<IDebugConfigurationService>(
         IDebugConfigurationService,
         PythonDebugConfigurationService,
     );
+    serviceManager.addSingleton<IExtensionSingleActivationService>(
+        IExtensionSingleActivationService,
+        LaunchJsonUpdaterService,
+    );
+    serviceManager.addSingleton<IExtensionSingleActivationService>(
+        IExtensionSingleActivationService,
+        InterpreterPathCommand,
+    );
     serviceManager.addSingleton<IDynamicDebugConfigurationService>(
         IDynamicDebugConfigurationService,
         DynamicPythonDebugConfigurationService,
-        
     );
     serviceManager.addSingleton<IDebugSessionEventHandlers>(IDebugSessionEventHandlers, ChildProcessAttachEventHandler);
     serviceManager.addSingleton<IChildProcessAttachService>(IChildProcessAttachService, ChildProcessAttachService);
     serviceManager.addSingleton<IDebugService>(IDebugService, DebugService);
-
     serviceManager.addSingleton<IDebugConfigurationResolver<LaunchRequestArguments>>(
         IDebugConfigurationResolver,
         LaunchConfigurationResolver,
@@ -61,7 +73,6 @@ export function registerTypes(serviceManager: IServiceManager): void {
         IDebugEnvironmentVariablesService,
         DebugEnvironmentVariablesHelper,
     );
-    
     serviceManager.addSingleton<IExtensionSingleActivationService>(
         IExtensionSingleActivationService,
         DebugAdapterActivator,
@@ -70,7 +81,6 @@ export function registerTypes(serviceManager: IServiceManager): void {
         IDebugAdapterDescriptorFactory,
         DebugAdapterDescriptorFactory,
     );
-
     serviceManager.addSingleton<IDebugSessionLoggingFactory>(IDebugSessionLoggingFactory, DebugSessionLoggingFactory);
     serviceManager.addSingleton<IOutdatedDebuggerPromptFactory>(
         IOutdatedDebuggerPromptFactory,
@@ -80,7 +90,5 @@ export function registerTypes(serviceManager: IServiceManager): void {
         IAttachProcessProviderFactory,
         AttachProcessProviderFactory,
     );
-
     serviceManager.addSingleton<IExtensionSingleActivationService>(IExtensionSingleActivationService, DebugCommands);
-
 }

@@ -19,11 +19,11 @@ import { showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getEnvironmentDetails, getInterpreterDetails, runPythonExtensionCommand } from '../../common/python';
+import { getActiveEnvironmentPath, getInterpreters, hasInterpreters, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, Interpreters } from '../../common/utils/localize';
-import { PythonEnvironment } from './types';
 import { IPersistentStateFactory } from '../../common/types';
+import { Environment } from '../../common/pythonTypes';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -124,27 +124,29 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
     ): Promise<string[]> {
         if (configuration.debugAdapterPython !== undefined) {
             return this.getExecutableCommand(
-                (await getEnvironmentDetails(configuration.debugAdapterPython)),
+                (await resolveEnvironment(configuration.debugAdapterPython)),
             );
         }
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
-        const interpreter = await getInterpreterDetails(resourceUri);
+        const interpreterPath = await getActiveEnvironmentPath(resourceUri);
 
-        if (interpreter) {
-            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreter.path}'`);
-            return this.getExecutableCommand(interpreter);
+        if (interpreterPath) {
+            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreterPath}'`);
+            return this.getExecutableCommand(
+                (await resolveEnvironment(interpreterPath)),
+            );
         }
 
-        // await this.interpreterService.hasInterpreters(); // Wait until we know whether we have an interpreter
-        // const interpreters = this.interpreterService.getInterpreters(resourceUri);
-        // if (interpreters.length === 0) {
-        //     this.notifySelectInterpreter().ignoreErrors();
-        //     return [];
-        // }
+        await hasInterpreters(); // Wait until we know whether we have an interpreter
+        const interpreters = await getInterpreters();
+        if (interpreters.length === 0) {
+            this.notifySelectInterpreter().ignoreErrors();
+            return [];
+        }
 
-        // traceVerbose(`Picking first available interpreter to launch the DA '${interpreters[0].path}'`);
-        return this.getExecutableCommand(interpreter);
+        traceVerbose(`Picking first available interpreter to launch the DA '${interpreters[0].path}'`);
+        return this.getExecutableCommand(interpreters[0]);
     }
 
     private async showDeprecatedPythonMessage() {
@@ -175,12 +177,12 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
     }
   
-    private async getExecutableCommand(interpreter: PythonEnvironment | undefined): Promise<string[]> {
+    private async getExecutableCommand(interpreter: Environment | undefined): Promise<string[]> {
         if (interpreter) {
-            if ((interpreter.version ? Number(interpreter.version[0]) : 0) < 3 || (interpreter.version ? Number(interpreter.version[1]) : 0) <= 6) {
+            if ((interpreter.version?.major ?? 0) < 3 || (interpreter.version?.minor ?? 0) <= 6) {
                 this.showDeprecatedPythonMessage();
             }
-            return interpreter.interpreterPath.length > 0 ? [interpreter.interpreterPath] : [];
+            return interpreter.path.length > 0 ? [interpreter.path] : [];
         }
         return [];
     }

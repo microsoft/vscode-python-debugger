@@ -3,11 +3,11 @@
 
 import * as path from 'path';
 import { inject, injectable } from 'inversify';
-import { debug, DebugConfiguration, Uri } from 'vscode';
+import { DebugConfiguration, Uri } from 'vscode';
 
 import { DebugPurpose, LaunchRequestArguments } from '../types';
 import { getConfigurationsByUri } from './configuration/launch.json/launchJsonReader';
-import { registerCommand } from '../common/vscodeapi';
+import { registerCommand, startDebugging } from '../common/vscodeapi';
 import { Commands } from '../common/constants';
 import { sendTelemetryEvent } from '../telemetry';
 import { EventName } from '../telemetry/constants';
@@ -34,7 +34,7 @@ export class DebugCommands implements IExtensionSingleActivationService {
                     return;
                 }
                 const config = await DebugCommands.getDebugConfiguration(file);
-                debug.startDebugging(undefined, config);
+                startDebugging(undefined, config);
             }),
         );
         return Promise.resolve();
