@@ -39,6 +39,9 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         debugConfiguration: DebugConfiguration,
         _token?: CancellationToken,
     ): Promise<T | undefined> {
+        if (debugConfiguration.clientOS === undefined) {
+            debugConfiguration.clientOS = getOSType() === OSType.Windows ? 'windows' : 'unix';
+        }
         return debugConfiguration as T;
     }
 
@@ -104,7 +107,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         if (debugConfiguration.pythonPath === '${command:python.interpreterPath}' || !debugConfiguration.pythonPath) {
             const interpreterDetail = await getInterpreterDetails(workspaceFolder);
             const interpreterPath =
-                interpreterDetail.path ? interpreterDetail.path :
+                interpreterDetail ? interpreterDetail.path :
                 (await getSettingsPythonPath(workspaceFolder));
             debugConfiguration.pythonPath = interpreterPath ? interpreterPath[0] : interpreterPath;
         } else {
@@ -158,8 +161,8 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
     }
 
     protected static isLocalHost(hostName?: string): boolean {
-        const LocalHosts = ['localhost', '127.0.0.1', '::1'];
-        return !!(hostName && LocalHosts.indexOf(hostName.toLowerCase()) >= 0);
+        const localHosts = ['localhost', '127.0.0.1', '::1'];
+        return !!(hostName && localHosts.indexOf(hostName.toLowerCase()) >= 0);
     }
 
     protected static fixUpPathMappings(
