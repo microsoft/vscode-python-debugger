@@ -38,8 +38,9 @@ export class DebugAdapterActivator implements IExtensionSingleActivationService 
         );
         this.disposables.push(
             this.debugService.onDidStartDebugSession((debugSession) => {
-                if (this.shouldTerminalFocusOnStart(debugSession.workspaceFolder?.uri))
-                    {executeCommand('workbench.action.terminal.focus');}
+                if (this.shouldTerminalFocusOnStart(debugSession.workspaceFolder?.uri)) {
+                    executeCommand('workbench.action.terminal.focus');
+                }
             }),
         );
     }

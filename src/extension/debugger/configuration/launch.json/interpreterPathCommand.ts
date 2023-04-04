@@ -15,9 +15,7 @@ import { registerCommand } from '../../../common/vscodeapi';
 export class InterpreterPathCommand implements IExtensionSingleActivationService {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
 
-    constructor(
-        @inject(IDisposableRegistry) private readonly disposables: IDisposable[],
-    ) {}
+    constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposable[]) {}
 
     public async activate(): Promise<void> {
         this.disposables.push(

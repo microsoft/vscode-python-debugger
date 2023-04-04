@@ -85,7 +85,6 @@ function getPythonPath(): string {
     return 'python';
 }
 
-
 export interface IExtensionTestApi extends IExtensionApi {
     serviceContainer: IServiceContainer;
     serviceManager: IServiceManager;

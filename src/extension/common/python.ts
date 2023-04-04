@@ -134,7 +134,7 @@ export async function hasInterpreters() {
         if (initialEnvs.length > 0) {
             return true;
         }
-        await Promise.race([onAddedToCollection.promise, api?.environments.refreshEnvironments]);
+        await Promise.race([onAddedToCollection.promise, api?.environments.refreshEnvironments()]);
 
         return api.environments.known.length > 0;
     }
