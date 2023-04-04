@@ -3,21 +3,8 @@
 
 import { IServiceManager } from '../debugger/ioc/types';
 import { ExtensionActivationManager } from './activationManager';
-import {
-    IExtensionActivationManager,
-    // IExtensionActivationService,
-    // IExtensionSingleActivationService,
-} from './types';
+import { IExtensionActivationManager } from './types';
 
 export function registerTypes(serviceManager: IServiceManager): void {
-    // serviceManager.addSingleton<IExtensionActivationService>(IExtensionActivationService, PartialModeStatusItem);
     serviceManager.add<IExtensionActivationManager>(IExtensionActivationManager, ExtensionActivationManager);
-    // serviceManager.addSingleton<IExtensionSingleActivationService>(
-    //     IExtensionSingleActivationService,
-    //     ExtensionSurveyPrompt,
-    // );
-    // serviceManager.addSingleton<IExtensionSingleActivationService>(
-    //     IExtensionSingleActivationService,
-    //     LoadLanguageServerExtension,
-    // );
 }

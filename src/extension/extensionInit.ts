@@ -67,17 +67,7 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
     // We need to setup this property before any telemetry is sent
     // await setExtensionInstallTelemetryProperties(fs);
 
-    // const applicationEnv = serviceManager.get<IApplicationEnvironment>(IApplicationEnvironment);
-    // const { enableProposedApi } = applicationEnv.packageJson;
-    // serviceManager.addSingletonInstance<boolean>(enableProposedApi);
-    // Feature specific registrations.
-    // unitTestsRegisterTypes(serviceManager);
-    // lintersRegisterTypes(serviceManager);
-    // formattersRegisterTypes(serviceManager);
-    // installerRegisterTypes(serviceManager);
-    // commonRegisterTerminalTypes(serviceManager);
     debugConfigurationRegisterTypes(serviceManager);
-    // tensorBoardRegisterTypes(serviceManager);
 
     // Note we should not trigger any extension related code which logs, until we have set logging level. So we cannot
     // use configurations service to get level setting. Instead, we use Workspace service to query for setting as it
@@ -89,18 +79,13 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
     appRegisterTypes(serviceManager);
     activationRegisterTypes(serviceManager);
 
-
-    // activationRegisterTypes(serviceManager);
-
     // "initialize" "services"
 
     const disposables = serviceManager.get<IDisposableRegistry>(IDisposableRegistry);
 
     const outputChannel = createOutputChannel("Python Debugger");
     context.subscriptions.push(outputChannel);
-    // disposables.push(registerCommand(Commands.ViewOutput, () => outputChannel.show()));
 
-    // languages.setLanguageConfiguration(PYTHON_LANGUAGE, getLanguageConfiguration());
     if (workspace.isTrusted) {
         if (!isVirtualWorkspace()) {
             const handlers = serviceManager.getAll<IDebugSessionEventHandlers>(IDebugSessionEventHandlers);

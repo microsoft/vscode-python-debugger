@@ -73,9 +73,6 @@ export class ExtensionActivationManager implements IExtensionActivationManager {
             return;
         }
         this.activatedWorkspaces.add(key);
-
-        // await sendActivationTelemetry(this.fileSystem, this.workspaceService, resource);
-        // await Promise.all(this.activationServices.map((item) => item.activate(resource)));
         await this.appDiagnostics.performPreStartupHealthCheck(resource);
     }
 

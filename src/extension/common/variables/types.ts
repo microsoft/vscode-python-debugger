@@ -3,6 +3,7 @@
 
 export type EnvironmentVariables = Object & Record<string, string | undefined>;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const IEnvironmentVariablesService = Symbol('IEnvironmentVariablesService');
 
 export interface IEnvironmentVariablesService {

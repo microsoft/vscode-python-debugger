@@ -13,6 +13,8 @@ import {
     DocumentSelector,
     env,
     languages,
+    MessageItem,
+    MessageOptions,
     OutputChannel,
     QuickPick,
     QuickPickItem,
@@ -72,35 +74,35 @@ export function applyEdit(edit: WorkspaceEdit): Thenable<boolean> {
     return workspace.applyEdit(edit);
 }
 
-// export function showErrorMessage<T extends string>(message: string, ...items: T[]): Thenable<T | undefined>;
-// export function showErrorMessage<T extends string>(
-//     message: string,
-//     options: MessageOptions,
-//     ...items: T[]
-// ): Thenable<T | undefined>;
-// export function showErrorMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T | undefined>;
-// export function showErrorMessage<T extends MessageItem>(
-//     message: string,
-//     options: MessageOptions,
-//     ...items: T[]
-// ): Thenable<T | undefined>;
+export function showErrorMessage<T extends string>(message: string, ...items: T[]): Thenable<T | undefined>;
+export function showErrorMessage<T extends string>(
+    message: string,
+    options: MessageOptions,
+    ...items: T[]
+): Thenable<T | undefined>;
+export function showErrorMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T | undefined>;
+export function showErrorMessage<T extends MessageItem>(
+    message: string,
+    options: MessageOptions,
+    ...items: T[]
+): Thenable<T | undefined>;
 
 export function showErrorMessage<T>(message: string, ...items: any[]): Thenable<T | undefined> {
     return window.showErrorMessage(message, ...items);
 }
 
-// export function showInformationMessage<T extends string>(message: string, ...items: T[]): Thenable<T | undefined>;
-// export function showInformationMessage<T extends string>(
-//     message: string,
-//     options: MessageOptions,
-//     ...items: T[]
-// ): Thenable<T | undefined>;
-// export function showInformationMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T | undefined>;
-// export function showInformationMessage<T extends MessageItem>(
-//     message: string,
-//     options: MessageOptions,
-//     ...items: T[]
-// ): Thenable<T | undefined>;
+export function showInformationMessage<T extends string>(message: string, ...items: T[]): Thenable<T | undefined>;
+export function showInformationMessage<T extends string>(
+    message: string,
+    options: MessageOptions,
+    ...items: T[]
+): Thenable<T | undefined>;
+export function showInformationMessage<T extends MessageItem>(message: string, ...items: T[]): Thenable<T | undefined>;
+export function showInformationMessage<T extends MessageItem>(
+    message: string,
+    options: MessageOptions,
+    ...items: T[]
+): Thenable<T | undefined>;
 
 export function showInformationMessage<T>(message: string, ...items: any[]): Thenable<T | undefined> {
     return window.showInformationMessage(message, ...items);

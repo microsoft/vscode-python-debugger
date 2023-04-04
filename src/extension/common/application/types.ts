@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -15,13 +16,11 @@ import {
     DebugSessionCustomEvent,
     Disposable,
     Event,
-    // UIKind,
     WorkspaceFolder,
 
 } from 'vscode';
 import { Resource } from '../types';
 
-// import { Channel } from '../constants';
 
 export const IDebugService = Symbol('IDebugManager');
 
@@ -128,110 +127,6 @@ export interface IDebugService {
      */
     removeBreakpoints(breakpoints: Breakpoint[]): void;
 }
-
-// export const IApplicationEnvironment = Symbol('IApplicationEnvironment');
-// export interface IApplicationEnvironment {
-//     /**
-//      * The application name of the editor, like 'VS Code'.
-//      *
-//      * @readonly
-//      */
-//     readonly appName: string;
-
-//     /**
-//      * The extension name.
-//      *
-//      * @readonly
-//      */
-//     readonly extensionName: string;
-
-//     /**
-//      * The application root folder from which the editor is running.
-//      *
-//      * @readonly
-//      */
-//     readonly appRoot: string;
-
-//     /**
-//      * Represents the preferred user-language, like `de-CH`, `fr`, or `en-US`.
-//      *
-//      * @readonly
-//      */
-//     readonly language: string;
-
-//     /**
-//      * A unique identifier for the computer.
-//      *
-//      * @readonly
-//      */
-//     readonly machineId: string;
-
-//     /**
-//      * A unique identifier for the current session.
-//      * Changes each time the editor is started.
-//      *
-//      * @readonly
-//      */
-//     readonly sessionId: string;
-//     /**
-//      * Contents of `package.json` as a JSON object.
-//      *
-//      * @type {any}
-//      * @memberof IApplicationEnvironment
-//      */
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     readonly packageJson: any;
-//     /**
-//      * Gets the full path to the user settings file. (may or may not exist).
-//      *
-//      * @type {string}
-//      * @memberof IApplicationShell
-//      */
-//     readonly userSettingsFile: string | undefined;
-//     /**
-//      * The detected default shell for the extension host, this is overridden by the
-//      * `terminal.integrated.shell` setting for the extension host's platform.
-//      *
-//      * @type {string}
-//      * @memberof IApplicationShell
-//      */
-//     readonly shell: string;
-//     /**
-//      * Gets the vscode channel (whether 'insiders' or 'stable').
-//      */
-//     readonly channel: Channel;
-//     /**
-//      * Gets the extension channel (whether 'insiders' or 'stable').
-//      *
-//      * @type {string}
-//      * @memberof IApplicationShell
-//      */
-//     readonly extensionChannel: Channel;
-//     /**
-//      * The version of the editor.
-//      */
-//     readonly vscodeVersion: string;
-//     /**
-//      * The custom uri scheme the editor registers to in the operating system.
-//      */
-//     readonly uriScheme: string;
-//     /**
-//      * The UI kind property indicates from which UI extensions
-//      * are accessed from. For example, extensions could be accessed
-//      * from a desktop application or a web browser.
-//      */
-//     readonly uiKind: UIKind;
-//     /**
-//      * The name of a remote. Defined by extensions, popular samples are `wsl` for the Windows
-//      * Subsystem for Linux or `ssh-remote` for remotes using a secure shell.
-//      *
-//      * *Note* that the value is `undefined` when there is no remote extension host but that the
-//      * value is defined in all extension hosts (local and remote) in case a remote extension host
-//      * exists. Use {@link Extension.extensionKind} to know if
-//      * a specific extension runs remote or not.
-//      */
-//     readonly remoteName: string | undefined;
-// }
 
 /**
 * Wraps the `ActiveResourceService` API class. Created for injecting and mocking class methods in testing

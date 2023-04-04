@@ -100,16 +100,6 @@ export type ResolvedEnvironment = Environment & {
   | undefined;
 };
 
-// export type EnvironmentsChangeEvent = {
-//     readonly env: Environment;
-//     /**
-//      * * "add": New environment is added.
-//      * * "remove": Existing environment in the list is removed.
-//      * * "update": New information found about existing environment.
-//      */
-//     readonly type: 'add' | 'remove' | 'update';
-// };
-
 export type ActiveEnvironmentPathChangeEvent = EnvironmentPath & {
     /**
      * Workspace folder the environment changed for.

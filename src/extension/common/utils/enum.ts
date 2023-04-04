@@ -11,10 +11,6 @@ function getNames(e: any) {
     return getObjValues(e).filter((v) => typeof v === 'string') as string[];
 }
 
-// export function getValues<T>(e: any) {
-//     return (getObjValues(e).filter((v) => typeof v === 'number') as any) as T[];
-// }
-
 function getObjValues(e: any): (number | string)[] {
     return Object.keys(e).map((k) => e[k]);
 }

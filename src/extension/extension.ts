@@ -7,8 +7,8 @@ if ((Reflect as any).metadata === undefined) {
 }
 
 // // Initialize source maps (this must never be moved up nor further down).
-// import { initialize } from './sourceMapSupport';
-// initialize(require('vscode'));
+import { initialize } from './debugger/sourceMapSupport';
+initialize(require('vscode'));
 
 //===============================================
 // We start tracking the extension's startup time at this point.  The
@@ -126,22 +126,8 @@ async function activateUnsafe(
     startupDurations.totalActivateTime = startupStopWatch.elapsedTime - startupDurations.startActivateTime;
     activationDeferred.resolve();
 
-    setTimeout(async () => {
-        if (activatedServiceContainer) {
-            if (workspace.isTrusted) {
-            //     const interpreterManager = activatedServiceContainer.get<IInterpreterService>(IInterpreterService);
-            //     const workspaces = workspace.workspaceFolders ?? [];
-            //     await interpreterManager
-            //         .refresh(workspaces.length > 0 ? workspaces[0].uri : undefined)
-            //         .catch((ex) => traceError('Python Extension: interpreterManager.refresh', ex));
-            }
-        }
-
-        // runAfterActivation();
-    });
-
     const api = buildApi(activationPromise, ext.legacyIOC.serviceManager, ext.legacyIOC.serviceContainer);
-    // const proposedApi = buildProposedApi(components.pythonEnvs, ext.legacyIOC.serviceContainer);
+
     return [api, activationPromise, ext.legacyIOC.serviceContainer];
 }
 

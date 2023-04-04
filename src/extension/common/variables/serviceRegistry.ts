@@ -10,5 +10,5 @@ export function registerTypes(serviceManager: IServiceManager) {
     serviceManager.addSingleton<IEnvironmentVariablesService>(
         IEnvironmentVariablesService,
         EnvironmentVariablesService,
-    )
+    );
 }

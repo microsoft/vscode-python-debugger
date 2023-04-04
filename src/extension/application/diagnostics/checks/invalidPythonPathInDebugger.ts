@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
@@ -56,7 +57,6 @@ export class InvalidPythonPathInDebuggerService extends BaseDiagnosticsService
     implements IInvalidPythonPathInDebuggerService {
     constructor(
         @inject(IServiceContainer) serviceContainer: IServiceContainer,
-        // @inject(IInterpreterHelper) private readonly interpreterHelper: IInterpreterHelper,
         @inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
         @inject(IDiagnosticHandlerService)
         @named(DiagnosticCommandPromptHandlerServiceId)

@@ -21,12 +21,10 @@ export namespace DebugConfigStrings {
         label: l10n.t('Python'),
         description: l10n.t('Select a Python debug configuration'),
     };
-
     export namespace file {
         export const snippet = {
             name: l10n.t('Python: Current File'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Python File'),
             description: l10n.t('Debug the currently active Python file'),
@@ -37,7 +35,6 @@ export namespace DebugConfigStrings {
             name: l10n.t('Python: Module'),
             default: l10n.t('enter-your-module-name'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Module'),
             description: l10n.t("Debug a Python module by invoking it with '-m'"),
@@ -53,7 +50,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: Remote Attach'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Remote Attach'),
             description: l10n.t('Attach to a remote debug server'),
@@ -73,7 +69,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: Attach using Process Id'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Attach using Process ID'),
             description: l10n.t('Attach to a local process'),
@@ -83,7 +78,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: Django'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Django'),
             description: l10n.t('Launch and debug a Django web application'),
@@ -100,7 +94,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: FastAPI'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('FastAPI'),
             description: l10n.t('Launch and debug a FastAPI web application'),
@@ -115,7 +108,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: Flask'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Flask'),
             description: l10n.t('Launch and debug a Flask web application'),
@@ -130,7 +122,6 @@ export namespace DebugConfigStrings {
         export const snippet = {
             name: l10n.t('Python: Pyramid Application'),
         };
-
         export const selectConfiguration = {
             label: l10n.t('Pyramid'),
             description: l10n.t('Launch and debug a Pyramid web application'),
@@ -147,7 +138,6 @@ export namespace Diagnostics {
         'Source map support is enabled in the Python Extension, this will adversely impact performance of the extension.',
     );
     export const disableSourceMaps = l10n.t('Disable Source Map Support');
-
     export const warnBeforeEnablingSourceMaps = l10n.t(
         'Enabling source map support in the Python Extension will adversely impact performance of the extension.',
     );

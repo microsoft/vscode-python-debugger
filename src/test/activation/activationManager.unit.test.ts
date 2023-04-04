@@ -5,6 +5,7 @@
 
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
+import * as vscode from 'vscode';
 // import { anything, verify, when } from 'ts-mockito';
 import * as typemoq from 'typemoq';
 import { TextDocument, Uri } from 'vscode';
@@ -35,7 +36,12 @@ suite('Activation Manager', () => {
         }
         let managerTest: ExtensionActivationManagerTest;
         let appDiagnostics: typemoq.IMock<IApplicationDiagnostics>;
-        let isVirtualWorkspaceStub :  sinon.SinonStub;
+        let isVirtualWorkspaceStub : sinon.SinonStub;
+        let isTrustedStub: sinon.SinonStub;
+        let onDidChangeWorkspaceFoldersStub: sinon.SinonStub;
+        let getWorkspaceFoldersStub: sinon.SinonStub;
+        let onDidOpenTextDocumentStub: sinon.SinonStub;
+
         // let autoSelection: typemoq.IMock<IInterpreterAutoSelectionService>;
         // let activeResourceService: IActiveResourceService;
         setup(() => {
@@ -47,7 +53,10 @@ suite('Activation Manager', () => {
                 appDiagnostics.object,
             );
             isVirtualWorkspaceStub = sinon.stub(vscodeapi, 'isVirtualWorkspace');
-
+            isTrustedStub = sinon.stub(vscode.workspace, 'isTrusted');
+            onDidChangeWorkspaceFoldersStub = sinon.stub(vscode.workspace, 'onDidChangeWorkspaceFolders');
+            getWorkspaceFoldersStub = sinon.stub(vscodeapi, 'getWorkspaceFolders');
+            onDidOpenTextDocumentStub = sinon.stub(vscode.workspace, 'onDidOpenTextDocument');
             // sinon.stub(EnvFileTelemetry, 'sendActivationTelemetry').resolves();
         });
 
@@ -80,6 +89,7 @@ suite('Activation Manager', () => {
 
         test('If running in a untrusted workspace, do not activate services that do not support it', async () => {
             // when(workspaceService.isTrusted).thenReturn(false);
+            isTrustedStub.returns(false);
             
             const resource = Uri.parse('two');
 
@@ -119,21 +129,33 @@ suite('Activation Manager', () => {
             appDiagnostics.verifyAll();
         });
 
-        test('Initialize will add event handlers and will dispose them when running dispose', async () => {
+        test.only('Initialize will add event handlers and will dispose them when running dispose', async () => {
             const disposable = typemoq.Mock.ofType<IDisposable>();
             const disposable2 = typemoq.Mock.ofType<IDisposable>();
+
+            onDidChangeWorkspaceFoldersStub.returns(() => disposable.object);
             // when(workspaceService.onDidChangeWorkspaceFolders).thenReturn(() => disposable.object);
+            
+            getWorkspaceFoldersStub.returns([
+                (1 as unknown) as vscode.WorkspaceFolder,
+                (2 as unknown) as vscode.WorkspaceFolder,
+            ]);
             // when(workspaceService.workspaceFolders).thenReturn([
             //     (1 as unknown) as WorkspaceFolder,
             //     (2 as unknown) as WorkspaceFolder,
             // ]);
+
             const eventDef = () => disposable2.object;
+            onDidOpenTextDocumentStub.returns(() => eventDef);
             // documentManager
             //     .setup((d) => d.onDidOpenTextDocument)
             //     .returns(() => eventDef)
             //     .verifiable(typemoq.Times.once());
 
             await managerTest.initialize();
+
+            sinon.assert.calledOnce(getWorkspaceFoldersStub);
+            sinon.assert.calledOnce(onDidChangeWorkspaceFoldersStub);
 
             // verify(workspaceService.workspaceFolders).once();
             // verify(workspaceService.onDidChangeWorkspaceFolders).once();
