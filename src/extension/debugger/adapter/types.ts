@@ -34,6 +34,7 @@ export type PythonEnvironment = {
     version?: string[];
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const IPromptShowState = Symbol('IPromptShowState');
 export interface IPromptShowState {
     shouldShowPrompt(): boolean;

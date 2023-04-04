@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-extra';
-// import { sleep } from '../client/common/utils/async';
 import { PYTHON_PATH } from './common';
 import { sleep } from './core';
 import { Proc, spawn } from './proc';

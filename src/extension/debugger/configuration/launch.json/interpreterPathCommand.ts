@@ -16,7 +16,6 @@ export class InterpreterPathCommand implements IExtensionSingleActivationService
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
 
     constructor(
-        // @inject(IInterpreterService) private readonly interpreterService: IInterpreterService,
         @inject(IDisposableRegistry) private readonly disposables: IDisposable[],
     ) {}
 

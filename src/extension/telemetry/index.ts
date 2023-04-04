@@ -70,6 +70,7 @@ function getTelemetryReporter() {
         return telemetryReporter;
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const Reporter = require('@vscode/extension-telemetry').default as typeof TelemetryReporter;
     telemetryReporter = new Reporter(AppinsightsKey, [
         {

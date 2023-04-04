@@ -2,22 +2,21 @@
 // Licensed under the MIT License.
 
 'use strict';
-// import { Uri } from 'vscode';
 import { inject, injectable } from 'inversify';
 import { IDebugAdapterDescriptorFactory, IDebugSessionLoggingFactory, IOutdatedDebuggerPromptFactory } from '../types';
-// import { executeCommand } from '../../common/vscodeapi';
 import { IDebugService } from '../../common/application/types';
 import { IDisposableRegistry } from '../../common/types';
 import { IExtensionSingleActivationService } from '../../activation/types';
 import { IAttachProcessProviderFactory } from '../attachQuickPick/types';
 import { DebuggerTypeName } from '../../constants';
+import { Uri } from 'vscode';
+import { executeCommand, getConfiguration } from '../../common/vscodeapi';
 
 @injectable()
 export class DebugAdapterActivator implements IExtensionSingleActivationService {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
     constructor(
         @inject(IDebugService) private readonly debugService: IDebugService,
-        // @inject(IConfigurationService) private readonly configSettings: IConfigurationService,
         @inject(IDebugAdapterDescriptorFactory) private descriptorFactory: IDebugAdapterDescriptorFactory,
         @inject(IDebugSessionLoggingFactory) private debugSessionLoggingFactory: IDebugSessionLoggingFactory,
         @inject(IOutdatedDebuggerPromptFactory) private debuggerPromptFactory: IOutdatedDebuggerPromptFactory,
@@ -37,15 +36,15 @@ export class DebugAdapterActivator implements IExtensionSingleActivationService 
         this.disposables.push(
             this.debugService.registerDebugAdapterDescriptorFactory(DebuggerTypeName, this.descriptorFactory),
         );
-        // this.disposables.push(
-        //     this.debugService.onDidStartDebugSession((debugSession) => {
-        //         if (this.shouldTerminalFocusOnStart(debugSession.workspaceFolder?.uri))
-        //             executeCommand('workbench.action.terminal.focus');
-        //     }),
-        // );
+        this.disposables.push(
+            this.debugService.onDidStartDebugSession((debugSession) => {
+                if (this.shouldTerminalFocusOnStart(debugSession.workspaceFolder?.uri))
+                    {executeCommand('workbench.action.terminal.focus');}
+            }),
+        );
     }
 
-    // private shouldTerminalFocusOnStart(uri: Uri | undefined): boolean {
-    //     return getSettings(uri)?.terminal.focusAfterLaunch;
-    // }
+    private shouldTerminalFocusOnStart(uri: Uri | undefined): boolean {
+        return getConfiguration('python', uri)?.terminal.focusAfterLaunch;
+    }
 }

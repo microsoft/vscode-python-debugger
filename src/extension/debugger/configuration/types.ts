@@ -5,6 +5,7 @@
 
 import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const IDebugConfigurationResolver = Symbol('IDebugConfigurationResolver');
 export interface IDebugConfigurationResolver<T extends DebugConfiguration> {
     resolveDebugConfiguration(
