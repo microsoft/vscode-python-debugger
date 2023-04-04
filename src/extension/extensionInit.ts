@@ -23,7 +23,6 @@ import { getLoggingLevel, setLoggingLevel } from './common/log/logging';
 import { createOutputChannel, isVirtualWorkspace } from './common/vscodeapi';
 import {
     IDebugConfigurationService,
-    IDebugSessionEventHandlers,
     IDynamicDebugConfigurationService,
 } from './debugger/types';
 import { DebugSessionEventDispatcher } from './debugger/hooks/eventHandlerDispatcher';
@@ -38,6 +37,7 @@ import { ActivationResult } from './components';
 import { IExtensionActivationManager } from './activation/types';
 import { registerTypes as activationRegisterTypes } from './activation/serviceRegistry';
 import { registerTypes as processRegisterTypes } from './common/process/serviceRegistry';
+import { IDebugSessionEventHandlers } from './debugger/hooks/types';
 
 // The code in this module should do nothing more complex than register
 // objects to DI and simple init (e.g. no side effects).  That implies
@@ -109,7 +109,7 @@ export async function activateLegacy(ext: ExtensionState): Promise<ActivationRes
                     disposables.push(debug.registerDebugConfigurationProvider(DebuggerTypeName, debugConfigProvider));
                 });
 
-            // register a dynamic configuration provider for 'python-debugger' debug type
+            // register a dynamic configuration provider for 'debugpy' debug type
             context.subscriptions.push(
                 debug.registerDebugConfigurationProvider(
                     DebuggerTypeName,

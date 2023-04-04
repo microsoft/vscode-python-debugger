@@ -38,10 +38,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "python-debugger.helloWorld",
-        "title": "Python Debugger: Hello World"
-      },
-      {
         "category": "Python",
         "command": "python-debugger.debugInTerminal",
         "icon": "$(debug-alt)",

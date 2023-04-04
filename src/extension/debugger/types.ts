@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 'use strict';
 
 import { Readable } from 'stream';
-import { DebugSession, DebugSessionCustomEvent } from 'vscode';
 import {
     CancellationToken,
     DebugAdapterDescriptorFactory,
@@ -15,12 +15,6 @@ import {
 } from 'vscode';
 
 import { DebugConfigurationArguments } from '../types';
-
-export const IDebugSessionEventHandlers = Symbol('IDebugSessionEventHandlers');
-export interface IDebugSessionEventHandlers {
-    handleCustomEvent?(e: DebugSessionCustomEvent): Promise<void>;
-    handleTerminateEvent?(e: DebugSession): Promise<void>;
-}
 
 export const IDebugConfigurationService = Symbol('IDebugConfigurationService');
 export interface IDebugConfigurationService extends DebugConfigurationProvider {}

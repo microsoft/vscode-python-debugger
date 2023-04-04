@@ -60,7 +60,7 @@ export async function activate(context: IExtensionContext): Promise<IExtensionAp
     try {
         context.subscriptions.push(
             workspace.onDidGrantWorkspaceTrust(async () => {
-                await deactivate();
+                deactivate();
                 await activate(context);
             }),
         );
@@ -121,6 +121,19 @@ async function activateUnsafe(
 
     startupDurations.totalActivateTime = startupStopWatch.elapsedTime - startupDurations.startActivateTime;
     activationDeferred.resolve();
+
+    setTimeout(async () => {
+        if (activatedServiceContainer) {
+            if (workspace.isTrusted) {
+            //     const interpreterManager = activatedServiceContainer.get<IInterpreterService>(IInterpreterService);
+            //     const workspaces = workspace.workspaceFolders ?? [];
+            //     await interpreterManager
+            //         .refresh(workspaces.length > 0 ? workspaces[0].uri : undefined)
+            //         .catch((ex) => traceError('Python Extension: interpreterManager.refresh', ex));
+            }
+        }
+        // runAfterActivation();
+    });
 
     const api = buildApi(activationPromise, ext.legacyIOC.serviceManager, ext.legacyIOC.serviceContainer);
 

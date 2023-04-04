@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { inject, injectable } from 'inversify';
 import { DebugConfiguration, Uri } from 'vscode';
-
 import { DebugPurpose, LaunchRequestArguments } from '../types';
 import { getConfigurationsByUri } from './configuration/launch.json/launchJsonReader';
 import { registerCommand, startDebugging } from '../common/vscodeapi';
@@ -15,6 +14,7 @@ import { IExtensionSingleActivationService } from '../activation/types';
 import { noop } from '../common/utils/misc';
 import { getInterpreterDetails, runPythonExtensionCommand } from '../common/python';
 import { IDisposableRegistry } from '../common/types';
+import { DebuggerTypeName } from '../constants';
 
 @injectable()
 export class DebugCommands implements IExtensionSingleActivationService {
@@ -54,7 +54,7 @@ export class DebugCommands implements IExtensionSingleActivationService {
         }
         return {
             name: `Debug ${uri ? path.basename(uri.fsPath) : 'File'}`,
-            type: 'python-debugger',
+            type: DebuggerTypeName,
             request: 'launch',
             program: uri?.fsPath ?? '${file}',
             console: 'integratedTerminal',
