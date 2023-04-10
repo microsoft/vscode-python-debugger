@@ -31,12 +31,12 @@ export function isUnitTestExecution(): boolean {
 export const isCI = process.env.TRAVIS === 'true' || process.env.TF_BUILD !== undefined;
 
 export namespace Commands {
-    export const Debug_In_Terminal = 'python-debugger.debugInTerminal';
-    export const TriggerEnvironmentSelection = 'python-debugger.triggerEnvSelection';
-    export const PickLocalProcess = 'python-debugger.pickLocalProcess';
-    export const ViewOutput = 'python-debugger.viewOutput';
-    export const ClearStorage = 'python-debugger.clearCacheAndReload';
-    export const Enable_SourceMap_Support = 'python-debugger.enableSourceMapSupport';
+    export const Debug_In_Terminal = 'debugpy.debugInTerminal';
+    export const TriggerEnvironmentSelection = 'debugpy.triggerEnvSelection';
+    export const PickLocalProcess = 'debugpy.pickLocalProcess';
+    export const ViewOutput = 'debugpy.viewOutput';
+    export const ClearStorage = 'debugpy.clearCacheAndReload';
+    export const Enable_SourceMap_Support = 'debugpy.enableSourceMapSupport';
     export const Set_Interpreter = 'python.setInterpreter';
     export const GetSelectedInterpreterPath = 'python.interpreterPath';
 }

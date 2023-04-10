@@ -5,7 +5,6 @@
 
 import { inject, injectable, named } from 'inversify';
 import { Memento } from 'vscode';
-import { IExtensionSingleActivationService } from '../activation/types';
 import { Commands } from './constants';
 import { traceError, traceVerbose, traceWarn } from './log/logging';
 import {
@@ -74,7 +73,7 @@ type KeysStorageType = 'global' | 'workspace';
 export type KeysStorage = { key: string; defaultValue: unknown };
 
 @injectable()
-export class PersistentStateFactory implements IPersistentStateFactory, IExtensionSingleActivationService {
+export class PersistentStateFactory implements IPersistentStateFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
     public readonly _globalKeysStorage = new PersistentState<KeysStorage[]>(
         this.globalState,

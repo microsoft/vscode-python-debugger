@@ -13,9 +13,9 @@ import {
     DocumentSelector,
     env,
     languages,
+    LogOutputChannel,
     MessageItem,
     MessageOptions,
-    OutputChannel,
     QuickPick,
     QuickPickItem,
     TextEditor,
@@ -27,8 +27,8 @@ import {
     WorkspaceFolder,
 } from 'vscode';
 
-export function createOutputChannel(name: string): OutputChannel {
-    return window.createOutputChannel(name);
+export function createOutputChannel(name: string): LogOutputChannel {
+    return window.createOutputChannel(name, { log: true });
 }
 
 export function getConfiguration(section?: string, scope?: ConfigurationScope): WorkspaceConfiguration {

@@ -10,7 +10,7 @@ import { ConsoleType, TriggerType } from '../types';
 import { DebugConfigurationType } from '../debugger/types';
 import { EventName } from './constants';
 import { isPromise } from '../common/utils/async';
-import { DiagnosticCodes } from '../application/diagnostics/constants';
+// import { DiagnosticCodes } from '../application/diagnostics/constants';
 
 /**
  * Checks whether telemetry is supported.
@@ -418,21 +418,21 @@ export interface IEventNamePropertyMapping {
          */
         console?: ConsoleType;
     };
-    /**
-     * Telemetry event sent when we are checking if we can handle the diagnostic code
-     */
-    /* __GDPR__
-       "diagnostics.message" : {
-          "code" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "karthiknadig" }
-       }
-     */
-    [EventName.DIAGNOSTICS_MESSAGE]: {
-        /**
-         * Code of diagnostics message detected and displayed.
-         * @type {string}
-         */
-        code: DiagnosticCodes;
-    };
+    // /**
+    //  * Telemetry event sent when we are checking if we can handle the diagnostic code
+    //  */
+    // /* __GDPR__
+    //    "diagnostics.message" : {
+    //       "code" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "karthiknadig" }
+    //    }
+    //  */
+    // [EventName.DIAGNOSTICS_MESSAGE]: {
+    //     /**
+    //      * Code of diagnostics message detected and displayed.
+    //      * @type {string}
+    //      */
+    //     code: DiagnosticCodes;
+    // };
     /**
      * Telemetry captured when user code starts running after loading the debugger.
      */

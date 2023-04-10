@@ -6,16 +6,27 @@ import { getInterpreterDetails } from './python';
 import { LoggingLevelSettingType } from './log/types';
 import { getConfiguration, getWorkspaceFolder, getWorkspaceFolders } from './vscodeapi';
 import { isUnitTestExecution } from './constants';
+import { traceLog } from './log/logging';
+
+const DEFAULT_SEVERITY: Record<string, string> = {
+    convention: 'Information',
+    error: 'Error',
+    fatal: 'Error',
+    refactor: 'Hint',
+    warning: 'Warning',
+    info: 'Information',
+};
 
 export interface ISettings {
+    cwd: string;
     workspace: string;
-    logLevel: LoggingLevelSettingType;
     args: string[];
+    severity: Record<string, string>;
     path: string[];
     interpreter: string[];
     importStrategy: string;
     showNotifications: string;
-    envFile: string;
+    extraPaths: string[];
 }
 
 export async function getExtensionSettings(namespace: string, includeInterpreter?: boolean): Promise<ISettings[]> {
@@ -58,12 +69,34 @@ function getPath(namespace: string, workspace: WorkspaceFolder): string[] {
         return path;
     }
 
-    const legacyConfig = getConfiguration('python-debugger', workspace.uri);
+    const legacyConfig = getConfiguration('debugpy', workspace.uri);
     const legacyPath = legacyConfig.get<string>('formatting.blackPath', '');
     if (legacyPath.length > 0 && legacyPath !== 'black') {
         return [legacyPath];
     }
     return [];
+}
+
+function getCwd(namespace: string, workspace: WorkspaceFolder): string {
+    const legacyConfig = getConfiguration('python', workspace.uri);
+    const legacyCwd = legacyConfig.get<string>('linting.cwd');
+
+    if (legacyCwd) {
+        traceLog('Using cwd from `python.linting.cwd`.');
+        return resolveWorkspace(workspace, legacyCwd);
+    }
+
+    return workspace.uri.fsPath;
+}
+
+function getExtraPaths(namespace: string, workspace: WorkspaceFolder): string[] {
+    const legacyConfig = getConfiguration('python', workspace.uri);
+    const legacyExtraPaths = legacyConfig.get<string[]>('analysis.extraPaths', []);
+
+    if (legacyExtraPaths.length > 0) {
+        traceLog('Using cwd from `python.analysis.extraPaths`.');
+    }
+    return legacyExtraPaths;
 }
 
 export function getInterpreterFromSetting(namespace: string) {
@@ -87,18 +120,18 @@ export async function getWorkspaceSettings(
     }
 
     const args = getArgs(namespace, workspace).map((s) => resolveWorkspace(workspace, s));
-    const envFile = resolveWorkspace(workspace, getEnvFile(namespace, workspace.uri));
-
     const path = getPath(namespace, workspace).map((s) => resolveWorkspace(workspace, s));
+    const extraPaths = getExtraPaths(namespace, workspace);
     const workspaceSetting = {
+        cwd: getCwd(namespace, workspace),
         workspace: workspace.uri.toString(),
-        logLevel: config.get<LoggingLevelSettingType>('logLevel', 'error'),
         args,
-        envFile,
+        severity: config.get<Record<string, string>>('severity', DEFAULT_SEVERITY),
         path,
         interpreter: (interpreter ?? []).map((s) => resolveWorkspace(workspace, s)),
         importStrategy: config.get<string>('importStrategy', 'fromEnvironment'),
         showNotifications: config.get<string>('showNotifications', 'off'),
+        extraPaths: extraPaths.map((s) => resolveWorkspace(workspace, s)),
     };
     return workspaceSetting;
 }
@@ -129,7 +162,7 @@ function getSettingsUriAndTarget(resource: Uri | undefined): { uri: Uri | undefi
 }
 
 export async function updateSetting(
-    section: string = 'python-debugger',
+    section: string = 'debugpy',
     setting: string,
     value?: unknown,
     resource?: Uri,
@@ -140,7 +173,7 @@ export async function updateSetting(
         target: configTarget || ConfigurationTarget.WorkspaceFolder,
     };
     let settingsInfo = defaultSetting;
-    if (section === 'python-debugger' && configTarget !== ConfigurationTarget.Global) {
+    if (section === 'debugpy' && configTarget !== ConfigurationTarget.Global) {
         settingsInfo = getSettingsUriAndTarget(resource);
     }
 

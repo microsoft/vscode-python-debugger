@@ -4,8 +4,7 @@
 import { inject, injectable } from 'inversify';
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, ProviderResult } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
-
-import { IExtensionSingleActivationService } from '../../activation/types';
+// import { IExtensionSingleActivationService } from '../../activation/types';
 import { IEventNamePropertyMapping, sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 import { TriggerType, AttachRequestArguments, ConsoleType, LaunchRequestArguments } from '../../types';
@@ -61,13 +60,13 @@ class TelemetryTracker implements DebugAdapterTracker {
 }
 
 @injectable()
-export class DebugSessionTelemetry implements DebugAdapterTrackerFactory, IExtensionSingleActivationService {
+export class DebugSessionTelemetry implements DebugAdapterTrackerFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
     constructor(
         @inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
         @inject(IDebugService) debugService: IDebugService,
     ) {
-        disposableRegistry.push(debugService.registerDebugAdapterTrackerFactory('python-debugger', this));
+        disposableRegistry.push(debugService.registerDebugAdapterTrackerFactory('debugpy', this));
     }
 
     public async activate(): Promise<void> {

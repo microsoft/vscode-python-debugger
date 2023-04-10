@@ -3,10 +3,8 @@
 
 'use strict';
 
-import { inject, injectable, named } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { CancellationToken, Uri, WorkspaceFolder } from 'vscode';
-import { InvalidPythonPathInDebuggerServiceId } from '../../../application/diagnostics/checks/invalidPythonPathInDebugger';
-import { IDiagnosticsService, IInvalidPythonPathInDebuggerService } from '../../../application/diagnostics/types';
 import { getOSType, OSType } from '../../../common/platform';
 import { getEnvFile } from '../../../common/settings';
 import { DebuggerTypeName } from '../../../constants';
@@ -18,9 +16,6 @@ import { getProgram, IDebugEnvironmentVariablesService } from './helper';
 @injectable()
 export class LaunchConfigurationResolver extends BaseConfigurationResolver<LaunchRequestArguments> {
     constructor(
-        @inject(IDiagnosticsService)
-        @named(InvalidPythonPathInDebuggerServiceId)
-        private readonly invalidPythonPathInDebuggerService: IInvalidPythonPathInDebuggerService,
         @inject(IDebugEnvironmentVariablesService) private readonly debugEnvHelper: IDebugEnvironmentVariablesService,
     ) {
         super();
@@ -62,10 +57,10 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         const workspaceFolder = LaunchConfigurationResolver.getWorkspaceFolder(folder);
         await this.provideLaunchDefaults(workspaceFolder, debugConfiguration);
 
-        const isValid = await this.validateLaunchConfiguration(folder, debugConfiguration);
-        if (!isValid) {
-            return undefined;
-        }
+        // const isValid = await this.validateLaunchConfiguration(folder, debugConfiguration);
+        // if (!isValid) {
+        //     return undefined;
+        // }
 
         if (Array.isArray(debugConfiguration.debugOptions)) {
             debugConfiguration.debugOptions = debugConfiguration.debugOptions!.filter(
@@ -184,20 +179,20 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         LaunchConfigurationResolver.sendTelemetry(trigger, debugConfiguration);
     }
 
-    protected async validateLaunchConfiguration(
-        folder: WorkspaceFolder | undefined,
-        debugConfiguration: LaunchRequestArguments,
-    ): Promise<boolean> {
-        const diagnosticService = this.invalidPythonPathInDebuggerService;
-        for (const executable of [
-            debugConfiguration.python,
-            debugConfiguration.debugAdapterPython,
-            debugConfiguration.debugLauncherPython,
-        ]) {
-            if (!(await diagnosticService.validatePythonPath(executable, this.pythonPathSource, folder?.uri))) {
-                return false;
-            }
-        }
-        return true;
-    }
+    // protected async validateLaunchConfiguration(
+    //     folder: WorkspaceFolder | undefined,
+    //     debugConfiguration: LaunchRequestArguments,
+    // ): Promise<boolean> {
+    //     const diagnosticService = this.invalidPythonPathInDebuggerService;
+    //     for (const executable of [
+    //         debugConfiguration.python,
+    //         debugConfiguration.debugAdapterPython,
+    //         debugConfiguration.debugLauncherPython,
+    //     ]) {
+    //         if (!(await diagnosticService.validatePythonPath(executable, this.pythonPathSource, folder?.uri))) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 }
