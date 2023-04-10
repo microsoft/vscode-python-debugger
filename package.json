@@ -1,11 +1,7 @@
 {
-  "name": "python-debugger",
-  "displayName": "Python Debugger",
-  "description": "Python Debugger",
-  "serverInfo": {
-    "name": "Python Debugger",
-    "module": "python-debugger"
-  },
+  "name": "debugpy",
+  "displayName": "Python Debugger extension using `debugpy`.",
+  "description": "Python Debugger extension using `debugpy`.",
   "version": "0.0.1",
   "publisher": "ms-python",
   "license": "MIT",
@@ -19,7 +15,8 @@
   },
   "keywords": [
     "python",
-    "debugger"
+    "debugger",
+    "debugpy"
   ],
   "engines": {
     "vscode": "^1.74.0"
@@ -29,8 +26,8 @@
   ],
   "activationEvents": [
     "onDebugInitialConfigurations",
-    "onDebugDynamicConfigurations:python-debugger",
-    "onDebugResolve:python-debugger",
+    "onDebugDynamicConfigurations:debugpy",
+    "onDebugResolve:debugpy",
     "onLanguage:python"
   ],
   "main": "./dist/extension.js",
@@ -38,12 +35,46 @@
   "contributes": {
     "commands": [
       {
-        "category": "Python",
-        "command": "python-debugger.debugInTerminal",
+        "category": "Debugpy",
+        "command": "debugpy.debugInTerminal",
         "icon": "$(debug-alt)",
-        "title": "Debug in Terminal"
+        "title": "%debugpy.command.debugInTerminal.title%"
+      },
+      {
+        "category": "Debugpy",
+        "command": "debugpy.clearCacheAndReload",
+        "title": "%debugpy.command.clearCacheAndReload.title%"
+      },
+      {
+        "category": "Debugpy",
+        "command": "debugpy.viewOutput",
+        "icon": {
+            "dark": "resources/dark/repl.svg",
+            "light": "resources/light/repl.svg"
+        },
+        "title": "%debugpy.command.viewOutput.title%"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "category": "Debugpy",
+          "command": "python.clearCacheAndReload",
+          "title": "%debugpy.command.clearCacheAndReload.title%"
+        },
+        {
+          "category": "Debugpy",
+          "command": "python.debugInTerminal",
+          "icon": "$(debug-alt)",
+          "title": "%debugpy.command.debugInTerminal.title%"
+        },
+        {
+          "category": "Debugpy",
+          "command": "python.viewOutput",
+          "title": "%debugpy.command.viewOutput.title%"
+        }
+      ]
+    },
     "debuggers": [
       {
         "configurationAttributes": {
@@ -402,7 +433,7 @@
         ],
         "type": "debugpy",
         "variables": {
-          "pickProcess": "python.pickLocalProcess"
+          "pickProcess": "debupy.pickLocalProcess"
         },
         "when": "!virtualWorkspace && shellExecutionSupported"
       }
