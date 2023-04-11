@@ -3,25 +3,12 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
+// import { injectable } from 'inversify';
 import { Uri } from 'vscode';
-import { IExtensionSingleActivationService } from '../../../activation/types';
-import { Commands } from '../../../common/constants';
 import { getInterpreterDetails } from '../../../common/python';
-import { IDisposable, IDisposableRegistry } from '../../../common/types';
-import { registerCommand } from '../../../common/vscodeapi';
 
-@injectable()
-export class InterpreterPathCommand implements IExtensionSingleActivationService {
+export class InterpreterPathCommand {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
-
-    constructor(@inject(IDisposableRegistry) private readonly disposables: IDisposable[]) {}
-
-    public async activate(): Promise<void> {
-        this.disposables.push(
-            registerCommand(Commands.GetSelectedInterpreterPath, (args) => this._getSelectedInterpreterPath(args)),
-        );
-    }
 
     public async _getSelectedInterpreterPath(args: { workspaceFolder: string } | string[]): Promise<string> {
         // If `launch.json` is launching this command, `args.workspaceFolder` carries the workspaceFolder

@@ -1,16 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 'use strict';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, ProviderResult } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
-// import { IExtensionSingleActivationService } from '../../activation/types';
 import { IEventNamePropertyMapping, sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 import { TriggerType, AttachRequestArguments, ConsoleType, LaunchRequestArguments } from '../../types';
-import { IDisposableRegistry } from '../types';
 import { StopWatch } from '../utils/stopWatch';
-import { IDebugService } from './types';
 
 function isResponse(a: any): a is DebugProtocol.Response {
     return a.type === 'response';
@@ -62,16 +59,7 @@ class TelemetryTracker implements DebugAdapterTracker {
 @injectable()
 export class DebugSessionTelemetry implements DebugAdapterTrackerFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
-    constructor(
-        @inject(IDisposableRegistry) disposableRegistry: IDisposableRegistry,
-        @inject(IDebugService) debugService: IDebugService,
-    ) {
-        disposableRegistry.push(debugService.registerDebugAdapterTrackerFactory('debugpy', this));
-    }
-
-    public async activate(): Promise<void> {
-        // We actually register in the constructor. Not necessary to do it here
-    }
+    constructor() {}
 
     public createDebugAdapterTracker(session: DebugSession): ProviderResult<DebugAdapterTracker> {
         return new TelemetryTracker(session);

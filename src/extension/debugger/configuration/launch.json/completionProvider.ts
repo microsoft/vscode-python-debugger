@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { getLocation } from 'jsonc-parser';
 import * as path from 'path';
 import {
@@ -11,33 +11,21 @@ import {
     CompletionItem,
     CompletionItemKind,
     CompletionItemProvider,
-    languages,
     Position,
     SnippetString,
     TextDocument,
 } from 'vscode';
-import { IExtensionSingleActivationService } from '../../../activation/types';
-import { IDisposableRegistry } from '../../../common/types';
 import { DebugConfigStrings } from '../../../common/utils/localize';
 
 const configurationNodeName = 'configurations';
-enum JsonLanguages {
+export enum JsonLanguages {
     json = 'json',
     jsonWithComments = 'jsonc',
 }
 
 @injectable()
-export class LaunchJsonCompletionProvider implements CompletionItemProvider, IExtensionSingleActivationService {
+export class LaunchJsonCompletionProvider implements CompletionItemProvider {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
-
-    constructor(@inject(IDisposableRegistry) private readonly disposableRegistry: IDisposableRegistry) {}
-
-    public async activate(): Promise<void> {
-        this.disposableRegistry.push(languages.registerCompletionItemProvider({ language: JsonLanguages.json }, this));
-        this.disposableRegistry.push(
-            languages.registerCompletionItemProvider({ language: JsonLanguages.jsonWithComments }, this),
-        );
-    }
 
     // eslint-disable-next-line class-methods-use-this
     public async provideCompletionItems(
@@ -52,7 +40,7 @@ export class LaunchJsonCompletionProvider implements CompletionItemProvider, IEx
         return [
             {
                 command: {
-                    command: 'python.SelectAndInsertDebugConfiguration',
+                    command: 'debugpy.SelectAndInsertDebugConfiguration',
                     title: DebugConfigStrings.launchJsonCompletions.description,
                     arguments: [document, position, token],
                 },

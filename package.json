@@ -427,7 +427,7 @@
           }
         },
         "configurationSnippets": [],
-        "label": "Python Debugger",
+        "label": "Debugpy",
         "languages": [
           "python"
         ],

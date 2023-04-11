@@ -3,7 +3,6 @@
 
 import { ConfigurationChangeEvent, ConfigurationTarget, Uri, WorkspaceConfiguration, WorkspaceFolder } from 'vscode';
 import { getInterpreterDetails } from './python';
-import { LoggingLevelSettingType } from './log/types';
 import { getConfiguration, getWorkspaceFolder, getWorkspaceFolders } from './vscodeapi';
 import { isUnitTestExecution } from './constants';
 import { traceLog } from './log/logging';
@@ -77,7 +76,7 @@ function getPath(namespace: string, workspace: WorkspaceFolder): string[] {
     return [];
 }
 
-function getCwd(namespace: string, workspace: WorkspaceFolder): string {
+function getCwd(_namespace: string, workspace: WorkspaceFolder): string {
     const legacyConfig = getConfiguration('python', workspace.uri);
     const legacyCwd = legacyConfig.get<string>('linting.cwd');
 
@@ -89,7 +88,7 @@ function getCwd(namespace: string, workspace: WorkspaceFolder): string {
     return workspace.uri.fsPath;
 }
 
-function getExtraPaths(namespace: string, workspace: WorkspaceFolder): string[] {
+function getExtraPaths(_namespace: string, workspace: WorkspaceFolder): string[] {
     const legacyConfig = getConfiguration('python', workspace.uri);
     const legacyExtraPaths = legacyConfig.get<string[]>('analysis.extraPaths', []);
 

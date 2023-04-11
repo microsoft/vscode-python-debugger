@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { Uri } from 'vscode';
+import { CancellationToken, Position, TextDocument, Uri } from 'vscode';
 import { Commands } from '../constants';
 
 export type CommandsWithoutArgs = keyof ICommandNameWithoutArgumentTypeMapping;
@@ -38,6 +38,9 @@ export type AllCommands = keyof ICommandNameArgumentTypeMapping;
  */
 export interface ICommandNameArgumentTypeMapping extends ICommandNameWithoutArgumentTypeMapping {
     ['python.reloadVSCode']: [string];
+    ['debugpy.SelectAndInsertDebugConfiguration']: [TextDocument, Position, CancellationToken];
     [Commands.GetSelectedInterpreterPath]: [{ workspaceFolder: string } | string[]];
     [Commands.TriggerEnvironmentSelection]: [undefined | Uri];
+    [Commands.Debug_In_Terminal]: [Uri];
+
 }
