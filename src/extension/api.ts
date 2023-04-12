@@ -4,15 +4,11 @@
 'use strict';
 
 import { IExtensionApi } from './apiTypes';
-import { isTestExecution } from './common/constants';
 import { traceError } from './common/log/logging';
 import { getDebugpyLauncherArgs, getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
-import { IServiceContainer, IServiceManager } from './debugger/ioc/types';
 
 export function buildApi(
-    ready: Promise<any>,
-    serviceManager: IServiceManager,
-    serviceContainer: IServiceContainer,
+    ready: Promise<any>
 ): IExtensionApi {
     const api: IExtensionApi = {
         // 'ready' will propagate the exception, but we must log it here first.
@@ -38,10 +34,5 @@ export function buildApi(
         },
     };
 
-    // In test environment return the DI Container.
-    if (isTestExecution()) {
-        (api as any).serviceContainer = serviceContainer;
-        (api as any).serviceManager = serviceManager;
-    }
     return api;
 }

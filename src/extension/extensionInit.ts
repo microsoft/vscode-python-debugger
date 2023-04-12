@@ -5,7 +5,6 @@
 
 import { debug, DebugConfigurationProviderTriggerKind, languages, Uri } from 'vscode';
 import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
-import { DebugService } from './common/application/debugService';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
 import { IExtensionContext } from './common/types';
@@ -37,17 +36,14 @@ import { InterpreterPathCommand } from './debugger/configuration/launch.json/int
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
-    const childProcessAttachService = new ChildProcessAttachService(DebugService.instance);
-    const handlers = [new ChildProcessAttachEventHandler(childProcessAttachService)];
+    const childProcessAttachService = new ChildProcessAttachService();
 
+    const childProcessAttachEventHandler = new ChildProcessAttachEventHandler(childProcessAttachService);
     context.subscriptions.push(
-        DebugService.instance.onDidReceiveDebugSessionCustomEvent((e) => {
-            handlers.forEach((handler) =>
-                handler.handleCustomEvent ? handler.handleCustomEvent(e).ignoreErrors() : undefined,
-            );
-        }),
+        debug.onDidReceiveDebugSessionCustomEvent(
+            (e) => { childProcessAttachEventHandler.handleCustomEvent(e).ignoreErrors();}
+        ),
     );
-
     const environmentVariablesService = new EnvironmentVariablesService();
     const debugEnvironmentVariablesHelper = new DebugEnvironmentVariablesHelper(environmentVariablesService);
     const attachConfigurationResolver = new AttachConfigurationResolver();
@@ -98,16 +94,16 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const debugSessionLoggingFactory = new DebugSessionLoggingFactory();
     const debuggerPromptFactory = new OutdatedDebuggerPromptFactory();
     context.subscriptions.push(
-        DebugService.instance.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory),
+        debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory),
     );
     context.subscriptions.push(
-        DebugService.instance.registerDebugAdapterTrackerFactory(DebuggerTypeName, debuggerPromptFactory),
+        debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debuggerPromptFactory),
     );
     context.subscriptions.push(
-        DebugService.instance.registerDebugAdapterDescriptorFactory(DebuggerTypeName, debugAdapterDescriptorFactory),
+        debug.registerDebugAdapterDescriptorFactory(DebuggerTypeName, debugAdapterDescriptorFactory),
     );
     context.subscriptions.push(
-        DebugService.instance.onDidStartDebugSession((debugSession) => {
+        debug.onDidStartDebugSession((debugSession) => {
             const shouldTerminalFocusOnStart = getConfiguration('python', debugSession.workspaceFolder?.uri)?.terminal.focusAfterLaunch;
             if (shouldTerminalFocusOnStart) {
                 executeCommand('workbench.action.terminal.focus');
@@ -115,7 +111,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         }),
     );
 
-    context.subscriptions.push(DebugService.instance.registerDebugAdapterTrackerFactory(DebuggerTypeName, new DebugSessionTelemetry()));
+    context.subscriptions.push(debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, new DebugSessionTelemetry()));
 
     const launchJsonUpdaterServiceHelper = new LaunchJsonUpdaterServiceHelper(debugConfigProvider);
     context.subscriptions.push(

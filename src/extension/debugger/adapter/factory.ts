@@ -55,7 +55,6 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         //
         // For the first three, we want to spawn the debug adapter directly.
         // For the last one, the adapter is already listening on the specified socket.
-        // When "debugServer" is used, the standard adapter factory takes care of it - no need to check here.
 
         if (configuration.request === 'attach') {
             if (configuration.connect !== undefined) {

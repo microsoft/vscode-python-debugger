@@ -10,7 +10,6 @@ import { AttachRequestArguments } from '../../types';
 export const IDebugSessionEventHandlers = Symbol('IDebugSessionEventHandlers');
 export interface IDebugSessionEventHandlers {
     handleCustomEvent?(e: DebugSessionCustomEvent): Promise<void>;
-    handleTerminateEvent?(e: DebugSession): Promise<void>;
 }
 
 export const IChildProcessAttachService = Symbol('IChildProcessAttachService');

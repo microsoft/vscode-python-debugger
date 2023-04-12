@@ -8,7 +8,6 @@ import { DebugConfiguration } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol/lib/debugProtocol';
 import { IDisposableRegistry, IExtensionContext } from './common/types';
 import { DebuggerTypeName } from './constants';
-import { IServiceContainer, IServiceManager } from './debugger/ioc/types';
 
 /**
  * The global extension state needed by components.
@@ -17,12 +16,6 @@ import { IServiceContainer, IServiceManager } from './debugger/ioc/types';
 export type ExtensionState = {
     context: IExtensionContext;
     disposables: IDisposableRegistry;
-    // For now we include the objects dealing with inversify (IOC)
-    // registration.  These will be removed later.
-    legacyIOC: {
-        serviceManager: IServiceManager;
-        serviceContainer: IServiceContainer;
-    };
 };
 
 export enum DebugOptions {
