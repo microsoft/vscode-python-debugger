@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-extra';
-import { injectable } from 'inversify';
 import * as path from 'path';
 import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
@@ -10,7 +9,6 @@ import { traceError } from '../log/logging';
 import { getSearchPathEnvVarNames } from '../utils/exec';
 import { EnvironmentVariables, IEnvironmentVariablesService } from './types';
 
-@injectable()
 export class EnvironmentVariablesService implements IEnvironmentVariablesService {
     private _pathVariable?: 'Path' | 'PATH';
     constructor() {}

@@ -3,7 +3,6 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import { isCI, isTestExecution } from '../constants';
 import { Logging } from '../utils/localize';
 import { IProcessLogger, SpawnOptions } from './types';
@@ -13,7 +12,6 @@ import { getWorkspaceFolders } from '../vscodeapi';
 import { getOSType, getUserHomeDir, OSType } from '../platform';
 import { replaceAll } from '../stringUtils';
 
-@injectable()
 export class ProcessLogger implements IProcessLogger {
     constructor() {}
 

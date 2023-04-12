@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 'use strict';
-import { injectable } from 'inversify';
+
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, ProviderResult } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { IEventNamePropertyMapping, sendTelemetryEvent } from '../../telemetry';
@@ -56,7 +57,6 @@ class TelemetryTracker implements DebugAdapterTracker {
     }
 }
 
-@injectable()
 export class DebugSessionTelemetry implements DebugAdapterTrackerFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
     constructor() {}

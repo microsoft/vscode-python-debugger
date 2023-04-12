@@ -6,7 +6,6 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import {
     Disposable,
     QuickInput,
@@ -302,7 +301,6 @@ export const IMultiStepInputFactory = Symbol('IMultiStepInputFactory');
 export interface IMultiStepInputFactory {
     create<S>(): IMultiStepInput<S>;
 }
-@injectable()
 export class MultiStepInputFactory {
     public create<S>(): IMultiStepInput<S> {
         return new MultiStepInput<S>();

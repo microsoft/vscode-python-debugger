@@ -3,7 +3,6 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import * as path from 'path';
 import { CancellationToken, DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
 import { sendTelemetryEvent } from '../../../telemetry';
@@ -18,7 +17,6 @@ import { getProgram } from './helper';
 import { getSettingsPythonPath, getInterpreterDetails } from '../../../common/python';
 import { getOSType, OSType } from '../../../common/platform';
 
-@injectable()
 export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
     implements IDebugConfigurationResolver<T>
 {

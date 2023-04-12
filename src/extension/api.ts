@@ -7,9 +7,7 @@ import { IExtensionApi } from './apiTypes';
 import { traceError } from './common/log/logging';
 import { getDebugpyLauncherArgs, getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
 
-export function buildApi(
-    ready: Promise<any>
-): IExtensionApi {
+export function buildApi(ready: Promise<any>): IExtensionApi {
     const api: IExtensionApi = {
         // 'ready' will propagate the exception, but we must log it here first.
         ready: ready.catch((ex) => {

@@ -42,5 +42,4 @@ export interface ICommandNameArgumentTypeMapping extends ICommandNameWithoutArgu
     [Commands.GetSelectedInterpreterPath]: [{ workspaceFolder: string } | string[]];
     [Commands.TriggerEnvironmentSelection]: [undefined | Uri];
     [Commands.Debug_In_Terminal]: [Uri];
-
 }

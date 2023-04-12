@@ -3,7 +3,6 @@
 'use strict';
 
 import { createWriteStream, WriteStream } from 'fs-extra';
-import { injectable } from 'inversify';
 import * as path from 'path';
 import {
     DebugAdapterTracker,
@@ -66,7 +65,6 @@ class DebugSessionLoggingTracker implements DebugAdapterTracker {
     }
 }
 
-@injectable()
 export class DebugSessionLoggingFactory implements DebugAdapterTrackerFactory {
     constructor() {}
 

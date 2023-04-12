@@ -3,12 +3,10 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import { Resource } from '../types';
 import { getActiveTextEditor, getWorkspaceFolders } from '../vscodeapi';
 import { IActiveResourceService } from './types';
 
-@injectable()
 export class ActiveResourceService implements IActiveResourceService {
     constructor() {}
 

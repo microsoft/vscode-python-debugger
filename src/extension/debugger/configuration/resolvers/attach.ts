@@ -3,13 +3,11 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import { CancellationToken, Uri, WorkspaceFolder } from 'vscode';
 import { getOSType, OSType } from '../../../common/platform';
 import { AttachRequestArguments, DebugOptions, PathMapping } from '../../../types';
 import { BaseConfigurationResolver } from './base';
 
-@injectable()
 export class AttachConfigurationResolver extends BaseConfigurationResolver<AttachRequestArguments> {
     public async resolveDebugConfigurationWithSubstitutedVariables(
         folder: WorkspaceFolder | undefined,

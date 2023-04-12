@@ -17,7 +17,6 @@ import { registerLogger, traceLog } from './common/log/logging';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: IExtensionContext): Promise<void> {
-
     // Setup logging
     const outputChannel = createOutputChannel('Debugpy');
     context.subscriptions.push(outputChannel, registerLogger(outputChannel));

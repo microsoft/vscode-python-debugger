@@ -121,6 +121,10 @@ export function launch(url: string): void {
     env.openExternal(Uri.parse(url));
 }
 
-export function startDebugging(folder: WorkspaceFolder | undefined, nameOrConfiguration: string | DebugConfiguration, parentSession?: DebugSession,) {
+export function startDebugging(
+    folder: WorkspaceFolder | undefined,
+    nameOrConfiguration: string | DebugConfiguration,
+    parentSession?: DebugSession,
+) {
     debug.startDebugging(folder, nameOrConfiguration, parentSession);
 }

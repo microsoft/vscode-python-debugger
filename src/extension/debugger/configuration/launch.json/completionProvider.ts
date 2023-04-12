@@ -3,7 +3,6 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import { getLocation } from 'jsonc-parser';
 import * as path from 'path';
 import {
@@ -23,7 +22,6 @@ export enum JsonLanguages {
     jsonWithComments = 'jsonc',
 }
 
-@injectable()
 export class LaunchJsonCompletionProvider implements CompletionItemProvider {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: false };
 

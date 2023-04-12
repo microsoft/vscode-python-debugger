@@ -19,7 +19,6 @@ import { noop } from '../../common/utils/misc';
  * @implements {IChildProcessAttachService}
  */
 export class ChildProcessAttachService implements IChildProcessAttachService {
-
     @captureTelemetry(EventName.DEBUGGER_ATTACH_TO_CHILD_PROCESS)
     public async attach(data: AttachRequestArguments & DebugConfiguration, parentSession: DebugSession): Promise<void> {
         const debugConfig: AttachRequestArguments & DebugConfiguration = data;

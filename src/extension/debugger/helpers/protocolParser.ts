@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { EventEmitter } from 'events';
-import { injectable } from 'inversify';
 import { Readable } from 'stream';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { IProtocolParser } from '../types';
@@ -23,7 +22,6 @@ type Listener = (...args: unknown[]) => void;
  * @extends {EventEmitter}
  * @implements {IProtocolParser}
  */
-@injectable()
 export class ProtocolParser implements IProtocolParser {
     private rawData = Buffer.alloc(0);
 

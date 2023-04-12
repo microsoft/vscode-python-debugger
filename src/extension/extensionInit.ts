@@ -40,9 +40,9 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
 
     const childProcessAttachEventHandler = new ChildProcessAttachEventHandler(childProcessAttachService);
     context.subscriptions.push(
-        debug.onDidReceiveDebugSessionCustomEvent(
-            (e) => { childProcessAttachEventHandler.handleCustomEvent(e).ignoreErrors();}
-        ),
+        debug.onDidReceiveDebugSessionCustomEvent((e) => {
+            childProcessAttachEventHandler.handleCustomEvent(e).ignoreErrors();
+        }),
     );
     const environmentVariablesService = new EnvironmentVariablesService();
     const debugEnvironmentVariablesHelper = new DebugEnvironmentVariablesHelper(environmentVariablesService);
@@ -81,30 +81,25 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     //PersistentStateFactory
     const persistantState = new PersistentStateFactory(context.globalState, context.workspaceState);
     persistantState.activate();
-    
+
     const processLogger = new ProcessLogger();
     const processServiceFactory = new ProcessServiceFactory(processLogger, context.subscriptions);
     const attachProcessProvider = new AttachProcessProvider(processServiceFactory);
     const attachPicker = new AttachPicker(attachProcessProvider);
-    context.subscriptions.push(
-        registerCommand(Commands.PickLocalProcess, () => attachPicker.showQuickPick(),)
-    );
+    context.subscriptions.push(registerCommand(Commands.PickLocalProcess, () => attachPicker.showQuickPick()));
 
     const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
     const debugSessionLoggingFactory = new DebugSessionLoggingFactory();
     const debuggerPromptFactory = new OutdatedDebuggerPromptFactory();
-    context.subscriptions.push(
-        debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory),
-    );
-    context.subscriptions.push(
-        debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debuggerPromptFactory),
-    );
+    context.subscriptions.push(debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory));
+    context.subscriptions.push(debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debuggerPromptFactory));
     context.subscriptions.push(
         debug.registerDebugAdapterDescriptorFactory(DebuggerTypeName, debugAdapterDescriptorFactory),
     );
     context.subscriptions.push(
         debug.onDidStartDebugSession((debugSession) => {
-            const shouldTerminalFocusOnStart = getConfiguration('python', debugSession.workspaceFolder?.uri)?.terminal.focusAfterLaunch;
+            const shouldTerminalFocusOnStart = getConfiguration('python', debugSession.workspaceFolder?.uri)?.terminal
+                .focusAfterLaunch;
             if (shouldTerminalFocusOnStart) {
                 executeCommand('workbench.action.terminal.focus');
             }
@@ -115,20 +110,28 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
 
     const launchJsonUpdaterServiceHelper = new LaunchJsonUpdaterServiceHelper(debugConfigProvider);
     context.subscriptions.push(
-        registerCommand('debugpy.SelectAndInsertDebugConfiguration', launchJsonUpdaterServiceHelper.selectAndInsertDebugConfig, launchJsonUpdaterServiceHelper),
+        registerCommand(
+            'debugpy.SelectAndInsertDebugConfiguration',
+            launchJsonUpdaterServiceHelper.selectAndInsertDebugConfig,
+            launchJsonUpdaterServiceHelper,
+        ),
     );
 
     const launchJsonCompletionProvider = new LaunchJsonCompletionProvider();
     context.subscriptions.push(
-        languages.registerCompletionItemProvider({ language: JsonLanguages.json }, launchJsonCompletionProvider));
+        languages.registerCompletionItemProvider({ language: JsonLanguages.json }, launchJsonCompletionProvider),
+    );
     context.subscriptions.push(
-        languages.registerCompletionItemProvider({ language: JsonLanguages.jsonWithComments }, launchJsonCompletionProvider),
+        languages.registerCompletionItemProvider(
+            { language: JsonLanguages.jsonWithComments },
+            launchJsonCompletionProvider,
+        ),
     );
 
     const interpreterPathCommand = new InterpreterPathCommand();
     context.subscriptions.push(
-        registerCommand(Commands.GetSelectedInterpreterPath, (args) => interpreterPathCommand._getSelectedInterpreterPath(args)),
+        registerCommand(Commands.GetSelectedInterpreterPath, (args) =>
+            interpreterPathCommand._getSelectedInterpreterPath(args),
+        ),
     );
-
-
 }

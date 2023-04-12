@@ -6,7 +6,6 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { injectable } from 'inversify';
 import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { IDynamicDebugConfigurationService } from '../types';
 import { asyncFilter } from '../../common/utilities';
@@ -14,7 +13,6 @@ import { DebuggerTypeName } from '../../constants';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
-@injectable()
 export class DynamicPythonDebugConfigurationService implements IDynamicDebugConfigurationService {
     // eslint-disable-next-line class-methods-use-this
     public async provideDebugConfigurations(
