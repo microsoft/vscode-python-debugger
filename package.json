@@ -146,7 +146,7 @@
               },
               "logToFile": {
                 "default": false,
-                "description": "Enable logging of debugger events to a log file.",
+                "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                 "type": "boolean"
               },
               "pathMappings": {
@@ -214,7 +214,7 @@
             "properties": {
               "args": {
                 "default": [],
-                "description": "Command line arguments passed to the program.",
+                "description": "Command line arguments passed to the program. For string type arguments, it will pass through the shell as is, and therefore all shell variable expansions will apply. But for the array type, tha values will be shell-escaped.",
                 "items": {
                   "type": "string"
                 },
@@ -301,11 +301,6 @@
                 "description": "Enable debugging of gevent monkey-patched code.",
                 "type": "boolean"
               },
-              "host": {
-                "default": "localhost",
-                "description": "IP address of the of the local debug server (default is localhost).",
-                "type": "string"
-              },
               "jinja": {
                 "default": null,
                 "description": "Jinja template debugging (e.g. Flask).",
@@ -322,7 +317,7 @@
               },
               "logToFile": {
                 "default": false,
-                "description": "Enable logging of debugger events to a log file.",
+                "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                 "type": "boolean"
               },
               "module": {
@@ -354,11 +349,6 @@
                 },
                 "label": "Path mappings.",
                 "type": "array"
-              },
-              "port": {
-                "default": 0,
-                "description": "Debug port (default is 0, resulting in the use of a dynamic port).",
-                "type": "number"
               },
               "program": {
                 "default": "${file}",
