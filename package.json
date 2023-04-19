@@ -1,6 +1,6 @@
 {
   "name": "debugpy",
-  "displayName": "Python Debugger extension using `debugpy`.",
+  "displayName": "Debugpy",
   "description": "Python Debugger extension using `debugpy`.",
   "version": "0.0.1",
   "publisher": "ms-python",
@@ -107,11 +107,6 @@
                 "description": "Django debugging.",
                 "type": "boolean"
               },
-              "host": {
-                "default": "127.0.0.1",
-                "description": "Hostname or IP address to connect to.",
-                "type": "string"
-              },
               "jinja": {
                 "default": null,
                 "description": "Jinja template debugging (e.g. Flask).",
@@ -173,10 +168,6 @@
                 },
                 "label": "Path mappings.",
                 "type": "array"
-              },
-              "port": {
-                "description": "Port to connect to.",
-                "type": "number"
               },
               "processId": {
                 "anyOf": [
@@ -275,7 +266,7 @@
                 "type": "string"
               },
               "debugAdapterPath": {
-                "description": "Path (fully qualified) to the python debug adapter executable.",
+                "description": "Path (fully qualified) to the Python debug adapter executable.",
                 "type": "string"
               },
               "django": {
