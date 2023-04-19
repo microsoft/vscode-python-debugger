@@ -28,8 +28,6 @@ export function isUnitTestExecution(): boolean {
     return process.env.VSC_PYTHON_UNIT_TEST === '1';
 }
 
-export const isCI = process.env.TRAVIS === 'true' || process.env.TF_BUILD !== undefined;
-
 export namespace Commands {
     export const Debug_In_Terminal = 'debugpy.debugInTerminal';
     export const TriggerEnvironmentSelection = 'debugpy.triggerEnvSelection';

@@ -4,8 +4,9 @@
 'use strict';
 
 import * as path from 'path';
-import '../../common/extensions';
+import '../../common/promiseUtils';
 import { EXTENSION_ROOT_DIR } from '../../common/constants';
+import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 
 const pathToPythonLibDir = path.join(EXTENSION_ROOT_DIR, 'pythonFiles', 'lib', 'python');
 const pathToDebugger = path.join(pathToPythonLibDir, 'debugpy');
@@ -19,7 +20,7 @@ type RemoteDebugOptions = {
 export function getDebugpyLauncherArgs(options: RemoteDebugOptions, debuggerPath: string = pathToDebugger) {
     const waitArgs = options.waitUntilDebuggerAttaches ? ['--wait-for-client'] : [];
     return [
-        debuggerPath.fileToCommandArgumentForPythonExt(),
+        fileToCommandArgumentForPythonExt(debuggerPath),
         '--listen',
         `${options.host}:${options.port}`,
         ...waitArgs,

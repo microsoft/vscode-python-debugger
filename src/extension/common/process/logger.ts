@@ -3,26 +3,20 @@
 
 'use strict';
 
-import { isCI, isTestExecution } from '../constants';
 import { Logging } from '../utils/localize';
 import { IProcessLogger, SpawnOptions } from './types';
 import { escapeRegExp } from 'lodash';
 import { traceLog } from '../log/logging';
 import { getWorkspaceFolders } from '../vscodeapi';
 import { getOSType, getUserHomeDir, OSType } from '../platform';
-import { replaceAll } from '../stringUtils';
+import { replaceAll, toCommandArgumentForPythonExt, trimQuotes } from '../stringUtils';
 
 export class ProcessLogger implements IProcessLogger {
     constructor() {}
 
     public logProcess(fileOrCommand: string, args?: string[], options?: SpawnOptions) {
-        if (!isTestExecution() && isCI && process.env.UITEST_DISABLE_PROCESS_LOGGING) {
-            // Added to disable logging of process execution commands during UI Tests.
-            // Used only during UI Tests (hence this setting need not be exposed as a valid setting).
-            return;
-        }
         let command = args
-            ? [fileOrCommand, ...args].map((e) => e.trimQuotes().toCommandArgumentForPythonExt()).join(' ')
+            ? [fileOrCommand, ...args].map((e) => toCommandArgumentForPythonExt(trimQuotes(e))).join(' ')
             : fileOrCommand;
         const info = [`> ${this.getDisplayCommands(command)}`];
         if (options && options.cwd) {

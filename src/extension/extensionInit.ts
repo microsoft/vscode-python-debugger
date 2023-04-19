@@ -34,6 +34,7 @@ import { DebugSessionTelemetry } from './common/application/debugSessionTelemetr
 import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configuration/launch.json/completionProvider';
 import { InterpreterPathCommand } from './debugger/configuration/launch.json/interpreterPathCommand';
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
+import { ignoreErrors } from './common/promiseUtils';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -41,7 +42,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const childProcessAttachEventHandler = new ChildProcessAttachEventHandler(childProcessAttachService);
     context.subscriptions.push(
         debug.onDidReceiveDebugSessionCustomEvent((e) => {
-            childProcessAttachEventHandler.handleCustomEvent(e).ignoreErrors();
+            ignoreErrors(childProcessAttachEventHandler.handleCustomEvent(e));
         }),
     );
     const environmentVariablesService = new EnvironmentVariablesService();

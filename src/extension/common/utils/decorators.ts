@@ -2,6 +2,7 @@
 
 import { isTestExecution } from '../constants';
 import { traceError, traceVerbose } from '../log/logging';
+import { ignoreErrors } from '../promiseUtils';
 import { getCacheKeyFromFunctionArgs, getGlobalCacheStore } from './cacheUtils';
 import { StopWatch } from './stopWatch';
 
@@ -95,9 +96,11 @@ export function cache(expiryDurationMs: number, cachePromise = false, expiryDura
             if (cachePromise) {
                 cacheStoreForMethods.set(key, { data: promise, expiry: Date.now() + expiryMs });
             } else {
-                promise
-                    .then((result) => cacheStoreForMethods.set(key, { data: result, expiry: Date.now() + expiryMs }))
-                    .ignoreErrors();
+                ignoreErrors(
+                    promise.then((result) =>
+                        cacheStoreForMethods.set(key, { data: result, expiry: Date.now() + expiryMs }),
+                    ),
+                );
             }
             return promise;
         };

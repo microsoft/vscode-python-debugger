@@ -6,9 +6,10 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { WorkspaceConfiguration } from 'vscode';
-import '../common/extensions';
+import '../common/promiseUtils';
 import { EXTENSION_ROOT_DIR } from '../common/constants';
 import { traceError } from '../common/log/logging';
+import { ignoreErrors } from '../common/promiseUtils';
 
 type VSCode = typeof import('vscode');
 
@@ -68,7 +69,7 @@ export class SourceMapSupport {
 }
 export function initialize(vscode: VSCode = require('vscode')) {
     if (!vscode.workspace.getConfiguration('python.diagnostics', null).get('sourceMapsEnabled', false)) {
-        new SourceMapSupport(vscode).disable().ignoreErrors();
+        ignoreErrors(new SourceMapSupport(vscode).disable());
         return;
     }
     new SourceMapSupport(vscode).initialize().catch((_ex) => {

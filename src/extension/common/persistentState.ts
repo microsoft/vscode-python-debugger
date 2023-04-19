@@ -18,6 +18,7 @@ import {
 import { cache } from './utils/decorators';
 import { noop } from './utils/misc';
 import { executeCommand, registerCommand } from './vscodeapi';
+import { ignoreErrors } from './promiseUtils';
 
 export class PersistentState<T> implements IPersistentState<T> {
     constructor(
@@ -100,10 +101,10 @@ export class PersistentStateFactory implements IPersistentStateFactory {
         // Old storages have grown to be unusually large due to https://github.com/microsoft/vscode-python/issues/17488,
         // so reset them. This line can be removed after a while.
         if (globalKeysStorageDeprecated.value.length > 0) {
-            globalKeysStorageDeprecated.updateValue([]).ignoreErrors();
+            ignoreErrors(globalKeysStorageDeprecated.updateValue([]));
         }
         if (workspaceKeysStorageDeprecated.value.length > 0) {
-            workspaceKeysStorageDeprecated.updateValue([]).ignoreErrors();
+            ignoreErrors(workspaceKeysStorageDeprecated.updateValue([]));
         }
     }
 
@@ -112,7 +113,7 @@ export class PersistentStateFactory implements IPersistentStateFactory {
         defaultValue?: T,
         expiryDurationMs?: number,
     ): IPersistentState<T> {
-        this.addKeyToStorage('global', key, defaultValue).ignoreErrors();
+        ignoreErrors(this.addKeyToStorage('global', key, defaultValue));
         return new PersistentState<T>(this.globalState, key, defaultValue, expiryDurationMs);
     }
 
@@ -121,7 +122,7 @@ export class PersistentStateFactory implements IPersistentStateFactory {
         defaultValue?: T,
         expiryDurationMs?: number,
     ): IPersistentState<T> {
-        this.addKeyToStorage('workspace', key, defaultValue).ignoreErrors();
+        ignoreErrors(this.addKeyToStorage('workspace', key, defaultValue));
         return new PersistentState<T>(this.workspaceState, key, defaultValue, expiryDurationMs);
     }
 
@@ -174,7 +175,7 @@ export function getGlobalStorage<T>(context: IExtensionContext, key: string, def
     const found = globalKeysStorage.value.find((value) => value.key === key && value.defaultValue === defaultValue);
     if (!found) {
         const newValue = [{ key, defaultValue }, ...globalKeysStorage.value];
-        globalKeysStorage.updateValue(newValue).ignoreErrors();
+        ignoreErrors(globalKeysStorage.updateValue(newValue));
     }
     const raw = new PersistentState<T>(context.globalState, key, defaultValue);
     return {

@@ -12,7 +12,6 @@ export interface IExtensionApi {
      * @type {Promise<void>}
      * @memberof IExtensionApi
      */
-    ready: Promise<void>;
     debug: {
         /**
          * Generate an array of strings for commands to pass to the Python executable to launch the debugger for remote debugging.

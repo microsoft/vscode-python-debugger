@@ -31,6 +31,7 @@ import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { Environment } from '../../common/pythonTypes';
+import { ignoreErrors } from '../../common/promiseUtils';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -136,7 +137,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         await hasInterpreters(); // Wait until we know whether we have an interpreter
         const interpreters = await getInterpreters();
         if (interpreters.length === 0) {
-            this.notifySelectInterpreter().ignoreErrors();
+            ignoreErrors(this.notifySelectInterpreter());
             return [];
         }
 

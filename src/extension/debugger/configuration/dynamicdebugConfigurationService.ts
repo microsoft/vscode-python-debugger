@@ -10,6 +10,7 @@ import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { IDynamicDebugConfigurationService } from '../types';
 import { asyncFilter } from '../../common/utilities';
 import { DebuggerTypeName } from '../../constants';
+import { replaceAll } from '../../common/stringUtils';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -61,7 +62,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
 
         let fastApiPath = await DynamicPythonDebugConfigurationService.getFastApiPath(folder);
         if (fastApiPath) {
-            fastApiPath = path.relative(folder.uri.fsPath, fastApiPath).replaceAll(path.sep, '.').replace('.py', '');
+            fastApiPath = replaceAll(path.relative(folder.uri.fsPath, fastApiPath), path.sep, '.').replace('.py', '');
             providers.push({
                 name: 'Python: FastAPI',
                 type: DebuggerTypeName,
