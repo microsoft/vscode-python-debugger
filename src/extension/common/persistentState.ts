@@ -3,17 +3,13 @@
 
 'use strict';
 
-import { inject, injectable, named } from 'inversify';
 import { Memento } from 'vscode';
 import { Commands } from './constants';
 import { traceError, traceVerbose, traceWarn } from './log/logging';
 import {
-    GLOBAL_MEMENTO,
     IExtensionContext,
-    IMemento,
     IPersistentState,
     IPersistentStateFactory,
-    WORKSPACE_MEMENTO,
 } from './types';
 import { cache } from './utils/decorators';
 import { noop } from './utils/misc';
@@ -73,23 +69,28 @@ const WORKSPACE_PERSISTENT_KEYS = 'PYTHON_WORKSPACE_STORAGE_KEYS';
 type KeysStorageType = 'global' | 'workspace';
 export type KeysStorage = { key: string; defaultValue: unknown };
 
-@injectable()
 export class PersistentStateFactory implements IPersistentStateFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
-    public readonly _globalKeysStorage = new PersistentState<KeysStorage[]>(
-        this.globalState,
-        GLOBAL_PERSISTENT_KEYS,
-        [],
-    );
-    public readonly _workspaceKeysStorage = new PersistentState<KeysStorage[]>(
-        this.workspaceState,
-        WORKSPACE_PERSISTENT_KEYS,
-        [],
-    );
-    constructor(
-        @inject(IMemento) @named(GLOBAL_MEMENTO) private globalState: Memento,
-        @inject(IMemento) @named(WORKSPACE_MEMENTO) private workspaceState: Memento,
-    ) {}
+    private globalState : Memento;
+    private workspaceState: Memento;
+    public readonly _globalKeysStorage :PersistentState<KeysStorage[]>;
+
+    public readonly _workspaceKeysStorage: PersistentState<KeysStorage[]>;
+
+    constructor(globalState: Memento,workspaceState: Memento) {
+        this.globalState = globalState;
+        this.workspaceState = workspaceState;
+        this._globalKeysStorage = new PersistentState<KeysStorage[]>(
+            this.globalState,
+            GLOBAL_PERSISTENT_KEYS,
+            [],
+        );
+        this._workspaceKeysStorage = new PersistentState<KeysStorage[]>(
+            this.workspaceState,
+            WORKSPACE_PERSISTENT_KEYS,
+            [],
+        );
+    }
 
     public async activate(): Promise<void> {
         registerCommand(Commands.ClearStorage, this.cleanAllPersistentStates.bind(this));

@@ -117,79 +117,8 @@ def tests(session: nox.Session) -> None:
     """Runs all the tests for the extension."""
     session.install("-r", "src/test/python_tests/requirements.txt")
     session.run("pytest", "src/test/python_tests")
-
     session.install("freezegun")
     session.run("pytest", "build")
-
-
-# @nox.session()
-# def lint(session: nox.Session) -> None:
-#     """Runs linter and formatter checks on python files."""
-#     session.install("-r", "./requirements.txt")
-#     session.install("-r", "src/test/python_tests/requirements.txt")
-
-#     session.install("flake8")
-#     session.run("flake8", "./bundled/tool")
-#     session.run(
-#         "flake8",
-#         "--extend-exclude",
-#         "./src/test/python_tests/test_data",
-#         "./src/test/python_tests",
-#     )
-#     session.run("flake8", "noxfile.py")
-
-#     # check formatting using black
-#     session.install("black")
-#     session.run("black", "--check", "./bundled/tool")
-#     session.run("black", "--check", "./src/test/python_tests")
-#     session.run("black", "--check", "noxfile.py")
-
-#     # check import sorting using isort
-#     session.install("isort")
-#     session.run("isort", "--check", "./bundled/tool")
-#     session.run("isort", "--check", "./src/test/python_tests")
-#     session.run("isort", "--check", "noxfile.py")
-
-#     # check typescript code
-#     session.run("npm", "run", "lint", external=True)
-
-
-# @nox.session()
-# def build_package(session: nox.Session) -> None:
-#     """Builds VSIX package for publishing."""
-#     _check_files(["README.md", "LICENSE", "SECURITY.md", "SUPPORT.md"])
-#     _setup_template_environment(session)
-#     session.run("npm", "install", external=True)
-#     session.run("npm", "run", "vsce-package", external=True)
-
-
-# @nox.session()
-# def update_build_number(session: nox.Session) -> None:
-#     """Updates build number for the extension."""
-#     if len(session.posargs) == 0:
-#         session.log("No updates to package version")
-#         return
-
-#     package_json_path = pathlib.Path(__file__).parent / "package.json"
-#     session.log(f"Reading package.json at: {package_json_path}")
-
-#     package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-
-#     parts = re.split("\\.|-", package_json["version"])
-#     major, minor = parts[:2]
-
-#     version = f"{major}.{minor}.{session.posargs[0]}"
-#     version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
-
-#     session.log(f"Updating version from {package_json['version']} to {version}")
-#     package_json["version"] = version
-#     package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
-
-
-# def _get_module_name() -> str:
-#     package_json_path = pathlib.Path(__file__).parent / "package.json"
-#     package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-#     return package_json["serverInfo"]["module"]
 
 
 @nox.session()
