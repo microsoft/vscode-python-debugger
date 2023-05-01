@@ -3,9 +3,7 @@
 
 'use strict';
 
-import type { IEventNamePropertyMapping } from './index';
+import { IEventNamePropertyMapping } from '.';
 import { EventName } from './constants';
 
 export type DebuggerTelemetry = IEventNamePropertyMapping[EventName.DEBUGGER];
-
-export type EditorLoadTelemetry = IEventNamePropertyMapping[EventName.EDITOR_LOAD];

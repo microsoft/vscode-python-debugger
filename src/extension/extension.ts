@@ -12,7 +12,9 @@ import { registerDebugger } from './extensionInit';
 import { IExtensionContext } from './common/types';
 import { createOutputChannel, registerCommand } from './common/vscodeapi';
 import { Commands } from './common/constants';
-import { registerLogger, traceLog } from './common/log/logging';
+import { registerLogger, traceError, traceLog } from './common/log/logging';
+import { sendTelemetryEvent } from './telemetry';
+import { EventName } from './telemetry/constants';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -25,7 +27,13 @@ export async function activate(context: IExtensionContext): Promise<void> {
     traceLog(`Name: Debugpy`);
     traceLog(`Module: debugpy`);
 
-    await registerDebugger(context);
+    try {
+        await registerDebugger(context);
+        sendTelemetryEvent(EventName.DEBUG_SUCCESS_ACTIVATION);
+    } catch (ex) {
+        traceError('sendDebugpySuccessActivationTelemetry() failed.', ex);
+    }
+
 }
 
 // this method is called when your extension is deactivated

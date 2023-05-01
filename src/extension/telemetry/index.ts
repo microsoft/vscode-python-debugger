@@ -297,12 +297,12 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent with details just after editor loads
      */
     /* __GDPR__
-       "editor.load" : {
-          "codeloadingtime" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "luabud" },
-\         "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "luabud" },
+       "debug.success_activation" : {
+          "codeloadingtime" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+\         "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
        }
      */
-    [EventName.EDITOR_LOAD]: {};
+    [EventName.DEBUG_SUCCESS_ACTIVATION]: {};
     /**
      * Telemetry event sent when debug in terminal button was used to debug current file.
      */
