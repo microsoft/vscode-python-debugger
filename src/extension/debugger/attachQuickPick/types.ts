@@ -26,5 +26,3 @@ export interface IAttachProcessProvider {
 export interface IAttachPicker {
     showQuickPick(): Promise<string>;
 }
-
-export const REFRESH_BUTTON_ICON = 'refresh.svg';

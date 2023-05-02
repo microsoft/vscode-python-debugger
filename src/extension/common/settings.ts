@@ -5,27 +5,11 @@ import { ConfigurationChangeEvent, ConfigurationTarget, Uri, WorkspaceConfigurat
 import { getInterpreterDetails } from './python';
 import { getConfiguration, getWorkspaceFolder, getWorkspaceFolders } from './vscodeapi';
 import { isUnitTestExecution } from './constants';
-import { traceLog } from './log/logging';
-
-const DEFAULT_SEVERITY: Record<string, string> = {
-    convention: 'Information',
-    error: 'Error',
-    fatal: 'Error',
-    refactor: 'Hint',
-    warning: 'Warning',
-    info: 'Information',
-};
 
 export interface ISettings {
-    cwd: string;
     workspace: string;
-    args: string[];
-    severity: Record<string, string>;
-    path: string[];
     interpreter: string[];
-    importStrategy: string;
-    showNotifications: string;
-    extraPaths: string[];
+    envFile?: string;
 }
 
 export async function getExtensionSettings(namespace: string, includeInterpreter?: boolean): Promise<ISettings[]> {
@@ -44,58 +28,10 @@ function resolveWorkspace(workspace: WorkspaceFolder, value: string): string {
     return value.replace('${workspaceFolder}', workspace.uri.fsPath);
 }
 
-function getArgs(namespace: string, workspace: WorkspaceFolder): string[] {
-    const config = getConfiguration(namespace, workspace.uri);
-    const args = config.get<string[]>('args', []);
-
-    if (args.length > 0) {
-        return args;
-    }
-    return [];
-}
-
 export function getEnvFile(namespace: string, resource: Uri): string {
     const config = getConfiguration(namespace, resource);
     const envFile = config.get<string>('envFile', '');
     return envFile;
-}
-
-function getPath(namespace: string, workspace: WorkspaceFolder): string[] {
-    const config = getConfiguration(namespace, workspace.uri);
-    const path = config.get<string[]>('path', []);
-
-    if (path.length > 0) {
-        return path;
-    }
-
-    const legacyConfig = getConfiguration('debugpy', workspace.uri);
-    const legacyPath = legacyConfig.get<string>('formatting.blackPath', '');
-    if (legacyPath.length > 0 && legacyPath !== 'black') {
-        return [legacyPath];
-    }
-    return [];
-}
-
-function getCwd(_namespace: string, workspace: WorkspaceFolder): string {
-    const legacyConfig = getConfiguration('python', workspace.uri);
-    const legacyCwd = legacyConfig.get<string>('linting.cwd');
-
-    if (legacyCwd) {
-        traceLog('Using cwd from `python.linting.cwd`.');
-        return resolveWorkspace(workspace, legacyCwd);
-    }
-
-    return workspace.uri.fsPath;
-}
-
-function getExtraPaths(_namespace: string, workspace: WorkspaceFolder): string[] {
-    const legacyConfig = getConfiguration('python', workspace.uri);
-    const legacyExtraPaths = legacyConfig.get<string[]>('analysis.extraPaths', []);
-
-    if (legacyExtraPaths.length > 0) {
-        traceLog('Using cwd from `python.analysis.extraPaths`.');
-    }
-    return legacyExtraPaths;
 }
 
 export function getInterpreterFromSetting(namespace: string) {
@@ -118,31 +54,18 @@ export async function getWorkspaceSettings(
         }
     }
 
-    const args = getArgs(namespace, workspace).map((s) => resolveWorkspace(workspace, s));
-    const path = getPath(namespace, workspace).map((s) => resolveWorkspace(workspace, s));
-    const extraPaths = getExtraPaths(namespace, workspace);
     const workspaceSetting = {
-        cwd: getCwd(namespace, workspace),
         workspace: workspace.uri.toString(),
-        args,
-        severity: config.get<Record<string, string>>('severity', DEFAULT_SEVERITY),
-        path,
         interpreter: (interpreter ?? []).map((s) => resolveWorkspace(workspace, s)),
-        importStrategy: config.get<string>('importStrategy', 'fromEnvironment'),
-        showNotifications: config.get<string>('showNotifications', 'off'),
-        extraPaths: extraPaths.map((s) => resolveWorkspace(workspace, s)),
+        envFile: config.get<string>('envFile', '')
     };
     return workspaceSetting;
 }
 
 export function checkIfConfigurationChanged(e: ConfigurationChangeEvent, namespace: string): boolean {
     const settings = [
-        `${namespace}.trace`,
-        `${namespace}.args`,
-        `${namespace}.path`,
         `${namespace}.interpreter`,
-        `${namespace}.importStrategy`,
-        `${namespace}.showNotifications`,
+        `${namespace}.envFile`,
     ];
     const changed = settings.map((s) => e.affectsConfiguration(s));
     return changed.includes(true);

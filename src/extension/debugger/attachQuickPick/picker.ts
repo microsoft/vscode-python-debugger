@@ -4,11 +4,10 @@
 'use strict';
 
 import { injectable } from 'inversify';
-import { Disposable } from 'vscode';
-import { getIcon } from '../../common/utils/icons';
+import { Disposable, ThemeIcon } from 'vscode';
 import { AttachProcess } from '../../common/utils/localize';
 import { createQuickPick } from '../../common/vscodeapi';
-import { IAttachItem, IAttachPicker, IAttachProcessProvider, REFRESH_BUTTON_ICON } from './types';
+import { IAttachItem, IAttachPicker, IAttachProcessProvider } from './types';
 
 @injectable()
 export class AttachPicker implements IAttachPicker {
@@ -19,7 +18,7 @@ export class AttachPicker implements IAttachPicker {
             const processEntries = await this.attachItemsProvider.getAttachItems();
 
             const refreshButton = {
-                iconPath: getIcon(REFRESH_BUTTON_ICON),
+                iconPath: new ThemeIcon('refresh'),
                 tooltip: AttachProcess.refreshList,
             };
 
