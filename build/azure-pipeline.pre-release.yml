@@ -26,7 +26,7 @@ extends:
     buildSteps:
       - task: NodeTool@0
         inputs:
-          versionSpec: '16.x'
+          versionSpec: '16.17.1'
         displayName: Select Node version
 
       - task: UsePythonVersion@0
