@@ -49,8 +49,8 @@
         "category": "Debugpy",
         "command": "debugpy.viewOutput",
         "icon": {
-            "dark": "resources/dark/repl.svg",
-            "light": "resources/light/repl.svg"
+          "dark": "resources/dark/repl.svg",
+          "light": "resources/light/repl.svg"
         },
         "title": "%debugpy.command.viewOutput.title%"
       }
@@ -474,8 +474,6 @@
     "jsonc-parser": "^3.2.0",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.5.4",
-    "rxjs-compat": "^6.5.4",
     "vscode-debugadapter": "^1.51.0",
     "vscode-debugprotocol": "^1.51.0",
     "vscode-languageclient": "^8.0.2"

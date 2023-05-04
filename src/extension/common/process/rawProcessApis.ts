@@ -1,17 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { exec, execSync, spawn } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import { Readable } from 'stream';
-import { Observable } from 'rxjs/Observable';
 import { IDisposable } from '../types';
 import { createDeferred } from '../utils/async';
 import { EnvironmentVariables } from '../variables/types';
 import { DEFAULT_ENCODING } from './constants';
-import { ExecutionResult, ObservableExecutionResult, Output, ShellOptions, SpawnOptions, StdErrError } from './types';
+import { ExecutionResult, ShellOptions, SpawnOptions, StdErrError } from './types';
 import { noop } from '../utils/misc';
 import { decodeBuffer } from './decoder';
-import { traceVerbose } from '../log/logging';
 
 function getDefaultOptions<T extends ShellOptions | SpawnOptions>(options: T, defaultEnv?: EnvironmentVariables): T {
     const defaultOptions = { ...options };
@@ -43,42 +41,6 @@ function getDefaultOptions<T extends ShellOptions | SpawnOptions>(options: T, de
     }
 
     return defaultOptions;
-}
-
-export function shellExec(
-    command: string,
-    options: ShellOptions = {},
-    defaultEnv?: EnvironmentVariables,
-    disposables?: Set<IDisposable>,
-): Promise<ExecutionResult<string>> {
-    const shellOptions = getDefaultOptions(options, defaultEnv);
-    traceVerbose(`Shell Exec: ${command} with options: ${JSON.stringify(shellOptions, null, 4)}`);
-    return new Promise((resolve, reject) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const callback = (e: any, stdout: any, stderr: any) => {
-            if (e && e !== null) {
-                reject(e);
-            } else if (shellOptions.throwOnStdErr && stderr && stderr.length) {
-                reject(new Error(stderr));
-            } else {
-                stdout = filterOutputUsingCondaRunMarkers(stdout);
-                // Make sure stderr is undefined if we actually had none. This is checked
-                // elsewhere because that's how exec behaves.
-                resolve({ stderr: stderr && stderr.length > 0 ? stderr : undefined, stdout });
-            }
-        };
-        const proc = exec(command, shellOptions, callback); // NOSONAR
-        const disposable: IDisposable = {
-            dispose: () => {
-                if (!proc.killed) {
-                    proc.kill();
-                }
-            },
-        };
-        if (disposables) {
-            disposables.add(disposable);
-        }
-    });
 }
 
 export function plainExec(
@@ -160,96 +122,6 @@ function filterOutputUsingCondaRunMarkers(stdout: string) {
     const match = stdout.match(regex);
     const filteredOut = match !== null && match.length >= 2 ? match[1].trim() : undefined;
     return filteredOut !== undefined ? filteredOut : stdout;
-}
-
-function removeCondaRunMarkers(out: string) {
-    out = out.replace('>>>PYTHON-EXEC-OUTPUT\r\n', '').replace('>>>PYTHON-EXEC-OUTPUT\n', '');
-    return out.replace('<<<PYTHON-EXEC-OUTPUT\r\n', '').replace('<<<PYTHON-EXEC-OUTPUT\n', '');
-}
-
-export function execObservable(
-    file: string,
-    args: string[],
-    options: SpawnOptions = {},
-    defaultEnv?: EnvironmentVariables,
-    disposables?: Set<IDisposable>,
-): ObservableExecutionResult<string> {
-    const spawnOptions = getDefaultOptions(options, defaultEnv);
-    const encoding = spawnOptions.encoding ? spawnOptions.encoding : 'utf8';
-    const proc = spawn(file, args, spawnOptions);
-    let procExited = false;
-    const disposable: IDisposable = {
-        dispose() {
-            if (proc && !proc.killed && !procExited) {
-                killPid(proc.pid!);
-            }
-            if (proc) {
-                proc.unref();
-            }
-        },
-    };
-    disposables?.add(disposable);
-
-    const output = new Observable<Output<string>>((subscriber) => {
-        const internalDisposables: IDisposable[] = [];
-
-        // eslint-disable-next-line @typescript-eslint/ban-types
-        const on = (ee: Readable | null, name: string, fn: Function) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ee?.on(name, fn as any);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            internalDisposables.push({ dispose: () => ee?.removeListener(name, fn as any) as any });
-        };
-
-        if (options.token) {
-            internalDisposables.push(
-                options.token.onCancellationRequested(() => {
-                    if (!procExited && !proc.killed) {
-                        proc.kill();
-                        procExited = true;
-                    }
-                }),
-            );
-        }
-
-        const sendOutput = (source: 'stdout' | 'stderr', data: Buffer) => {
-            let out = decodeBuffer([data], encoding);
-            if (source === 'stderr' && options.throwOnStdErr) {
-                subscriber.error(new StdErrError(out));
-            } else {
-                // Because all of output is not retrieved at once, filtering out the
-                // actual output using markers is not possible. Hence simply remove
-                // the markers and return original output.
-                out = removeCondaRunMarkers(out);
-                subscriber.next({ source, out });
-            }
-        };
-
-        on(proc.stdout, 'data', (data: Buffer) => sendOutput('stdout', data));
-        on(proc.stderr, 'data', (data: Buffer) => sendOutput('stderr', data));
-
-        proc.once('close', () => {
-            procExited = true;
-            subscriber.complete();
-            internalDisposables.forEach((d) => d.dispose());
-        });
-        proc.once('exit', () => {
-            procExited = true;
-            subscriber.complete();
-            internalDisposables.forEach((d) => d.dispose());
-        });
-        proc.once('error', (ex) => {
-            procExited = true;
-            subscriber.error(ex);
-            internalDisposables.forEach((d) => d.dispose());
-        });
-    });
-
-    return {
-        proc,
-        out: output,
-        dispose: disposable.dispose,
-    };
 }
 
 export function killPid(pid: number): void {

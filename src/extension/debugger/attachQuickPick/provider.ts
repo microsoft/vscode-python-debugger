@@ -3,17 +3,17 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
 import { l10n } from 'vscode';
 import { getOSType, OSType } from '../../common/platform';
-import { IProcessServiceFactory } from '../../common/process/types';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
 import { WmicProcessParser } from './wmicProcessParser';
+import { getEnvironmentVariables } from '../../common/python';
+import { plainExec } from '../../common/process/rawProcessApis';
+import { logProcess } from '../../common/process/logger';
 
-@injectable()
 export class AttachProcessProvider implements IAttachProcessProvider {
-    constructor(@inject(IProcessServiceFactory) private readonly processServiceFactory: IProcessServiceFactory) {}
+    constructor() {}
 
     public getAttachItems(): Promise<IAttachItem[]> {
         return this._getInternalProcessEntries().then((processEntries) => {
@@ -70,8 +70,11 @@ export class AttachProcessProvider implements IAttachProcessProvider {
             throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
         }
 
-        const processService = await this.processServiceFactory.create();
-        const output = await processService.exec(processCmd.command, processCmd.args, { throwOnStdErr: true });
+        const customEnvVars = await getEnvironmentVariables();
+        const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
+        logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true })
+        
+
 
         return osType === OSType.Windows
             ? WmicProcessParser.parseProcesses(output.stdout)

@@ -4,41 +4,37 @@
 'use strict';
 
 import { Logging } from '../utils/localize';
-import { IProcessLogger, SpawnOptions } from './types';
+import { SpawnOptions } from './types';
 import { escapeRegExp } from 'lodash';
 import { traceLog } from '../log/logging';
 import { getWorkspaceFolders } from '../vscodeapi';
 import { getOSType, getUserHomeDir, OSType } from '../platform';
 import { replaceAll, toCommandArgumentForPythonExt, trimQuotes } from '../stringUtils';
 
-export class ProcessLogger implements IProcessLogger {
-    constructor() {}
-
-    public logProcess(fileOrCommand: string, args?: string[], options?: SpawnOptions) {
-        let command = args
-            ? [fileOrCommand, ...args].map((e) => toCommandArgumentForPythonExt(trimQuotes(e))).join(' ')
-            : fileOrCommand;
-        const info = [`> ${this.getDisplayCommands(command)}`];
-        if (options && options.cwd) {
-            info.push(`${Logging.currentWorkingDirectory} ${this.getDisplayCommands(options.cwd as string)}`);
-        }
-
-        info.forEach((line) => {
-            traceLog(line);
-        });
+export function logProcess(fileOrCommand: string, args?: string[], options?: SpawnOptions) {
+    let command = args
+        ? [fileOrCommand, ...args].map((e) => toCommandArgumentForPythonExt(trimQuotes(e))).join(' ')
+        : fileOrCommand;
+    const info = [`> ${getDisplayCommands(command)}`];
+    if (options && options.cwd) {
+        info.push(`${Logging.currentWorkingDirectory} ${getDisplayCommands(options.cwd as string)}`);
     }
 
-    private getDisplayCommands(command: string): string {
-        const workspaceFolders = getWorkspaceFolders();
-        if (workspaceFolders && workspaceFolders.length === 1) {
-            command = replaceMatchesWithCharacter(command, workspaceFolders[0].uri.fsPath, '.');
-        }
-        const home = getUserHomeDir();
-        if (home) {
-            command = replaceMatchesWithCharacter(command, home, '~');
-        }
-        return command;
+    info.forEach((line) => {
+        traceLog(line);
+    });
+}
+
+function getDisplayCommands(command: string): string {
+    const workspaceFolders = getWorkspaceFolders();
+    if (workspaceFolders && workspaceFolders.length === 1) {
+        command = replaceMatchesWithCharacter(command, workspaceFolders[0].uri.fsPath, '.');
     }
+    const home = getUserHomeDir();
+    if (home) {
+        command = replaceMatchesWithCharacter(command, home, '~');
+    }
+    return command;
 }
 
 /**

@@ -26,8 +26,6 @@ import { PersistentStateFactory } from './common/persistentState';
 import { DebugAdapterDescriptorFactory } from './debugger/adapter/factory';
 import { DebugSessionLoggingFactory } from './debugger/adapter/logging';
 import { OutdatedDebuggerPromptFactory } from './debugger/adapter/outdatedDebuggerPrompt';
-import { ProcessServiceFactory } from './common/process/processFactory';
-import { ProcessLogger } from './common/process/logger';
 import { AttachProcessProvider } from './debugger/attachQuickPick/provider';
 import { AttachPicker } from './debugger/attachQuickPick/picker';
 import { DebugSessionTelemetry } from './common/application/debugSessionTelemetry';
@@ -83,9 +81,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const persistantState = new PersistentStateFactory(context.globalState, context.workspaceState);
     persistantState.activate();
 
-    const processLogger = new ProcessLogger();
-    const processServiceFactory = new ProcessServiceFactory(processLogger, context.subscriptions);
-    const attachProcessProvider = new AttachProcessProvider(processServiceFactory);
+    const attachProcessProvider = new AttachProcessProvider();
     const attachPicker = new AttachPicker(attachProcessProvider);
     context.subscriptions.push(registerCommand(Commands.PickLocalProcess, () => attachPicker.showQuickPick()));
 
