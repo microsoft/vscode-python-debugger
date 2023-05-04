@@ -4,9 +4,9 @@
 
 // This line should always be right on top.
 
-// if ((Reflect as any).metadata === undefined) {
-//     require('reflect-metadata');
-// }
+if ((Reflect as any).metadata === undefined) {
+    require('reflect-metadata');
+}
 
 import { registerDebugger } from './extensionInit';
 import { IExtensionContext } from './common/types';

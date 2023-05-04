@@ -5,7 +5,6 @@
 'use strict';
 
 import { ExtensionContext, Memento } from 'vscode';
-import { EnvironmentVariables } from './variables/types';
 
 export interface IDisposable {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

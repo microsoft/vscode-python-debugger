@@ -59,18 +59,18 @@
       "commandPalette": [
         {
           "category": "Debugpy",
-          "command": "python.clearCacheAndReload",
+          "command": "debugpy.clearCacheAndReload",
           "title": "%debugpy.command.clearCacheAndReload.title%"
         },
         {
           "category": "Debugpy",
-          "command": "python.debugInTerminal",
+          "command": "debugpy.debugInTerminal",
           "icon": "$(debug-alt)",
           "title": "%debugpy.command.debugInTerminal.title%"
         },
         {
           "category": "Debugpy",
-          "command": "python.viewOutput",
+          "command": "debugpy.viewOutput",
           "title": "%debugpy.command.viewOutput.title%"
         }
       ]
@@ -414,7 +414,7 @@
         ],
         "type": "debugpy",
         "variables": {
-          "pickProcess": "debupy.pickLocalProcess"
+          "pickProcess": "debugpy.pickLocalProcess"
         },
         "when": "!virtualWorkspace && shellExecutionSupported"
       }
