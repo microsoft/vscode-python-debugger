@@ -70,7 +70,6 @@ export async function getDebugEnvironmentVariables(args: LaunchRequestArguments)
     return env;
 }
 
-
 export function getProgram(): string | undefined {
     const activeTextEditor = getActiveTextEditor();
     if (activeTextEditor && activeTextEditor.document.languageId === PYTHON_LANGUAGE) {

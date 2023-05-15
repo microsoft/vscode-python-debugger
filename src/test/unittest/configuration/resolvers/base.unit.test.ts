@@ -178,10 +178,6 @@ suite('Debugging - Config Resolver', () => {
     test('config should only contain python and not pythonPath after resolving', async () => {
         const config = { pythonPath: '${command:python.interpreterPath}', python: '${command:python.interpreterPath}' };
         const pythonPath = path.join('1', '2', '3');
-
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -193,9 +189,6 @@ suite('Debugging - Config Resolver', () => {
         const config = { pythonPath: '${command:python.interpreterPath}', python: undefined };
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -208,9 +201,6 @@ suite('Debugging - Config Resolver', () => {
         const config = { pythonPath: '${command:python.interpreterPath}', python: expected };
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -222,9 +212,6 @@ suite('Debugging - Config Resolver', () => {
         const config = {};
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -236,9 +223,6 @@ suite('Debugging - Config Resolver', () => {
         const config = {};
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -255,9 +239,6 @@ suite('Debugging - Config Resolver', () => {
         const config = { debugAdapterPython: debugAdapterPythonPath, debugLauncherPython: debugLauncherPythonPath };
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);
@@ -274,9 +255,6 @@ suite('Debugging - Config Resolver', () => {
         };
         const pythonPath = path.join('1', '2', '3');
 
-        // when(interpreterService.getActiveInterpreter(anything())).thenResolve({
-        //     path: pythonPath,
-        // } as PythonEnvironment);
         getInterpreterDetailsStub.resolves({ path: [pythonPath] } as unknown as PythonEnvironment);
 
         await resolver.resolveAndUpdatePythonPath(undefined, config as LaunchRequestArguments);

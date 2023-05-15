@@ -6,11 +6,7 @@
 import { Memento } from 'vscode';
 import { Commands } from './constants';
 import { traceError, traceVerbose, traceWarn } from './log/logging';
-import {
-    IExtensionContext,
-    IPersistentState,
-    IPersistentStateFactory,
-} from './types';
+import { IExtensionContext, IPersistentState, IPersistentStateFactory } from './types';
 import { cache } from './utils/decorators';
 import { noop } from './utils/misc';
 import { executeCommand, registerCommand } from './vscodeapi';
@@ -71,20 +67,16 @@ export type KeysStorage = { key: string; defaultValue: unknown };
 
 export class PersistentStateFactory implements IPersistentStateFactory {
     public readonly supportedWorkspaceTypes = { untrustedWorkspace: false, virtualWorkspace: true };
-    private globalState : Memento;
+    private globalState: Memento;
     private workspaceState: Memento;
-    public readonly _globalKeysStorage :PersistentState<KeysStorage[]>;
+    public readonly _globalKeysStorage: PersistentState<KeysStorage[]>;
 
     public readonly _workspaceKeysStorage: PersistentState<KeysStorage[]>;
 
-    constructor(globalState: Memento,workspaceState: Memento) {
+    constructor(globalState: Memento, workspaceState: Memento) {
         this.globalState = globalState;
         this.workspaceState = workspaceState;
-        this._globalKeysStorage = new PersistentState<KeysStorage[]>(
-            this.globalState,
-            GLOBAL_PERSISTENT_KEYS,
-            [],
-        );
+        this._globalKeysStorage = new PersistentState<KeysStorage[]>(this.globalState, GLOBAL_PERSISTENT_KEYS, []);
         this._workspaceKeysStorage = new PersistentState<KeysStorage[]>(
             this.workspaceState,
             WORKSPACE_PERSISTENT_KEYS,

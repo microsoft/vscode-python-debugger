@@ -24,7 +24,7 @@ suite('Attach to process - process provider', () => {
     setup(() => {
         provider = new AttachProcessProvider();
         getOSTypeStub = sinon.stub(platform, 'getOSType');
-        plainExecStub = sinon.stub(rawProcessApis, 'plainExec')
+        plainExecStub = sinon.stub(rawProcessApis, 'plainExec');
     });
 
     teardown(() => {
@@ -64,22 +64,18 @@ suite('Attach to process - process provider', () => {
                 commandLine: 'kextd',
             },
         ];
-        // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-        //     stdout: psOutput,
-        // });
-        plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
+        plainExecStub
+            .withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+            .resolves({ stdout: psOutput });
 
         const attachItems = await provider._getInternalProcessEntries();
-
-
-        // verify(
-        //     processService.exec(
-        //         PsProcessParser.psLinuxCommand.command,
-        //         PsProcessParser.psLinuxCommand.args,
-        //         anything(),
-        //     ),
-        // ).once();
-        sinon.assert.calledOnceWithExactly(plainExecStub,PsProcessParser.psLinuxCommand.command, PsProcessParser.psLinuxCommand.args, sinon.match.any, sinon.match.any )
+        sinon.assert.calledOnceWithExactly(
+            plainExecStub,
+            PsProcessParser.psLinuxCommand.command,
+            PsProcessParser.psLinuxCommand.args,
+            sinon.match.any,
+            sinon.match.any,
+        );
         assert.deepEqual(attachItems, expectedOutput);
     });
 
@@ -116,22 +112,18 @@ suite('Attach to process - process provider', () => {
                 commandLine: 'kextd',
             },
         ];
-        // when(processService.exec(PsProcessParser.psDarwinCommand.command, anything(), anything())).thenResolve({
-        //     stdout: psOutput,
-        // });
-        plainExecStub.withArgs(PsProcessParser.psDarwinCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
-
+        plainExecStub
+            .withArgs(PsProcessParser.psDarwinCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+            .resolves({ stdout: psOutput });
 
         const attachItems = await provider._getInternalProcessEntries();
-
-        // verify(
-        //     processService.exec(
-        //         PsProcessParser.psDarwinCommand.command,
-        //         PsProcessParser.psDarwinCommand.args,
-        //         anything(),
-        //     ),
-        // ).once();
-        sinon.assert.calledOnceWithExactly(plainExecStub, PsProcessParser.psDarwinCommand.command, PsProcessParser.psDarwinCommand.args, sinon.match.any, sinon.match.any )
+        sinon.assert.calledOnceWithExactly(
+            plainExecStub,
+            PsProcessParser.psDarwinCommand.command,
+            PsProcessParser.psDarwinCommand.args,
+            sinon.match.any,
+            sinon.match.any,
+        );
 
         assert.deepEqual(attachItems, expectedOutput);
     });
@@ -178,19 +170,18 @@ ProcessId=5912\r
             },
         ];
         getOSTypeStub.returns(platform.OSType.Windows);
-
-        // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-        //     stdout: windowsOutput,
-        // });
-        plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
-
+        plainExecStub
+            .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+            .resolves({ stdout: windowsOutput });
 
         const attachItems = await provider._getInternalProcessEntries();
-
-        // verify(
-        //     processService.exec(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, anything()),
-        // ).once();
-        sinon.assert.calledOnceWithExactly(plainExecStub, WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, sinon.match.any, sinon.match.any )
+        sinon.assert.calledOnceWithExactly(
+            plainExecStub,
+            WmicProcessParser.wmicCommand.command,
+            WmicProcessParser.wmicCommand.args,
+            sinon.match.any,
+            sinon.match.any,
+        );
 
         assert.deepEqual(attachItems, expectedOutput);
     });
@@ -241,11 +232,9 @@ ProcessId=5912\r
                     commandLine: 'syslogd',
                 },
             ];
-            // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-            //     stdout: psOutput,
-            // });
-            plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
-
+            plainExecStub
+                .withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+                .resolves({ stdout: psOutput });
 
             const output = await provider.getAttachItems();
 
@@ -302,11 +291,10 @@ ProcessId=5912\r
                     commandLine: 'syslogd',
                 },
             ];
-            // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-            //     stdout: psOutput,
-            // });
-            plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
 
+            plainExecStub
+                .withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+                .resolves({ stdout: psOutput });
 
             const output = await provider.getAttachItems();
 
@@ -360,11 +348,10 @@ ProcessId=5728\r
                     commandLine: '',
                 },
             ];
-            // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-            //     stdout: windowsOutput,
-            // });
-            plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
 
+            plainExecStub
+                .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+                .resolves({ stdout: windowsOutput });
 
             const output = await provider.getAttachItems();
 
@@ -453,11 +440,10 @@ ProcessId=8026\r
                     commandLine: '',
                 },
             ];
-            // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-            //     stdout: windowsOutput,
-            // });
-            plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
 
+            plainExecStub
+                .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
+                .resolves({ stdout: windowsOutput });
 
             const output = await provider.getAttachItems();
 

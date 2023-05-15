@@ -5,12 +5,16 @@
 
 import * as sinon from 'sinon';
 import * as typemoq from 'typemoq';
-import* as vscode from 'vscode';
+import * as vscode from 'vscode';
 import { IExtensionContext, IPersistentStateFactory } from '../../extension/common/types';
 import { registerDebugger } from '../../extension/extensionInit';
 import * as vscodeapi from '../../extension/common/vscodeapi';
 import { Commands } from '../../extension/common/constants';
-import { IDebugAdapterDescriptorFactory, IDebugSessionLoggingFactory, IOutdatedDebuggerPromptFactory } from '../../extension/debugger/types';
+import {
+    IDebugAdapterDescriptorFactory,
+    IDebugSessionLoggingFactory,
+    IOutdatedDebuggerPromptFactory,
+} from '../../extension/debugger/types';
 import { DebugSessionLoggingFactory } from '../../extension/debugger/adapter/logging';
 import { OutdatedDebuggerPromptFactory } from '../../extension/debugger/adapter/outdatedDebuggerPrompt';
 import { DebugAdapterDescriptorFactory } from '../../extension/debugger/adapter/factory';
@@ -19,12 +23,11 @@ import { PersistentStateFactory } from '../../extension/common/persistentState';
 import { DebugSessionTelemetry } from '../../extension/common/application/debugSessionTelemetry';
 import { LaunchJsonCompletionProvider } from '../../extension/debugger/configuration/launch.json/completionProvider';
 
-
 suite('Debugging - register Debugging', () => {
     let context: typemoq.IMock<IExtensionContext>;
     let registerCommandStub: sinon.SinonStub;
-    let registerDebugAdapterTrackerFactoryStub:sinon.SinonStub;
-    let registerDebugAdapterDescriptorFactoryStub:sinon.SinonStub;
+    let registerDebugAdapterTrackerFactoryStub: sinon.SinonStub;
+    let registerDebugAdapterDescriptorFactoryStub: sinon.SinonStub;
     let registerCompletionItemProviderStub: sinon.SinonStub;
     let loggingFactory: IDebugSessionLoggingFactory;
     let debuggerPromptFactory: IOutdatedDebuggerPromptFactory;
@@ -48,7 +51,6 @@ suite('Debugging - register Debugging', () => {
         registerCompletionItemProviderStub = sinon.stub(vscode.languages, 'registerCompletionItemProvider');
         descriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
         context.setup((c) => c.subscriptions).returns(() => []);
-
     });
     teardown(() => {
         sinon.restore();
@@ -57,32 +59,16 @@ suite('Debugging - register Debugging', () => {
     test('Ensure to register all the commands related to the debugger', () => {
         registerDebugger(context.object);
 
-        sinon.assert.calledWithExactly(
-            registerCommandStub,
-            Commands.Debug_In_Terminal,
-            sinon.match.any
-        );
-        sinon.assert.calledWithExactly(
-            registerCommandStub,
-            Commands.PickLocalProcess,
-            sinon.match.any
-        );
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_In_Terminal, sinon.match.any);
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any);
         sinon.assert.calledWithExactly(
             registerCommandStub,
             Commands.SelectDebugConfig,
             sinon.match.any,
-            sinon.match.any
-        );
-        sinon.assert.calledWithExactly(
-            registerCommandStub,
-            Commands.GetSelectedInterpreterPath,
             sinon.match.any,
         );
-        sinon.assert.calledWithExactly(
-            registerCommandStub,
-            Commands.ClearStorage,
-            sinon.match.any
-        );
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.GetSelectedInterpreterPath, sinon.match.any);
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.ClearStorage, sinon.match.any);
         expect(registerCommandStub.callCount).to.be.equal(5);
     });
     test('Activation will register the Debug adapter factories', async () => {
@@ -92,22 +78,14 @@ suite('Debugging - register Debugging', () => {
         sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debuggerPromptFactory);
         sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debugSessionTelemetry);
         sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, 'debugpy', descriptorFactory);
-        
+
         expect(registerDebugAdapterTrackerFactoryStub.callCount).to.be.equal(3);
     });
 
     test('Activation will register the completion provider', async () => {
         registerDebugger(context.object);
 
-        sinon.assert.calledWithExactly(
-            registerCompletionItemProviderStub,
-            { language: 'json' },
-            completionProvider,
-        );
-        sinon.assert.calledWithExactly(
-            registerCompletionItemProviderStub,
-            { language: 'jsonc' },
-            completionProvider,
-        );
+        sinon.assert.calledWithExactly(registerCompletionItemProviderStub, { language: 'json' }, completionProvider);
+        sinon.assert.calledWithExactly(registerCompletionItemProviderStub, { language: 'jsonc' }, completionProvider);
     });
 });

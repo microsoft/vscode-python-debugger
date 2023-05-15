@@ -33,15 +33,6 @@ suite('Interpreter Path Command', () => {
             assert.deepEqual(arg, Uri.parse('folderPath'));
             return Promise.resolve({ path: ['settingValue'] }) as unknown;
         });
-        // getInterpreterDetailsStub.onCall(1).callsFake((arg) => {
-        //     assert.deepEqual(arg, Uri.parse('folderPath'));
-        //     return Promise.resolve({ path: 'settingValue' }) as unknown;
-        // });
-        // when(interpreterService.getActiveInterpreter(anything())).thenCall((arg) => {
-        //     assert.deepEqual(arg, Uri.parse('folderPath'));
-
-        //     return Promise.resolve({ path: 'settingValue' }) as unknown;
-        // });
         const setting = await interpreterPathCommand._getSelectedInterpreterPath(args);
         expect(setting).to.equal('settingValue');
     });
@@ -59,10 +50,6 @@ suite('Interpreter Path Command', () => {
 
     test('If neither of these exists, value of workspace folder is `undefined`', async () => {
         const args = ['command'];
-
-        // when(interpreterService.getActiveInterpreter(undefined)).thenReturn(
-        //     Promise.resolve({ path: 'settingValue' }) as Promise<PythonEnvironment | undefined>,
-        // );
         getInterpreterDetailsStub
             .withArgs(undefined)
             .resolves({ path: ['settingValue'] } as unknown as Environment | undefined);

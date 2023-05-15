@@ -37,13 +37,11 @@ suite('Debug - Attach to Child Process', () => {
         const session: any = {};
         getWorkspaceFoldersStub.returns(undefined);
         startDebuggingStub.resolves(true);
-        // when(startDebugging(anything(), anything(), anything())).thenResolve(true as any);
         showErrorMessageStub.returns(undefined);
 
         await attachService.attach(data, session);
 
         sinon.assert.calledOnce(getWorkspaceFoldersStub);
-        // verify(debugService.startDebugging(anything(), anything(), anything())).once();
         sinon.assert.calledOnce(startDebuggingStub);
         sinon.assert.notCalled(showErrorMessageStub);
     });
