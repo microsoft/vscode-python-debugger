@@ -7,30 +7,24 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { expect, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import { anything, instance, mock, verify, when } from 'ts-mockito';
-import { ProcessService } from '../../../extension/common/process/proc';
-import { ProcessServiceFactory } from '../../../extension/common/process/processFactory';
-import { IProcessService, IProcessServiceFactory } from '../../../extension/common/process/types';
 import { AttachProcessProvider } from '../../../extension/debugger/attachQuickPick/provider';
 import { PsProcessParser } from '../../../extension/debugger/attachQuickPick/psProcessParser';
 import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 import * as platform from '../../../extension/common/platform';
+import * as rawProcessApis from '../../../extension/common/process/rawProcessApis';
 
 use(chaiAsPromised);
 
 suite('Attach to process - process provider', () => {
-    let processService: IProcessService;
-    let processServiceFactory: IProcessServiceFactory;
     let provider: AttachProcessProvider;
     let getOSTypeStub: sinon.SinonStub;
+    let plainExecStub: sinon.SinonStub;
 
     setup(() => {
-        processService = mock(ProcessService);
-        processServiceFactory = mock(ProcessServiceFactory);
-        when(processServiceFactory.create()).thenResolve(instance(processService));
         provider = new AttachProcessProvider();
         getOSTypeStub = sinon.stub(platform, 'getOSType');
+        plainExecStub = sinon.stub(rawProcessApis, 'plainExec')
     });
 
     teardown(() => {
@@ -70,19 +64,22 @@ suite('Attach to process - process provider', () => {
                 commandLine: 'kextd',
             },
         ];
-        when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-            stdout: psOutput,
-        });
+        // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
+        //     stdout: psOutput,
+        // });
+        plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
 
         const attachItems = await provider._getInternalProcessEntries();
 
-        verify(
-            processService.exec(
-                PsProcessParser.psLinuxCommand.command,
-                PsProcessParser.psLinuxCommand.args,
-                anything(),
-            ),
-        ).once();
+
+        // verify(
+        //     processService.exec(
+        //         PsProcessParser.psLinuxCommand.command,
+        //         PsProcessParser.psLinuxCommand.args,
+        //         anything(),
+        //     ),
+        // ).once();
+        sinon.assert.calledOnceWithExactly(plainExecStub,PsProcessParser.psLinuxCommand.command, PsProcessParser.psLinuxCommand.args, sinon.match.any, sinon.match.any )
         assert.deepEqual(attachItems, expectedOutput);
     });
 
@@ -119,19 +116,23 @@ suite('Attach to process - process provider', () => {
                 commandLine: 'kextd',
             },
         ];
-        when(processService.exec(PsProcessParser.psDarwinCommand.command, anything(), anything())).thenResolve({
-            stdout: psOutput,
-        });
+        // when(processService.exec(PsProcessParser.psDarwinCommand.command, anything(), anything())).thenResolve({
+        //     stdout: psOutput,
+        // });
+        plainExecStub.withArgs(PsProcessParser.psDarwinCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
+
 
         const attachItems = await provider._getInternalProcessEntries();
 
-        verify(
-            processService.exec(
-                PsProcessParser.psDarwinCommand.command,
-                PsProcessParser.psDarwinCommand.args,
-                anything(),
-            ),
-        ).once();
+        // verify(
+        //     processService.exec(
+        //         PsProcessParser.psDarwinCommand.command,
+        //         PsProcessParser.psDarwinCommand.args,
+        //         anything(),
+        //     ),
+        // ).once();
+        sinon.assert.calledOnceWithExactly(plainExecStub, PsProcessParser.psDarwinCommand.command, PsProcessParser.psDarwinCommand.args, sinon.match.any, sinon.match.any )
+
         assert.deepEqual(attachItems, expectedOutput);
     });
 
@@ -178,15 +179,19 @@ ProcessId=5912\r
         ];
         getOSTypeStub.returns(platform.OSType.Windows);
 
-        when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-            stdout: windowsOutput,
-        });
+        // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
+        //     stdout: windowsOutput,
+        // });
+        plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
+
 
         const attachItems = await provider._getInternalProcessEntries();
 
-        verify(
-            processService.exec(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, anything()),
-        ).once();
+        // verify(
+        //     processService.exec(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, anything()),
+        // ).once();
+        sinon.assert.calledOnceWithExactly(plainExecStub, WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, sinon.match.any, sinon.match.any )
+
         assert.deepEqual(attachItems, expectedOutput);
     });
 
@@ -236,9 +241,11 @@ ProcessId=5912\r
                     commandLine: 'syslogd',
                 },
             ];
-            when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-                stdout: psOutput,
-            });
+            // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
+            //     stdout: psOutput,
+            // });
+            plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
+
 
             const output = await provider.getAttachItems();
 
@@ -295,9 +302,11 @@ ProcessId=5912\r
                     commandLine: 'syslogd',
                 },
             ];
-            when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
-                stdout: psOutput,
-            });
+            // when(processService.exec(PsProcessParser.psLinuxCommand.command, anything(), anything())).thenResolve({
+            //     stdout: psOutput,
+            // });
+            plainExecStub.withArgs(PsProcessParser.psLinuxCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: psOutput})
+
 
             const output = await provider.getAttachItems();
 
@@ -351,9 +360,11 @@ ProcessId=5728\r
                     commandLine: '',
                 },
             ];
-            when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-                stdout: windowsOutput,
-            });
+            // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
+            //     stdout: windowsOutput,
+            // });
+            plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
+
 
             const output = await provider.getAttachItems();
 
@@ -442,9 +453,11 @@ ProcessId=8026\r
                     commandLine: '',
                 },
             ];
-            when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
-                stdout: windowsOutput,
-            });
+            // when(processService.exec(WmicProcessParser.wmicCommand.command, anything(), anything())).thenResolve({
+            //     stdout: windowsOutput,
+            // });
+            plainExecStub.withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any).resolves({stdout: windowsOutput})
+
 
             const output = await provider.getAttachItems();
 
