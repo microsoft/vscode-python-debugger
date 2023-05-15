@@ -26,21 +26,6 @@ suite('Interpreter Path Command', () => {
     teardown(() => {
         sinon.restore();
     });
-    //ACTIVATE
-    test('Ensure command is registered with the correct callback handler', async () => {
-        let getInterpreterPathHandler = (_param: unknown) => undefined;
-        registerCommandStub.callsFake((_, cb) => {
-            getInterpreterPathHandler = cb;
-            return TypeMoq.Mock.ofType<IDisposable>().object;
-        });
-        // await interpreterPathCommand.activate();
-
-        sinon.assert.calledOnce(registerCommandStub);
-        const getSelectedInterpreterPath = sinon.stub(InterpreterPathCommand.prototype, '_getSelectedInterpreterPath');
-        getInterpreterPathHandler([]);
-        sinon.assert.calledOnceWithExactly(getSelectedInterpreterPath, []);
-    });
-
     test('If `workspaceFolder` property exists in `args`, it is used to retrieve setting from config', async () => {
         const args = { workspaceFolder: 'folderPath' };
 

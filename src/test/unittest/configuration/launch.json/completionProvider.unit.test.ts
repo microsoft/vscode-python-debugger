@@ -6,7 +6,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as sinon from 'sinon';
-import { deepEqual } from 'ts-mockito';
 import * as typemoq from 'typemoq';
 import {
     CancellationTokenSource,
@@ -30,20 +29,6 @@ suite('Debugging - launch.json Completion Provider', () => {
     });
     teardown(() => {
         sinon.restore();
-    });
-    //ACTIVATE
-    test.skip('Activation will register the completion provider', async () => {
-        // await completionProvider.activate();
-        sinon.assert.calledOnceWithExactly(
-            registerCompletionItemProviderStub,
-            deepEqual({ language: 'json' }),
-            completionProvider,
-        );
-        sinon.assert.calledOnceWithExactly(
-            registerCompletionItemProviderStub,
-            deepEqual({ language: 'jsonc' }),
-            completionProvider,
-        );
     });
     test('Cannot provide completions for non launch.json files', () => {
         const document = typemoq.Mock.ofType<TextDocument>();

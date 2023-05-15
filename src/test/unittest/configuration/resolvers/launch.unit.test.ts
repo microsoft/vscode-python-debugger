@@ -8,9 +8,7 @@ import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
 import { DebugConfiguration, DebugConfigurationProvider, TextDocument, TextEditor, Uri, WorkspaceFolder } from 'vscode';
 import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
-import { IDebugEnvironmentVariablesService } from '../../../../extension/debugger/configuration/resolvers/helper';
 import { LaunchConfigurationResolver } from '../../../../extension/debugger/configuration/resolvers/launch';
-// import { PythonPathSource } from '../../../../extension/debugger/types';
 import { getInfoPerOS } from './common';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
 import * as platform from '../../../../extension/common/platform';
@@ -18,6 +16,7 @@ import { ConsoleType, DebugOptions, LaunchRequestArguments } from '../../../../e
 import { DebuggerTypeName } from '../../../../extension/constants';
 import * as pythonApi from '../../../../extension/common/python';
 import * as settings from '../../../../extension/common/settings';
+import * as helper from '../../../../extension/debugger/configuration/resolvers/helper';
 
 getInfoPerOS().forEach(([osName, osType, path]) => {
     if (osType === platform.OSType.Unknown) {
@@ -26,12 +25,12 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
     suite(`Debugging - Config Resolver Launch, OS = ${osName}`, () => {
         let debugProvider: DebugConfigurationProvider;
-        let debugEnvHelper: TypeMoq.IMock<IDebugEnvironmentVariablesService>;
         let getActiveTextEditorStub: sinon.SinonStub;
         let getOSTypeStub: sinon.SinonStub;
         let getWorkspaceFolderStub: sinon.SinonStub;
         let getInterpreterDetailsStub: sinon.SinonStub;
         let getEnvFileStub: sinon.SinonStub;
+        let getDebugEnvironmentVariablesStub: sinon.SinonStub;
 
         setup(() => {
             getActiveTextEditorStub = sinon.stub(vscodeapi, 'getActiveTextEditor');
@@ -40,6 +39,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getOSTypeStub.returns(osType);
             getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
             getEnvFileStub = sinon.stub(settings, 'getEnvFile');
+            getDebugEnvironmentVariablesStub = sinon.stub(helper, 'getDebugEnvironmentVariables');
         });
 
         teardown(() => {
@@ -57,7 +57,6 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         }
 
         function setupIoc(pythonPath: string, workspaceFolder?: WorkspaceFolder) {
-            debugEnvHelper = TypeMoq.Mock.ofType<IDebugEnvironmentVariablesService>();
             getInterpreterDetailsStub.resolves({ path: [pythonPath] });
 
             if (workspaceFolder) {
@@ -65,11 +64,8 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     .withArgs('python', sinon.match.any)
                     .returns(path.join(workspaceFolder!.uri.fsPath, '.env2'));
             }
-            debugEnvHelper
-                .setup((x) => x.getEnvironmentVariables(TypeMoq.It.isAny()))
-                .returns(() => Promise.resolve({}));
-
-            debugProvider = new LaunchConfigurationResolver(debugEnvHelper.object);
+            getDebugEnvironmentVariablesStub.returns(() => Promise.resolve({}));
+            debugProvider = new LaunchConfigurationResolver();
         }
 
         function setupActiveEditor(fileName: string | undefined, languageId: string) {
