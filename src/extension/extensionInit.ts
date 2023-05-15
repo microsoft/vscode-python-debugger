@@ -13,8 +13,6 @@ import { ChildProcessAttachService } from './debugger/hooks/childProcessAttachSe
 import { PythonDebugConfigurationService } from './debugger/configuration/debugConfigurationService';
 import { AttachConfigurationResolver } from './debugger/configuration/resolvers/attach';
 import { LaunchConfigurationResolver } from './debugger/configuration/resolvers/launch';
-import { EnvironmentVariablesService } from './common/variables/environment';
-import { DebugEnvironmentVariablesHelper } from './debugger/configuration/resolvers/helper';
 import { MultiStepInputFactory } from './common/multiStepInput';
 import { sendTelemetryEvent } from './telemetry';
 import { Commands } from './common/constants';
@@ -43,10 +41,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             ignoreErrors(childProcessAttachEventHandler.handleCustomEvent(e));
         }),
     );
-    const environmentVariablesService = new EnvironmentVariablesService();
-    const debugEnvironmentVariablesHelper = new DebugEnvironmentVariablesHelper(environmentVariablesService);
     const attachConfigurationResolver = new AttachConfigurationResolver();
-    const launchConfigurationResolver = new LaunchConfigurationResolver(debugEnvironmentVariablesHelper);
+    const launchConfigurationResolver = new LaunchConfigurationResolver();
     const multiStepInputFactory = new MultiStepInputFactory();
     const debugConfigProvider = new PythonDebugConfigurationService(
         attachConfigurationResolver,

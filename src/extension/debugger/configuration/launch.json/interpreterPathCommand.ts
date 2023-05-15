@@ -3,7 +3,6 @@
 
 'use strict';
 
-// import { injectable } from 'inversify';
 import { Uri } from 'vscode';
 import { getInterpreterDetails } from '../../../common/python';
 

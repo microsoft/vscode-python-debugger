@@ -7,101 +7,91 @@ import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 import { traceError } from '../log/logging';
 import { getSearchPathEnvVarNames } from '../utils/exec';
-import { EnvironmentVariables, IEnvironmentVariablesService } from './types';
+import { EnvironmentVariables } from './types';
 
-export class EnvironmentVariablesService implements IEnvironmentVariablesService {
-    private _pathVariable?: 'Path' | 'PATH';
-    constructor() {}
 
-    public async parseFile(
-        filePath?: string,
-        baseVars?: EnvironmentVariables,
-    ): Promise<EnvironmentVariables | undefined> {
-        if (!filePath || !(await fs.pathExists(filePath))) {
+export async function parseFile(
+    filePath?: string,
+    baseVars?: EnvironmentVariables,
+): Promise<EnvironmentVariables | undefined> {
+    if (!filePath || !(await fs.pathExists(filePath))) {
+        return;
+    }
+    const contents = await fs.readFile(filePath).catch((ex) => {
+        traceError('Custom .env is likely not pointing to a valid file', ex);
+        return undefined;
+    });
+    if (!contents) {
+        return;
+    }
+    return parseEnvFile(contents, baseVars);
+}
+
+export function parseFileSync(filePath?: string, baseVars?: EnvironmentVariables): EnvironmentVariables | undefined {
+    if (!filePath || !fs.pathExistsSync(filePath)) {
+        return;
+    }
+    let contents: string | undefined;
+    try {
+        contents = fs.readFileSync(filePath, { encoding: 'utf8' });
+    } catch (ex) {
+        traceError('Custom .env is likely not pointing to a valid file', ex);
+    }
+    if (!contents) {
+        return;
+    }
+    return parseEnvFile(contents, baseVars);
+}
+
+export function mergeVariables(
+    source: EnvironmentVariables,
+    target: EnvironmentVariables,
+    options?: { overwrite?: boolean },
+) {
+    if (!target) {
+        return;
+    }
+    const settingsNotToMerge = ['PYTHONPATH', getSearchPathEnvVarNames()[0]];
+    Object.keys(source).forEach((setting) => {
+        if (settingsNotToMerge.indexOf(setting) >= 0) {
             return;
         }
-        const contents = await fs.readFile(filePath).catch((ex) => {
-            traceError('Custom .env is likely not pointing to a valid file', ex);
-            return undefined;
-        });
-        if (!contents) {
-            return;
+        if (target[setting] === undefined || options?.overwrite) {
+            target[setting] = source[setting];
         }
-        return parseEnvFile(contents, baseVars);
-    }
+    });
+}
 
-    public parseFileSync(filePath?: string, baseVars?: EnvironmentVariables): EnvironmentVariables | undefined {
-        if (!filePath || !fs.pathExistsSync(filePath)) {
-            return;
-        }
-        let contents: string | undefined;
-        try {
-            contents = fs.readFileSync(filePath, { encoding: 'utf8' });
-        } catch (ex) {
-            traceError('Custom .env is likely not pointing to a valid file', ex);
-        }
-        if (!contents) {
-            return;
-        }
-        return parseEnvFile(contents, baseVars);
-    }
+export function appendPythonPath(vars: EnvironmentVariables, ...pythonPaths: string[]) {
+    return appendPaths(vars, 'PYTHONPATH', ...pythonPaths);
+}
 
-    public mergeVariables(
-        source: EnvironmentVariables,
-        target: EnvironmentVariables,
-        options?: { overwrite?: boolean },
-    ) {
-        if (!target) {
-            return;
-        }
-        const settingsNotToMerge = ['PYTHONPATH', this.pathVariable];
-        Object.keys(source).forEach((setting) => {
-            if (settingsNotToMerge.indexOf(setting) >= 0) {
-                return;
-            }
-            if (target[setting] === undefined || options?.overwrite) {
-                target[setting] = source[setting];
-            }
-        });
-    }
+export function appendPath(vars: EnvironmentVariables, ...paths: string[]) {
+    return appendPaths(vars, getSearchPathEnvVarNames()[0], ...paths);
+}
 
-    public appendPythonPath(vars: EnvironmentVariables, ...pythonPaths: string[]) {
-        return this.appendPaths(vars, 'PYTHONPATH', ...pythonPaths);
-    }
-
-    public appendPath(vars: EnvironmentVariables, ...paths: string[]) {
-        return this.appendPaths(vars, this.pathVariable, ...paths);
-    }
-
-    private get pathVariable(): 'Path' | 'PATH' {
-        if (!this._pathVariable) {
-            this._pathVariable = getSearchPathEnvVarNames()[0];
-        }
-        return this._pathVariable!;
-    }
-
-    private appendPaths(
-        vars: EnvironmentVariables,
-        variableName: 'PATH' | 'Path' | 'PYTHONPATH',
-        ...pathsToAppend: string[]
-    ) {
-        const valueToAppend = pathsToAppend
-            .filter((item) => typeof item === 'string' && item.trim().length > 0)
-            .map((item) => item.trim())
-            .join(path.delimiter);
-        if (valueToAppend.length === 0) {
-            return vars;
-        }
-
-        const variable = vars ? vars[variableName] : undefined;
-        if (variable && typeof variable === 'string' && variable.length > 0) {
-            vars[variableName] = variable + path.delimiter + valueToAppend;
-        } else {
-            vars[variableName] = valueToAppend;
-        }
+export function appendPaths(
+    vars: EnvironmentVariables,
+    variableName: 'PATH' | 'Path' | 'PYTHONPATH',
+    ...pathsToAppend: string[]
+) {
+    const valueToAppend = pathsToAppend
+        .filter((item) => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => item.trim())
+        .join(path.delimiter);
+    if (valueToAppend.length === 0) {
         return vars;
     }
+
+    const variable = vars ? vars[variableName] : undefined;
+    if (variable && typeof variable === 'string' && variable.length > 0) {
+        vars[variableName] = variable + path.delimiter + valueToAppend;
+    } else {
+        vars[variableName] = valueToAppend;
+    }
+    return vars;
 }
+
 
 export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVariables): EnvironmentVariables {
     const globalVars = baseVars ? baseVars : {};

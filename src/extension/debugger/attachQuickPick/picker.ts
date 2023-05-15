@@ -3,13 +3,11 @@
 
 'use strict';
 
-import { injectable } from 'inversify';
 import { Disposable, ThemeIcon } from 'vscode';
 import { AttachProcess } from '../../common/utils/localize';
 import { createQuickPick } from '../../common/vscodeapi';
 import { IAttachItem, IAttachPicker, IAttachProcessProvider } from './types';
 
-@injectable()
 export class AttachPicker implements IAttachPicker {
     constructor(private readonly attachItemsProvider: IAttachProcessProvider) {}
 

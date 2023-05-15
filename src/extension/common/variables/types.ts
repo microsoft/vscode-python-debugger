@@ -2,14 +2,3 @@
 // Licensed under the MIT License.
 
 export type EnvironmentVariables = Object & Record<string, string | undefined>;
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const IEnvironmentVariablesService = Symbol('IEnvironmentVariablesService');
-
-export interface IEnvironmentVariablesService {
-    parseFile(filePath?: string, baseVars?: EnvironmentVariables): Promise<EnvironmentVariables | undefined>;
-    parseFileSync(filePath?: string, baseVars?: EnvironmentVariables): EnvironmentVariables | undefined;
-    mergeVariables(source: EnvironmentVariables, target: EnvironmentVariables, options?: { overwrite?: boolean }): void;
-    appendPythonPath(vars: EnvironmentVariables, ...pythonPaths: string[]): void;
-    appendPath(vars: EnvironmentVariables, ...paths: string[]): void;
-}
