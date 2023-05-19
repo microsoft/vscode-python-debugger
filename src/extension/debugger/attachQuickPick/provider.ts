@@ -72,9 +72,7 @@ export class AttachProcessProvider implements IAttachProcessProvider {
 
         const customEnvVars = await getEnvironmentVariables();
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
-        logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true })
-        
-
+        logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
 
         return osType === OSType.Windows
             ? WmicProcessParser.parseProcesses(output.stdout)

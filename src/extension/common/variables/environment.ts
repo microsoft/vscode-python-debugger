@@ -9,7 +9,6 @@ import { traceError } from '../log/logging';
 import { getSearchPathEnvVarNames } from '../utils/exec';
 import { EnvironmentVariables } from './types';
 
-
 export async function parseFile(
     filePath?: string,
     baseVars?: EnvironmentVariables,
@@ -91,7 +90,6 @@ export function appendPaths(
     }
     return vars;
 }
-
 
 export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVariables): EnvironmentVariables {
     const globalVars = baseVars ? baseVars : {};

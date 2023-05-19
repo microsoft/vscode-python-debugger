@@ -14,7 +14,6 @@ export interface IDisposable {
 export const IDisposableRegistry = Symbol('IDisposableRegistry');
 export type IDisposableRegistry = IDisposable[];
 
-
 export interface IPersistentState<T> {
     /**
      * Storage is exposed in this type to make sure folks always use persistent state
@@ -31,7 +30,6 @@ export interface IPersistentStateFactory {
     createGlobalPersistentState<T>(key: string, defaultValue?: T, expiryDurationMs?: number): IPersistentState<T>;
     createWorkspacePersistentState<T>(key: string, defaultValue?: T, expiryDurationMs?: number): IPersistentState<T>;
 }
-
 
 export const IExtensionContext = Symbol('ExtensionContext');
 export interface IExtensionContext extends ExtensionContext {}
