@@ -68,7 +68,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
                 type: DebuggerTypeName,
                 request: 'launch',
                 module: 'uvicorn',
-                args: [`${fastApiPath}:app`],
+                args: [`${fastApiPath}:app`, '--reload'],
                 jinja: true,
                 justMyCode: true,
             });
