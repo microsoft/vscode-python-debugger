@@ -461,7 +461,7 @@
     "ts-mockito": "^2.6.1",
     "typemoq": "^2.1.0",
     "typescript": "^4.7.4",
-    "vscode-nls-dev": "^4.0.1",
+    "vscode-nls-dev": "^4.0.4",
     "vscode-test": "^1.6.1",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
