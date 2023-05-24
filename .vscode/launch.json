@@ -13,9 +13,11 @@
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/dist/**/*.js"
+				"${workspaceFolder}/dist/**/*.js",
+				"!${workspaceFolder}/**/node_modules**/*"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "${defaultBuildTask}",
+			"skipFiles": ["<node_internals>/**"]
 		},
 		{
 			"name": "Unit Tests",

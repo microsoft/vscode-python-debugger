@@ -35,7 +35,7 @@ export namespace Commands {
     export const ViewOutput = 'debugpy.viewOutput';
     export const ClearStorage = 'debugpy.clearCacheAndReload';
     export const Enable_SourceMap_Support = 'debugpy.enableSourceMapSupport';
-    export const SelectDebugConfig ='debugpy.SelectAndInsertDebugConfiguration'
+    export const SelectDebugConfig = 'debugpy.SelectAndInsertDebugConfiguration';
     export const Set_Interpreter = 'python.setInterpreter';
     export const GetSelectedInterpreterPath = 'python.interpreterPath';
 }
