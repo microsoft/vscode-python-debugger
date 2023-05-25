@@ -2,7 +2,7 @@
   "name": "debugpy",
   "displayName": "Debugpy",
   "description": "Python Debugger extension using `debugpy`.",
-  "version": "0.0.1",
+  "version": "2023.4.0-dev",
   "publisher": "ms-python",
   "license": "MIT",
   "homepage": "https://github.com/Microsoft/vscode-python-debugger",
