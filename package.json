@@ -13,6 +13,7 @@
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-python-debugger/issues"
   },
+  "icon": "icon.png",
   "keywords": [
     "python",
     "debugger",
