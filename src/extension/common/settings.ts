@@ -57,16 +57,13 @@ export async function getWorkspaceSettings(
     const workspaceSetting = {
         workspace: workspace.uri.toString(),
         interpreter: (interpreter ?? []).map((s) => resolveWorkspace(workspace, s)),
-        envFile: config.get<string>('envFile', '')
+        envFile: config.get<string>('envFile', ''),
     };
     return workspaceSetting;
 }
 
 export function checkIfConfigurationChanged(e: ConfigurationChangeEvent, namespace: string): boolean {
-    const settings = [
-        `${namespace}.interpreter`,
-        `${namespace}.envFile`,
-    ];
+    const settings = [`${namespace}.interpreter`, `${namespace}.envFile`];
     const changed = settings.map((s) => e.affectsConfiguration(s));
     return changed.includes(true);
 }

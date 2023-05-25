@@ -40,7 +40,7 @@ export function registerCommand(command: string, callback: (...args: any[]) => a
     return commands.registerCommand(command, callback, thisArg);
 }
 
-export function executeCommand<T = unknown>(command: string, ...rest: any[]): Thenable<T> {
+export function executeCommand<T = unknown>(command: string, ...rest: any[]): Thenable<T | undefined> {
     return commands.executeCommand(command, ...rest);
 }
 

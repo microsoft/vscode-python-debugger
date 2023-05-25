@@ -35,7 +35,7 @@ import { ignoreErrors } from './common/promiseUtils';
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
     const childProcessAttachEventHandler = new ChildProcessAttachEventHandler(childProcessAttachService);
-    
+
     context.subscriptions.push(
         debug.onDidReceiveDebugSessionCustomEvent((e) => {
             ignoreErrors(childProcessAttachEventHandler.handleCustomEvent(e));

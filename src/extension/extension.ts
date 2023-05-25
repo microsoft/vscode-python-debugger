@@ -33,7 +33,6 @@ export async function activate(context: IExtensionContext): Promise<void> {
     } catch (ex) {
         traceError('sendDebugpySuccessActivationTelemetry() failed.', ex);
     }
-
 }
 
 // this method is called when your extension is deactivated
