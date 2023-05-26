@@ -15,4 +15,4 @@ If you want to disable debugpy, you can [disable this extension](https://code.vi
 | ---------------------- | --------------------------------- |
 | Debugpy: viewOutput | Show the debugpy extension output. |
 | Debugpy: clearCacheAndReload | Allows you to clear the global values set in the extension. |
-| Debugpy: debugInTerminal | Allows you to debug a simple python file in the terminal. |
+| Debugpy: debugInTerminal | Allows you to debug a simple Python file in the terminal. |
