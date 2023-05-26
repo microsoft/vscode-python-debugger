@@ -6,7 +6,7 @@ A Visual Studio Code extension that supports debugging of several types of Pytho
 
 Once installed in Visual Studio Code, debugpy will be automatically activated when you open a Python file.
 
-## Disabling the debugpy extension
+## Disabling the Debugpy extension
 If you want to disable debugpy, you can [disable this extension](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension) per workspace in Visual Studio Code.
 
 ## Commands
