@@ -3,8 +3,8 @@
 
 'use strict';
 
-import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window } from 'vscode';
-import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
+import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window, workspace } from 'vscode';
+import { executeCommand, getConfiguration, registerCommand, showInformationMessage, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
 import { IExtensionContext } from './common/types';
@@ -31,6 +31,8 @@ import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configur
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
+import { DebugPortAttributesProvider, DefaultPythonDebugPorts } from './debugger/debugPort/portAttributesProvider';
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -124,5 +126,26 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             { language: JsonLanguages.jsonWithComments },
             launchJsonCompletionProvider,
         ),
+    );
+
+    const debugPortAttributesProvider = new DebugPortAttributesProvider();
+    context.subscriptions.push(
+        workspace.registerPortAttributesProvider(
+            { portRange: [DefaultPythonDebugPorts.Min, DefaultPythonDebugPorts.Max] },
+            debugPortAttributesProvider,
+        ),
+    );
+    context.subscriptions.push(
+        registerCommand('debugpy.helloWorld', () => {
+            showInformationMessage('Hello World!');
+        
+            const server = createServer((request: IncomingMessage, response: ServerResponse) => {
+                response.end('Hello world!');
+            });
+            
+            server.listen(55100, () => {
+                showInformationMessage('Message received');
+            });
+        })
     );
 }
