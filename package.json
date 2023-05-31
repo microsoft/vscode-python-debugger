@@ -4,6 +4,9 @@
   "description": "Python Debugger extension using `debugpy`.",
   "version": "0.0.1",
   "publisher": "ms-python",
+  "enabledApiProposals": [
+    "portsAttributes"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/Microsoft/vscode-python-debugger",
   "repository": {
@@ -39,6 +42,11 @@
         "command": "debugpy.debugInTerminal",
         "icon": "$(debug-alt)",
         "title": "%debugpy.command.debugInTerminal.title%"
+      },
+      {
+        "category": "Debugpy",
+        "command": "debugpy.helloWorld",
+        "title": "helloWorld"
       },
       {
         "category": "Debugpy",
