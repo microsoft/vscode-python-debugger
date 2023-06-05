@@ -2,7 +2,7 @@
   "name": "debugpy",
   "displayName": "Debugpy",
   "description": "Python Debugger extension using `debugpy`.",
-  "version": "0.0.1",
+  "version": "2023.1.0-dev",
   "publisher": "ms-python",
   "license": "MIT",
   "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -13,13 +13,14 @@
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-python-debugger/issues"
   },
+  "icon": "icon.png",
   "keywords": [
     "python",
     "debugger",
     "debugpy"
   ],
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.78.0"
   },
   "categories": [
     "Debuggers"
@@ -444,7 +445,7 @@
     "@types/node": "16.x",
     "@types/semver": "^7.3.13",
     "@types/sinon": "^10.0.13",
-    "@types/vscode": "^1.74.0",
+    "@types/vscode": "^1.78.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "@vscode/test-electron": "^2.1.5",
@@ -461,8 +462,6 @@
     "ts-mockito": "^2.6.1",
     "typemoq": "^2.1.0",
     "typescript": "^4.7.4",
-    "vscode": "^1.1.37",
-    "vscode-nls-dev": "^4.0.1",
     "vscode-test": "^1.6.1",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
@@ -470,6 +469,7 @@
   "dependencies": {
     "@vscode/extension-telemetry": "^0.7.4-preview",
     "fs-extra": "^11.1.0",
+    "iconv-lite": "^0.6.3",
     "inversify": "^6.0.1",
     "jsonc-parser": "^3.2.0",
     "lodash": "^4.17.21",
