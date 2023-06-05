@@ -20,3 +20,6 @@ If you want to disable the Debugpy extension, you can [disable this extension](h
 | Debugpy: viewOutput | Show the debugpy extension output. |
 | Debugpy: clearCacheAndReload | Allows you to clear the global values set in the extension. |
 | Debugpy: debugInTerminal | Allows you to debug a simple Python file in the terminal. |
+
+## Data and telemetry
+The Debubpy Extension for Visual Studio Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://privacy.microsoft.com/privacystatement) to learn more. This extension respects the `telemetry.enableTelemetry` setting which you can learn more about at https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting.
