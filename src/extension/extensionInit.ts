@@ -143,9 +143,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
                 response.end('Hello world!');
             });
             
-            server.listen(55100, () => {
-                showInformationMessage('Message received');
-            });
+            server.listen(55100);
         })
     );
 }
