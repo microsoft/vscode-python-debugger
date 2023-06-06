@@ -2,7 +2,7 @@
   "name": "debugpy",
   "displayName": "Debugpy",
   "description": "Python Debugger extension using `debugpy`.",
-  "version": "0.0.1",
+  "version": "2023.1.0-dev",
   "publisher": "ms-python",
   "license": "MIT",
   "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -13,6 +13,7 @@
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-python-debugger/issues"
   },
+  "icon": "icon.png",
   "keywords": [
     "python",
     "debugger",
@@ -468,6 +469,7 @@
   "dependencies": {
     "@vscode/extension-telemetry": "^0.7.4-preview",
     "fs-extra": "^11.1.0",
+    "iconv-lite": "^0.6.3",
     "inversify": "^6.0.1",
     "jsonc-parser": "^3.2.0",
     "lodash": "^4.17.21",
