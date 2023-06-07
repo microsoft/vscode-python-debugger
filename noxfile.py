@@ -201,3 +201,25 @@ def _install_package(root, package_name, version="latest"):
 
     for url in _get_urls(data, use_version):
         _download_and_extract(root, url, use_version)
+
+@nox.session()
+def update_build_number(session: nox.Session) -> None:
+    """Updates build number for the extension."""
+    if len(session.posargs) == 0:
+        session.log("No updates to package version")
+        return
+
+    package_json_path = pathlib.Path(__file__).parent / "package.json"
+    session.log(f"Reading package.json at: {package_json_path}")
+
+    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
+
+    parts = re.split("\\.|-", package_json["version"])
+    major, minor = parts[:2]
+
+    version = f"{major}.{minor}.{session.posargs[0]}"
+    version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
+
+    session.log(f"Updating version from {package_json['version']} to {version}")
+    package_json["version"] = version
+    package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
