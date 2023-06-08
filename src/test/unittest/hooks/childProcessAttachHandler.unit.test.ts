@@ -52,7 +52,7 @@ suite('Debug - Child Process', () => {
             port: 1234,
             subProcessId: 2,
         };
-        const session: any = {configuration:{type: DebuggerTypeName}};
+        const session: any = { configuration: { type: DebuggerTypeName } };
         when(attachService.attach(body, session)).thenThrow(new Error('Kaboom'));
         await handler.handleCustomEvent({ event: DebuggerEvents.DebugpyAttachToSubprocess, body, session });
         verify(attachService.attach(body, anything())).once();
