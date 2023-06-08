@@ -46,6 +46,12 @@ def _update_pip_packages(session: nox.Session) -> None:
         "./src/test/python_tests/requirements.in",
     )
 
+@nox.session()
+def tests(session: nox.Session) -> None:
+    """Runs all the tests for the extension."""
+    session.install("-r", "./requirements.txt")
+    session.run("npm", "run", "test")
+
 
 def _get_package_data(package):
     json_uri = f"https://registry.npmjs.org/{package}"
@@ -110,16 +116,6 @@ def install_bundled_libs(session):
 def setup(session: nox.Session) -> None:
     """Sets up the extension for development."""
     _setup_template_environment(session)
-
-
-@nox.session()
-def tests(session: nox.Session) -> None:
-    """Runs all the tests for the extension."""
-    session.install("-r", "src/test/python_tests/requirements.txt")
-    session.run("pytest", "src/test/python_tests")
-    session.install("freezegun")
-    session.run("pytest", "build")
-
 
 @nox.session()
 def validate_readme(session: nox.Session) -> None:
