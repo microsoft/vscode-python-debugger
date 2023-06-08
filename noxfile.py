@@ -1,16 +1,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 """All the action we need during build"""
+import io
 import json
 import os
-import io
 import pathlib
 import re
 import urllib.request as url_lib
 import zipfile
-from typing import List
 
-import nox # pylint: disable=import-error
+import nox  # pylint: disable=import-error
+
 
 def _install_bundle(session: nox.Session) -> None:
     session.install(
@@ -28,15 +28,6 @@ def _install_bundle(session: nox.Session) -> None:
     _install_package(f"{os.getcwd()}/bundled/libs", "debugpy")
 
 
-def _check_files(names: List[str]) -> None:
-    root_dir = pathlib.Path(__file__).parent
-    for name in names:
-        file_path = root_dir / name
-        lines: List[str] = file_path.read_text().splitlines()
-        if any(line for line in lines if line.startswith("# TODO:")):
-            raise Exception(f"Please update {os.fspath(file_path)}.")
-
-
 def _update_pip_packages(session: nox.Session) -> None:
     session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
     session.run(
@@ -45,6 +36,26 @@ def _update_pip_packages(session: nox.Session) -> None:
         "--upgrade",
         "./src/test/python_tests/requirements.in",
     )
+
+
+@nox.session()
+def lint(session: nox.Session) -> None:
+    """Runs linter and formatter checks on python files."""
+
+    session.install("flake8")
+    session.run("flake8", "noxfile.py")
+
+    # check formatting using black
+    session.install("black")
+    session.run("black", "--check", "noxfile.py")
+
+    # check import sorting using isort
+    session.install("isort")
+    session.run("isort", "--check", "noxfile.py")
+
+    # check typescript code
+    session.run("npm", "run", "lint", external=True)
+
 
 @nox.session()
 def tests(session: nox.Session) -> None:
@@ -117,37 +128,6 @@ def setup(session: nox.Session) -> None:
     """Sets up the extension for development."""
     _setup_template_environment(session)
 
-@nox.session()
-def validate_readme(session: nox.Session) -> None:
-    """Ensures the linter version in 'requirements.txt' matches 'readme.md'."""
-    requirements_file = pathlib.Path(__file__).parent / "requirements.txt"
-    readme_file = pathlib.Path(__file__).parent / "README.md"
-
-    lines = requirements_file.read_text(encoding="utf-8").splitlines(keepends=False)
-    module = _get_module_name()
-    linter_ver = list(line for line in lines if line.startswith(module))[0]
-    name, version = linter_ver.split(" ")[0].split("==")
-
-    session.log(f"Looking for {name}={version} in README.md")
-    content = readme_file.read_text(encoding="utf-8")
-    if f"{name}={version}" not in content:
-        raise ValueError(f"Linter info {name}={version} was not found in README.md.")
-    session.log(f"FOUND {name}={version} in README.md")
-
-
-def _update_readme() -> None:
-    requirements_file = pathlib.Path(__file__).parent / "requirements.txt"
-    lines = requirements_file.read_text(encoding="utf-8").splitlines(keepends=False)
-    module = _get_module_name()
-    linter_ver = list(line for line in lines if line.startswith(module))[0]
-    _, version = linter_ver.split(" ")[0].split("==")
-
-    readme_file = pathlib.Path(__file__).parent / "README.md"
-    content = readme_file.read_text(encoding="utf-8")
-    regex = r"\`([a-zA-Z0-9]+)=([0-9]+\.[0-9]+\.[0-9]+)\`"
-    result = re.sub(regex, f"`{module}={version}`", content, 0, re.MULTILINE)
-    content = readme_file.write_text(result, encoding="utf-8")
-
 
 @nox.session()
 def update_packages(session: nox.Session) -> None:
@@ -155,10 +135,11 @@ def update_packages(session: nox.Session) -> None:
     session.install("wheel", "pip-tools")
     _update_pip_packages(session)
     _update_npm_packages(session)
-    _update_readme()
+
 
 def _contains(s, parts=()):
     return any(p for p in parts if p in s)
+
 
 def _get_pypi_package_data(package_name):
     json_uri = "https://pypi.org/pypi/{0}/json".format(package_name)
@@ -166,6 +147,7 @@ def _get_pypi_package_data(package_name):
     # Release metadata format: https://github.com/pypa/interoperability-peps/blob/master/pep-0426-core-metadata.rst
     with url_lib.urlopen(json_uri) as response:
         return json.loads(response.read())
+
 
 def _get_urls(data, version):
     return list(
@@ -185,6 +167,7 @@ def _download_and_extract(root, url, version):
                 print("\t" + zip_info.filename)
                 wheel.extract(zip_info.filename, root)
 
+
 def _install_package(root, package_name, version="latest"):
     from packaging.version import parse as version_parser
 
@@ -197,6 +180,7 @@ def _install_package(root, package_name, version="latest"):
 
     for url in _get_urls(data, use_version):
         _download_and_extract(root, url, use_version)
+
 
 @nox.session()
 def update_build_number(session: nox.Session) -> None:
