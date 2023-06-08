@@ -42,7 +42,7 @@ suite('Debug - Child Process', () => {
         await handler.handleCustomEvent({ event: DebuggerEvents.DebugpyAttachToSubprocess, body, session });
         verify(attachService.attach(body, session)).never();
     });
-    test.only('Exceptions are not bubbled up if exceptions are thrown', async () => {
+    test('Exceptions are not bubbled up if exceptions are thrown', async () => {
         const attachService = mock(ChildProcessAttachService);
         const handler = new ChildProcessAttachEventHandler(instance(attachService));
         const body: AttachRequestArguments = {
