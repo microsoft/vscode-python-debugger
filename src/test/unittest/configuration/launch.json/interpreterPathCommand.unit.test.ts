@@ -5,20 +5,15 @@
 
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
-import * as TypeMoq from 'typemoq';
 import { Uri } from 'vscode';
 import * as pythonApi from '../../../../extension/common/python';
-import { IDisposable } from '../../../../extension/common/types';
-import * as vscodeapi from '../../../../extension/common/vscodeapi';
 import { InterpreterPathCommand } from '../../../../extension/debugger/configuration/launch.json/interpreterPathCommand';
 import { Environment } from '../../../../extension/common/pythonTypes';
 
 suite('Interpreter Path Command', () => {
     let interpreterPathCommand: InterpreterPathCommand;
-    let registerCommandStub: sinon.SinonStub;
     let getInterpreterDetailsStub: sinon.SinonStub;
     setup(() => {
-        registerCommandStub = sinon.stub(vscodeapi, 'registerCommand');
         interpreterPathCommand = new InterpreterPathCommand();
         getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
     });

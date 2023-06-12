@@ -4,7 +4,6 @@
 'use strict';
 
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as sinon from 'sinon';
 import * as typemoq from 'typemoq';
 import {
@@ -21,11 +20,9 @@ import { LaunchJsonCompletionProvider } from '../../../../extension/debugger/con
 
 suite('Debugging - launch.json Completion Provider', () => {
     let completionProvider: LaunchJsonCompletionProvider;
-    let registerCompletionItemProviderStub: sinon.SinonStub;
 
     setup(() => {
         completionProvider = new LaunchJsonCompletionProvider();
-        registerCompletionItemProviderStub = sinon.stub(vscode.languages, 'registerCompletionItemProvider');
     });
     teardown(() => {
         sinon.restore();
