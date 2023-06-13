@@ -9,6 +9,7 @@ import { ChildProcessAttachEventHandler } from '../../../extension/debugger/hook
 import { ChildProcessAttachService } from '../../../extension/debugger/hooks/childProcessAttachService';
 import { DebuggerEvents } from '../../../extension/debugger/hooks/constants';
 import { AttachRequestArguments } from '../../../extension/types';
+import { DebuggerTypeName } from '../../../extension/constants';
 
 suite('Debug - Child Process', () => {
     test('Do not attach if the event is undefined', async () => {
@@ -41,7 +42,7 @@ suite('Debug - Child Process', () => {
         await handler.handleCustomEvent({ event: DebuggerEvents.DebugpyAttachToSubprocess, body, session });
         verify(attachService.attach(body, session)).never();
     });
-    test.skip('Exceptions are not bubbled up if exceptions are thrown', async () => {
+    test('Exceptions are not bubbled up if exceptions are thrown', async () => {
         const attachService = mock(ChildProcessAttachService);
         const handler = new ChildProcessAttachEventHandler(instance(attachService));
         const body: AttachRequestArguments = {
@@ -51,9 +52,9 @@ suite('Debug - Child Process', () => {
             port: 1234,
             subProcessId: 2,
         };
-        const session: any = {};
+        const session: any = { configuration: { type: DebuggerTypeName } };
         when(attachService.attach(body, session)).thenThrow(new Error('Kaboom'));
-        await handler.handleCustomEvent({ event: DebuggerEvents.DebugpyAttachToSubprocess, body, session: {} as any });
+        await handler.handleCustomEvent({ event: DebuggerEvents.DebugpyAttachToSubprocess, body, session });
         verify(attachService.attach(body, anything())).once();
         const [, secondArg] = capture(attachService.attach).last();
         expect(secondArg).to.deep.equal(session);

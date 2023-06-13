@@ -1,0 +1,55 @@
+name: 'Lint'
+description: 'Lint TypeScript and Python code'
+
+inputs:
+  node_version:
+    description: 'Version of Node to install'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node_version }}
+        cache: 'npm'
+
+    - name: Install Node dependencies
+      run: npm ci
+      shell: bash
+
+    - name: Lint TypeScript code
+      run: npm run lint
+      shell: bash
+
+    - name: Check TypeScript format
+      run: npm run format-check
+      shell: bash
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.7'
+
+    - name: Pip cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-lint-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-lint-
+
+    # For faster/better builds of sdists.
+    - name: Update pip, install pipx and install wheel
+      run: python -m pip install -U pip pipx wheel
+      shell: bash
+
+    # This will install libraries to a target directory.
+    - name: Install bundled python libraries
+      run: pipx run nox --session install_bundled_libs
+      shell: bash
+
+    - name: Check linting and formatting
+      run: pipx run nox --session lint
+      shell: bash
