@@ -72,7 +72,7 @@ jobs:
       - name: Install bundled python libraries
         run: pipx run nox --session install_bundled_libs
         shell: bash
-      
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
