@@ -73,6 +73,16 @@ jobs:
         run: pipx run nox --session install_bundled_libs
         shell: bash
 
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.special-working-directory-relative }}/package-lock.json
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
       # Now that the bundle is installed to target using python 3.7
       # switch back the python we want to test with
       - name: Use Python ${{ matrix.python }}
