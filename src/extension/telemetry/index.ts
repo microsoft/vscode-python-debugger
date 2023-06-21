@@ -10,7 +10,6 @@ import { ConsoleType, TriggerType } from '../types';
 import { DebugConfigurationType } from '../debugger/types';
 import { EventName } from './constants';
 import { isPromise } from '../common/utils/async';
-// import { DiagnosticCodes } from '../application/diagnostics/constants';
 
 /**
  * Checks whether telemetry is supported.
