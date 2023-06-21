@@ -30,12 +30,6 @@ def _install_bundle(session: nox.Session) -> None:
 
 def _update_pip_packages(session: nox.Session) -> None:
     session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
-    session.run(
-        "pip-compile",
-        "--generate-hashes",
-        "--upgrade",
-        "./src/test/python_tests/requirements.in",
-    )
 
 
 @nox.session()

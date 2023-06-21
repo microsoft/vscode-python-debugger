@@ -26,6 +26,7 @@ process.env.NODE_ENV = 'production'; // Make sure react is using production bits
 
 // Custom module loader so we skip .css files that break non webpack wrapped compiles
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Module = require('module');
 
 // Required for DS functional tests.

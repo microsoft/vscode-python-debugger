@@ -1,7 +1,7 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "ES2020",
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2020",
         "lib": [
             "es6",
             "es2018",
@@ -9,10 +9,10 @@
             "ES2019",
             "ES2020"
         ],
-		"sourceMap": true,
-		"rootDir": "src",
-		"strict": true,   /* enable all strict type-checking options */
-		"experimentalDecorators": true,
+        "sourceMap": true,
+        "rootDir": "src",
+        "strict": true, /* enable all strict type-checking options */
+        "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
@@ -21,5 +21,5 @@
         "noFallthroughCasesInSwitch": true,
         "resolveJsonModule": true,
         "removeComments": true
-	}
+    }
 }

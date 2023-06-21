@@ -10,19 +10,19 @@ const path = require('path');
 
 const loaders = [];
 loaders.push({
-    test: /\.ts$/,
-    exclude: /node_modules/,
-    use: [
-        {
-            loader: 'ts-loader',
-        },
-    ],
+  test: /\.ts$/,
+  exclude: /node_modules/,
+  use: [
+    {
+      loader: 'ts-loader',
+    },
+  ],
 });
 
 /** @type WebpackConfig */
 const extensionConfig = {
   target: 'node', // VS Code extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
+  mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 
   entry: './src/extension/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
@@ -37,6 +37,7 @@ const extensionConfig = {
     'applicationinsights-native-metrics': 'commonjs applicationinsights-native-metrics', // ignored because we don't ship native module
     '@opentelemetry/instrumentation': 'commonjs @opentelemetry/instrumentation', // ignored because we don't ship instrumentation
     '@azure/opentelemetry-instrumentation-azure-sdk': 'commonjs @azure/opentelemetry-instrumentation-azure-sdk', // ignored because we don't ship instrumentation
+    '@azure/functions-core': '@azure/functions-core', // ignored because we don't ship instrumentation
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -50,4 +51,4 @@ const extensionConfig = {
     level: "log", // enables logging required for problem matchers
   },
 };
-module.exports = [ extensionConfig ];
+module.exports = [extensionConfig];
