@@ -49,11 +49,6 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         const workspaceFolder = LaunchConfigurationResolver.getWorkspaceFolder(folder);
         await this.provideLaunchDefaults(workspaceFolder, debugConfiguration);
 
-        // const isValid = await this.validateLaunchConfiguration(folder, debugConfiguration);
-        // if (!isValid) {
-        //     return undefined;
-        // }
-
         if (Array.isArray(debugConfiguration.debugOptions)) {
             debugConfiguration.debugOptions = debugConfiguration.debugOptions!.filter(
                 (item, pos) => debugConfiguration.debugOptions!.indexOf(item) === pos,
@@ -170,21 +165,4 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
                 : 'launch';
         LaunchConfigurationResolver.sendTelemetry(trigger, debugConfiguration);
     }
-
-    // protected async validateLaunchConfiguration(
-    //     folder: WorkspaceFolder | undefined,
-    //     debugConfiguration: LaunchRequestArguments,
-    // ): Promise<boolean> {
-    //     const diagnosticService = this.invalidPythonPathInDebuggerService;
-    //     for (const executable of [
-    //         debugConfiguration.python,
-    //         debugConfiguration.debugAdapterPython,
-    //         debugConfiguration.debugLauncherPython,
-    //     ]) {
-    //         if (!(await diagnosticService.validatePythonPath(executable, this.pythonPathSource, folder?.uri))) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
 }

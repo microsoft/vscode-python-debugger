@@ -4,7 +4,7 @@
 
 import TelemetryReporter from '@vscode/extension-telemetry';
 
-import { AppinsightsKey, isTestExecution, isUnitTestExecution } from '../common/constants';
+import { AppinsightsKey, isTestExecution } from '../common/constants';
 import { StopWatch } from '../common/utils/stopWatch';
 import { ConsoleType, TriggerType } from '../types';
 import { DebugConfigurationType } from '../debugger/types';
@@ -29,40 +29,7 @@ function isTelemetrySupported(): boolean {
     }
 }
 
-// /**
-//  * Checks if the telemetry is disabled in user settings
-//  * @returns {boolean}
-//  */
-// export function isTelemetryDisabled(workspaceService: IWorkspaceService): boolean {
-//     const settings = workspaceService.getConfiguration('telemetry').inspect<boolean>('enableTelemetry')!;
-//     return settings.globalValue === false;
-// }
-
 const sharedProperties: Record<string, unknown> = {};
-/**
- * Set shared properties for all telemetry events.
- */
-export function setSharedProperty<P extends ISharedPropertyMapping, E extends keyof P>(name: E, value?: P[E]): void {
-    const propertyName = name as string;
-    // Ignore such shared telemetry during unit tests.
-    if (isUnitTestExecution() && propertyName.startsWith('ds_')) {
-        return;
-    }
-    if (value === undefined) {
-        delete sharedProperties[propertyName];
-    } else {
-        sharedProperties[propertyName] = value;
-    }
-}
-
-// /**
-//  * Reset shared properties for testing purposes.
-//  */
-// export function _resetSharedProperties(): void {
-//     for (const key of Object.keys(sharedProperties)) {
-//         delete sharedProperties[key];
-//     }
-// }
 
 let telemetryReporter: TelemetryReporter | undefined;
 function getTelemetryReporter() {

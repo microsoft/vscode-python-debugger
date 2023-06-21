@@ -16,8 +16,12 @@
 				"${workspaceFolder}/dist/**/*.js",
 				"!${workspaceFolder}/**/node_modules**/*"
 			],
-			"preLaunchTask": "${defaultBuildTask}",
-			"skipFiles": ["<node_internals>/**"]
+			"preLaunchTask": "npm: watch",
+			"presentation": {
+				"hidden": false,
+				"group": "",
+				"order": 2
+			}
 		},
 		{
 			"name": "Unit Tests",
