@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { debug, DebugConfiguration, DebugSession, l10n, WorkspaceFolder } from 'vscode';
+import { debug, DebugConfiguration, DebugSession, DebugSessionOptions, l10n, WorkspaceFolder } from 'vscode';
 import { captureTelemetry } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 import { AttachRequestArguments } from '../../types';
@@ -22,11 +22,17 @@ export class ChildProcessAttachService implements IChildProcessAttachService {
     @captureTelemetry(EventName.DEBUGGER_ATTACH_TO_CHILD_PROCESS)
     public async attach(data: AttachRequestArguments & DebugConfiguration, parentSession: DebugSession): Promise<void> {
         const debugConfig: AttachRequestArguments & DebugConfiguration = data;
-        const processId = debugConfig.subProcessId!;
+        const debugSessionOption: DebugSessionOptions = {
+            parentSession: parentSession,
+            lifecycleManagedByParent: true,
+        };
         const folder = this.getRelatedWorkspaceFolder(debugConfig);
-        const launched = await debug.startDebugging(folder, debugConfig, parentSession);
+        const launched = await debug.startDebugging(folder, debugConfig, debugSessionOption);
         if (!launched) {
-            showErrorMessage(l10n.t('Failed to launch debugger for child process {0}', processId)).then(noop, noop);
+            showErrorMessage(l10n.t('Failed to launch debugger for child process {0}', debugConfig.subProcessId!)).then(
+                noop,
+                noop,
+            );
         }
     }
 
