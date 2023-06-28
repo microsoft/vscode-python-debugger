@@ -23,7 +23,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         const providers = [];
 
         providers.push({
-            name: 'Python: File',
+            name: 'Debugpy: Python File',
             type: DebuggerTypeName,
             request: 'launch',
             program: '${file}',
@@ -33,7 +33,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         const djangoManagePath = await DynamicPythonDebugConfigurationService.getDjangoPath(folder);
         if (djangoManagePath) {
             providers.push({
-                name: 'Python: Django',
+                name: 'Debugpy: Django',
                 type: DebuggerTypeName,
                 request: 'launch',
                 program: `${workspaceFolderToken}${path.sep}${djangoManagePath}`,
@@ -46,7 +46,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         const flaskPath = await DynamicPythonDebugConfigurationService.getFlaskPath(folder);
         if (flaskPath) {
             providers.push({
-                name: 'Python: Flask',
+                name: 'Debugpy: Flask',
                 type: DebuggerTypeName,
                 request: 'launch',
                 module: 'flask',
@@ -64,7 +64,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         if (fastApiPath) {
             fastApiPath = replaceAll(path.relative(folder.uri.fsPath, fastApiPath), path.sep, '.').replace('.py', '');
             providers.push({
-                name: 'Python: FastAPI',
+                name: 'Debugpy: FastAPI',
                 type: DebuggerTypeName,
                 request: 'launch',
                 module: 'uvicorn',
