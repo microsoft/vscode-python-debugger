@@ -80,17 +80,6 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
     }
 }
 
-export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
-    const api = await getPythonExtensionAPI();
-    const environment = await api?.environments.resolveEnvironment(
-        api?.environments.getActiveEnvironmentPath(resource),
-    );
-    if (environment?.executable.uri) {
-        return { path: [environment?.executable.uri.fsPath], resource };
-    }
-    return { path: undefined, resource };
-}
-
 export async function getDebuggerPath(): Promise<string | undefined> {
     const api = await getPythonExtensionAPI();
     return api?.debug.getDebuggerPackagePath();
@@ -119,6 +108,17 @@ export async function resolveEnvironment(env: Environment | EnvironmentPath | st
 export async function getActiveEnvironmentPath(resource?: Resource) {
     const api = await getPythonExtensionAPI();
     return api?.environments.getActiveEnvironmentPath(resource);
+}
+
+export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
+    const api = await getPythonExtensionAPI();
+    const environment = await api?.environments.resolveEnvironment(
+        api?.environments.getActiveEnvironmentPath(resource),
+    );
+    if (environment?.executable.uri) {
+        return { path: [environment?.executable.uri.fsPath], resource };
+    }
+    return { path: undefined, resource };
 }
 
 export async function hasInterpreters() {
