@@ -83,7 +83,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     context.subscriptions.push(registerCommand(Commands.PickLocalProcess, () => attachPicker.showQuickPick()));
     context.subscriptions.push(
         registerCommand(Commands.PickArguments, () => {
-            return window.showInputBox({ title: pickArgsInput.title, prompt: pickArgsInput.prompt});
+            return window.showInputBox({ title: pickArgsInput.title, prompt: pickArgsInput.prompt });
         }),
     );
 
@@ -128,9 +128,9 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     );
 
     const interpreterPathCommand = new InterpreterPathCommand();
-    // context.subscriptions.push(
-    //     registerCommand(Commands.GetSelectedInterpreterPath, (args) =>
-    //         interpreterPathCommand._getSelectedInterpreterPath(args),
-    //     ),
-    // );
+    context.subscriptions.push(
+        registerCommand(Commands.GetSelectedInterpreterPath, (args) =>
+            interpreterPathCommand._getSelectedInterpreterPath(args),
+        ),
+    );
 }
