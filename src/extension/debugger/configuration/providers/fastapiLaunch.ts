@@ -30,7 +30,7 @@ export async function buildFastAPILaunchDebugConfiguration(
         justMyCode: true,
     };
 
-    if (!application && config.args) {
+    if (!application) {
         const selectedPath = await input.showInputBox({
             title: DebugConfigStrings.fastapi.enterAppPathOrNamePath.title,
             value: 'main.py',
@@ -44,7 +44,7 @@ export async function buildFastAPILaunchDebugConfiguration(
         });
         if (selectedPath) {
             manuallyEnteredAValue = true;
-            config.args[0] = `${path.basename(selectedPath, '.py').replace('/', '.')}:app`;
+            config.args = [`${path.basename(selectedPath, '.py').replace('/', '.')}:app`, '--reload'];
         }
     }
 

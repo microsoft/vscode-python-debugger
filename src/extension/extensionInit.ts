@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { debug, DebugConfigurationProviderTriggerKind, languages, Uri } from 'vscode';
+import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window } from 'vscode';
 import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
@@ -31,6 +31,7 @@ import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configur
 import { InterpreterPathCommand } from './debugger/configuration/launch.json/interpreterPathCommand';
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
+import { pickArgsInput } from './common/utils/localize';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -80,6 +81,11 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const attachProcessProvider = new AttachProcessProvider();
     const attachPicker = new AttachPicker(attachProcessProvider);
     context.subscriptions.push(registerCommand(Commands.PickLocalProcess, () => attachPicker.showQuickPick()));
+    context.subscriptions.push(
+        registerCommand(Commands.PickArguments, () => {
+            return window.showInputBox({ title: pickArgsInput.title, prompt: pickArgsInput.prompt });
+        }),
+    );
 
     const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
     const debugSessionLoggingFactory = new DebugSessionLoggingFactory();

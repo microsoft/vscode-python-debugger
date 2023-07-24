@@ -210,9 +210,19 @@
                                 "items": {
                                     "type": "string"
                                 },
-                                "type": [
-                                    "array",
-                                    "string"
+                                "anyOf": [
+                                    {
+                                        "default": "${command:pickArgs}",
+                                        "enum": [
+                                            "${command:pickArgs}"
+                                        ]
+                                    },
+                                    {
+                                        "type": [
+                                            "array",
+                                            "string"
+                                        ]
+                                    }
                                 ]
                             },
                             "autoReload": {
@@ -415,7 +425,8 @@
                 ],
                 "type": "debugpy",
                 "variables": {
-                    "pickProcess": "debugpy.pickLocalProcess"
+                    "pickProcess": "debugpy.pickLocalProcess",
+                    "pickArgs": "debugpy.pickArgs"
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }

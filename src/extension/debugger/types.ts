@@ -30,6 +30,7 @@ export type DebugConfigurationState = {
 
 export enum DebugConfigurationType {
     launchFile = 'launchFile',
+    launchFileWithArgs = 'launchFileWithArgs',
     remoteAttach = 'remoteAttach',
     launchDjango = 'launchDjango',
     launchFastAPI = 'launchFastAPI',

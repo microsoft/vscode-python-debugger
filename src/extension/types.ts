@@ -97,7 +97,7 @@ interface IKnownLaunchRequestArguments extends ICommonDebugArguments {
     python?: string;
     // Automatically stop target after launch. If not specified, target does not stop.
     stopOnEntry?: boolean;
-    args?: string[];
+    args?: string[] | String;
     cwd?: string;
     debugOptions?: DebugOptions[];
     env?: Record<string, string | undefined>;
