@@ -213,13 +213,11 @@
                                 "anyOf": [
                                     {
                                         "default": "${command:pickArgs}",
-                                        "description": "Command line arguments passed to the program.",
                                         "enum": [
                                             "${command:pickArgs}"
                                         ]
                                     },
                                     {
-                                        "description": "Command line arguments passed to the program.",
                                         "type": [
                                             "array",
                                             "string"
