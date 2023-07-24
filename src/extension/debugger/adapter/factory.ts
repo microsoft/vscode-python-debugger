@@ -93,14 +93,13 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             sendTelemetryEvent(EventName.DEBUG_ADAPTER_USING_WHEELS_PATH, undefined, { usingWheels: true });
             return new DebugAdapterExecutable(executable, args);
         } else {
-            debug.stopDebugging(session);
+            throw new Error('Debug Stopped');
         }
     }
 
-    // FIX THIS
     /**
      * Get the python executable used to launch the Python Debug Adapter.
-     * In the case of `attach` scenarios, just use the workspace interpreter, else first available one.
+     * In the case of `attach` scenarios, just use the workspace interpreter.
      * It is unlike user won't have a Python interpreter
      *
      * @private
@@ -137,7 +136,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             ...prompts,
         );
         if (selection === Interpreters.changePythonInterpreter) {
-            executeCommand(Commands.Set_Interpreter);
+            await executeCommand(Commands.Set_Interpreter);
         }
         return [];
     }
