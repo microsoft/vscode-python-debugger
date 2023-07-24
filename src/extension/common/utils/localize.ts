@@ -32,11 +32,11 @@ export namespace DebugConfigStrings {
     }
     export namespace fileWithArgs {
         export const snippet = {
-            name: l10n.t('Debugpy: Current File With Arguments'),
+            name: l10n.t('Debugpy: Current File with Arguments'),
         };
         export const selectConfiguration = {
-            label: l10n.t('Python File With Args'),
-            description: l10n.t('Debug the currently active Python file with a prompt for add arguments commands'),
+            label: l10n.t('Python File with Arguments'),
+            description: l10n.t('Debug the currently active Python file with arguments'),
         };
     }
     export namespace module {
@@ -204,6 +204,6 @@ export namespace Logging {
 }
 
 export namespace pickArgsInput {
-    export const title = l10n.t('Program Arguments');
-    export const prompt = l10n.t('Enter the commands line arguments you want to pass to the program');
+    export const title = l10n.t('Command Line Arguments');
+    export const prompt = l10n.t('Enter the command line arguments you want to pass to the program');
 }
