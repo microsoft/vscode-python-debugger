@@ -210,9 +210,21 @@
                                 "items": {
                                     "type": "string"
                                 },
-                                "type": [
-                                    "array",
-                                    "string"
+                                "anyOf": [
+                                    {
+                                        "default": "${command:pickArgs}",
+                                        "description": "Command line arguments passed to the program.",
+                                        "enum": [
+                                            "${command:pickArgs}"
+                                        ]
+                                    },
+                                    {
+                                        "description": "Command line arguments passed to the program.",
+                                        "type": [
+                                            "array",
+                                            "string"
+                                        ]
+                                    }
                                 ]
                             },
                             "autoReload": {
@@ -415,7 +427,8 @@
                 ],
                 "type": "debugpy",
                 "variables": {
-                    "pickProcess": "debugpy.pickLocalProcess"
+                    "pickProcess": "debugpy.pickLocalProcess",
+                    "pickArgs": "debugpy.pickArgs"
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }

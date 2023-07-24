@@ -19,6 +19,7 @@ import { buildPidAttachConfiguration } from './providers/pidAttach';
 import { buildPyramidLaunchConfiguration } from './providers/pyramidLaunch';
 import { buildRemoteAttachConfiguration } from './providers/remoteAttach';
 import { IDebugConfigurationResolver } from './types';
+import { buildFileLaunchWithArgsDebugConfiguration } from './providers/fileLaunchWithArgs';
 
 @injectable()
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
@@ -117,6 +118,11 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
                 description: DebugConfigStrings.file.selectConfiguration.description,
             },
             {
+                label: DebugConfigStrings.fileWithArgs.selectConfiguration.label,
+                type: DebugConfigurationType.launchFileWithArgs,
+                description: DebugConfigStrings.fileWithArgs.selectConfiguration.description,
+            },
+            {
                 label: DebugConfigStrings.module.selectConfiguration.label,
                 type: DebugConfigurationType.launchModule,
                 description: DebugConfigStrings.module.selectConfiguration.description,
@@ -162,6 +168,7 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         debugConfigurations.set(DebugConfigurationType.launchDjango, buildDjangoLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFastAPI, buildFastAPILaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFile, buildFileLaunchDebugConfiguration);
+        debugConfigurations.set(DebugConfigurationType.launchFileWithArgs, buildFileLaunchWithArgsDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFlask, buildFlaskLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchModule, buildModuleLaunchConfiguration);
         debugConfigurations.set(DebugConfigurationType.pidAttach, buildPidAttachConfiguration);
