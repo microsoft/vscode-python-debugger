@@ -26,7 +26,7 @@ interface IExtensionApi {
         known: Environment[];
         getActiveEnvironmentPath(resource?: Resource): EnvironmentPath;
         resolveEnvironment(
-            environment: Environment | EnvironmentPath | string,
+            environment: Environment | EnvironmentPath | string | undefined,
         ): Promise<ResolvedEnvironment | undefined>;
         readonly onDidChangeActiveEnvironmentPath: Event<ActiveEnvironmentPathChangeEvent>;
         getEnvironmentVariables(resource?: Resource): EnvironmentVariables;
@@ -100,7 +100,7 @@ export async function getEnvironmentVariables(resource?: Resource) {
     return api?.environments.getEnvironmentVariables(resource);
 }
 
-export async function resolveEnvironment(env: Environment | EnvironmentPath | string) {
+export async function resolveEnvironment(env: Environment | EnvironmentPath | string | undefined) {
     const api = await getPythonExtensionAPI();
     return api?.environments.resolveEnvironment(env);
 }

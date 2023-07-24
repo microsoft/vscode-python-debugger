@@ -21,18 +21,11 @@ import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import {
-    getInterpreterDetails,
-    getInterpreters,
-    hasInterpreters,
-    resolveEnvironment,
-    runPythonExtensionCommand,
-} from '../../common/python';
+import { getActiveEnvironmentPath, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { Environment } from '../../common/pythonTypes';
-import { ignoreErrors } from '../../common/promiseUtils';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -127,16 +120,19 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
-        const interpreter = await getInterpreterDetails(resourceUri);
+        const interpreterPath = await getActiveEnvironmentPath(resourceUri);
+        const interpreter = await resolveEnvironment(interpreterPath);
 
-        if (interpreter.path) {
-            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreter.path[0]}'`);
-            return this.getExecutableCommand(await resolveEnvironment(interpreter.path[0]));
+        if (interpreter?.path) {
+            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreterPath}'`);
+            return this.getExecutableCommand(await resolveEnvironment(interpreterPath));
         }
 
         const prompts = [Interpreters.changePythonInterpreter];
         const selection = await showErrorMessage(
-            l10n.t('You need to select a Python interpreter before you start debugging.\n\nTip: click on "Select Interpreter" in the status bar.',),
+            l10n.t(
+                'You need to select a Python interpreter before you start debugging.\n\nTip: click on "Select Interpreter" in the status bar.',
+            ),
             { modal: true },
             ...prompts,
         );

@@ -133,7 +133,6 @@ export namespace DebugConfigStrings {
     }
 }
 
-
 export namespace Common {
     export const loadingExtension = l10n.t('Python Debugger extension loading...');
     export const doNotShowAgain = l10n.t('Do not show again');
