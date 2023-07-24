@@ -11,7 +11,7 @@ import { DebuggerTypeName } from '../../../constants';
 import { LaunchRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
 
-export async function buildFileLaunchWithArgsDebugConfiguration(
+export async function buildFileWithArgsLaunchDebugConfiguration(
     _input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {

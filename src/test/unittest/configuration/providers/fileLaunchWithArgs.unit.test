@@ -9,7 +9,7 @@ import { Uri } from 'vscode';
 import { MultiStepInput } from '../../../../extension/common/multiStepInput';
 import { DebugConfigStrings } from '../../../../extension/common/utils/localize';
 import { DebuggerTypeName } from '../../../../extension/constants';
-import { buildFileLaunchWithArgsDebugConfiguration } from '../../../../extension/debugger/configuration/providers/fileLaunchWithArgs';
+import { buildFileWithArgsLaunchDebugConfiguration } from '../../../../extension/debugger/configuration/providers/fileLaunchWithArgs';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
 
 suite('Debugging - Configuration Provider File with Arguments', () => {
@@ -17,7 +17,7 @@ suite('Debugging - Configuration Provider File with Arguments', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
 
-        await buildFileLaunchWithArgsDebugConfiguration(undefined as unknown as MultiStepInput<DebugConfigurationState>, state);
+        await buildFileWithArgsLaunchDebugConfiguration(undefined as unknown as MultiStepInput<DebugConfigurationState>, state);
 
         const config = {
             name: DebugConfigStrings.fileWithArgs.snippet.name,

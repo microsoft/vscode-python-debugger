@@ -19,7 +19,7 @@ import { buildPidAttachConfiguration } from './providers/pidAttach';
 import { buildPyramidLaunchConfiguration } from './providers/pyramidLaunch';
 import { buildRemoteAttachConfiguration } from './providers/remoteAttach';
 import { IDebugConfigurationResolver } from './types';
-import { buildFileLaunchWithArgsDebugConfiguration } from './providers/fileLaunchWithArgs';
+import { buildFileWithArgsLaunchDebugConfiguration } from './providers/fileLaunchWithArgs';
 
 @injectable()
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
@@ -168,7 +168,7 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         debugConfigurations.set(DebugConfigurationType.launchDjango, buildDjangoLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFastAPI, buildFastAPILaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFile, buildFileLaunchDebugConfiguration);
-        debugConfigurations.set(DebugConfigurationType.launchFileWithArgs, buildFileLaunchWithArgsDebugConfiguration);
+        debugConfigurations.set(DebugConfigurationType.launchFileWithArgs, buildFileWithArgsLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFlask, buildFlaskLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchModule, buildModuleLaunchConfiguration);
         debugConfigurations.set(DebugConfigurationType.pidAttach, buildPidAttachConfiguration);
