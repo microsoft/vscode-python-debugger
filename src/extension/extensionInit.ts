@@ -28,7 +28,6 @@ import { AttachProcessProvider } from './debugger/attachQuickPick/provider';
 import { AttachPicker } from './debugger/attachQuickPick/picker';
 import { DebugSessionTelemetry } from './common/application/debugSessionTelemetry';
 import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configuration/launch.json/completionProvider';
-import { InterpreterPathCommand } from './debugger/configuration/launch.json/interpreterPathCommand';
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
@@ -124,13 +123,6 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         languages.registerCompletionItemProvider(
             { language: JsonLanguages.jsonWithComments },
             launchJsonCompletionProvider,
-        ),
-    );
-
-    const interpreterPathCommand = new InterpreterPathCommand();
-    context.subscriptions.push(
-        registerCommand(Commands.GetSelectedInterpreterPath, (args) =>
-            interpreterPathCommand._getSelectedInterpreterPath(args),
         ),
     );
 }
