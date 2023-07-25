@@ -16,22 +16,15 @@ import {
 } from 'vscode';
 import { AttachRequestArguments, LaunchRequestArguments } from '../../types';
 import { IDebugAdapterDescriptorFactory } from '../types';
-import { showErrorMessage } from '../../common/vscodeapi';
+import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import {
-    getActiveEnvironmentPath,
-    getInterpreters,
-    hasInterpreters,
-    resolveEnvironment,
-    runPythonExtensionCommand,
-} from '../../common/python';
+import { getActiveEnvironmentPath, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
-import { Common, Interpreters } from '../../common/utils/localize';
+import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { Environment } from '../../common/pythonTypes';
-import { ignoreErrors } from '../../common/promiseUtils';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -45,7 +38,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
     public async createDebugAdapterDescriptor(
         session: DebugSession,
         _executable: DebugAdapterExecutable | undefined,
-    ): Promise<DebugAdapterDescriptor> {
+    ): Promise<DebugAdapterDescriptor | undefined> {
         const configuration = session.configuration as LaunchRequestArguments | AttachRequestArguments;
 
         // There are four distinct scenarios here:
@@ -98,16 +91,14 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
             sendTelemetryEvent(EventName.DEBUG_ADAPTER_USING_WHEELS_PATH, undefined, { usingWheels: true });
             return new DebugAdapterExecutable(executable, args);
+        } else {
+            throw new Error(DebugConfigStrings.debugStopped);
         }
-
-        // Unlikely scenario.
-        throw new Error('Debug Adapter Executable not provided');
     }
 
-    // FIX THIS
     /**
      * Get the python executable used to launch the Python Debug Adapter.
-     * In the case of `attach` scenarios, just use the workspace interpreter, else first available one.
+     * In the case of `attach` scenarios, just use the workspace interpreter.
      * It is unlike user won't have a Python interpreter
      *
      * @private
@@ -128,21 +119,25 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
         const interpreterPath = await getActiveEnvironmentPath(resourceUri);
+        const interpreter = await resolveEnvironment(interpreterPath);
 
-        if (interpreterPath) {
+        if (interpreter?.path) {
             traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreterPath}'`);
             return this.getExecutableCommand(await resolveEnvironment(interpreterPath));
         }
 
-        await hasInterpreters(); // Wait until we know whether we have an interpreter
-        const interpreters = await getInterpreters();
-        if (interpreters.length === 0) {
-            ignoreErrors(this.notifySelectInterpreter());
-            return [];
+        const prompts = [Interpreters.changePythonInterpreter];
+        const selection = await showErrorMessage(
+            l10n.t(
+                'You need to select a Python interpreter before you start debugging.\n\nTip: click on "Select Interpreter" in the status bar.',
+            ),
+            { modal: true },
+            ...prompts,
+        );
+        if (selection === Interpreters.changePythonInterpreter) {
+            await executeCommand(Commands.Set_Interpreter);
         }
-
-        traceVerbose(`Picking first available interpreter to launch the DA '${interpreters[0].path}'`);
-        return this.getExecutableCommand(interpreters[0]);
+        return [];
     }
 
     private async showDeprecatedPythonMessage() {
@@ -184,17 +179,5 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             return interpreter.path.length > 0 ? [interpreter.path] : [];
         }
         return [];
-    }
-
-    /**
-     * Notify user about the requirement for Python.
-     * Unlikely scenario, as ex expect users to have Python in order to use the extension.
-     * However it is possible to ignore the warnings and continue using the extension.
-     *
-     * @private
-     * @memberof DebugAdapterDescriptorFactory
-     */
-    private async notifySelectInterpreter() {
-        await showErrorMessage(l10n.t('Please install Python or select a Python Interpreter to use the debugger.'));
     }
 }
