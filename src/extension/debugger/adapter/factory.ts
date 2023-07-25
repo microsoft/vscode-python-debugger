@@ -169,6 +169,9 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
     }
 
     private async getExecutableCommand(interpreter: Environment | undefined): Promise<string[]> {
+        const debugpyVersionPath = path.join(EXTENSION_ROOT_DIR, 'pythonFiles', 'get_debugpy_version.py');
+
+
         if (interpreter) {
             if (
                 (interpreter.version?.major ?? 0) < 3 ||
