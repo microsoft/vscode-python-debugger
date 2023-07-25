@@ -13,7 +13,6 @@ import {
     DebugSession,
     l10n,
     WorkspaceFolder,
-    debug,
 } from 'vscode';
 import { AttachRequestArguments, LaunchRequestArguments } from '../../types';
 import { IDebugAdapterDescriptorFactory } from '../types';
