@@ -32,12 +32,12 @@ export namespace Commands {
     export const Debug_In_Terminal = 'debugpy.debugInTerminal';
     export const TriggerEnvironmentSelection = 'debugpy.triggerEnvSelection';
     export const PickLocalProcess = 'debugpy.pickLocalProcess';
+    export const PickArguments = 'debugpy.pickArgs';
     export const ViewOutput = 'debugpy.viewOutput';
     export const ClearStorage = 'debugpy.clearCacheAndReload';
     export const Enable_SourceMap_Support = 'debugpy.enableSourceMapSupport';
     export const SelectDebugConfig = 'debugpy.SelectAndInsertDebugConfiguration';
     export const Set_Interpreter = 'python.setInterpreter';
-    export const GetSelectedInterpreterPath = 'python.interpreterPath';
 }
 
 export type Channel = 'stable' | 'insiders';

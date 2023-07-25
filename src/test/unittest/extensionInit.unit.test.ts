@@ -61,13 +61,13 @@ suite('Debugging - register Debugging', () => {
 
         sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_In_Terminal, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any);
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.PickArguments, sinon.match.any);
         sinon.assert.calledWithExactly(
             registerCommandStub,
             Commands.SelectDebugConfig,
             sinon.match.any,
             sinon.match.any,
         );
-        sinon.assert.calledWithExactly(registerCommandStub, Commands.GetSelectedInterpreterPath, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.ClearStorage, sinon.match.any);
         expect(registerCommandStub.callCount).to.be.equal(5);
     });
