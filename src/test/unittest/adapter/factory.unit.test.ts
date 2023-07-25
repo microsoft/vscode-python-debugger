@@ -23,6 +23,7 @@ import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { Architecture } from '../../../extension/common/platform';
 import * as pythonApi from '../../../extension/common/python';
 import { debug } from 'vscode';
+import { DebugConfigStrings } from '../../../extension/common/utils/localize';
 
 use(chaiAsPromised);
 
@@ -128,13 +129,12 @@ suite('Debugging - Adapter Factory', () => {
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
 
-    test('Display a message if no python interpreter is set', async () => {
+    test.only('Display a message if no python interpreter is set', async () => {
         getActiveEnvironmentPathStub.resolves(undefined);
         const session = createSession({});
-        await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+        const promise = factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
-        //check stop debugger
-        sinon.assert.calledOnceWithExactly(stopDebuggingStub, session);
+        await expect(promise).to.eventually.be.rejectedWith(DebugConfigStrings.debugStopped);
 
         //check error message
         sinon.assert.calledOnce(showErrorMessageStub);

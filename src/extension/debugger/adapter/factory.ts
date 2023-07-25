@@ -22,7 +22,7 @@ import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
 import { getActiveEnvironmentPath, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
-import { Common, Interpreters } from '../../common/utils/localize';
+import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { Environment } from '../../common/pythonTypes';
 
@@ -92,7 +92,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             sendTelemetryEvent(EventName.DEBUG_ADAPTER_USING_WHEELS_PATH, undefined, { usingWheels: true });
             return new DebugAdapterExecutable(executable, args);
         } else {
-            throw new Error('Debug Stopped');
+            throw new Error(DebugConfigStrings.debugStopped);
         }
     }
 

@@ -13,6 +13,7 @@ export namespace AttachProcess {
 }
 
 export namespace DebugConfigStrings {
+    export const debugStopped = l10n.t('Debug Stopped');
     export const selectConfiguration = {
         title: l10n.t('Select a debug configuration'),
         placeholder: l10n.t('Debug Configuration'),
