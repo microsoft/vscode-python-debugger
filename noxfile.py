@@ -149,17 +149,19 @@ def _get_urls(data, version):
     )
 
 
-def _download_and_extract(root, url, version):
-    root = os.getcwd() if root is None or root == "." else root
-    with url_lib.urlopen(url) as response:
-        data = response.read()
-        with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
-            for zip_info in wheel.infolist():
-                # Ignore dist info since we are merging multiple wheels
-                if ".dist-info/" in zip_info.filename:
-                    continue
-                print("\t" + zip_info.filename)
-                wheel.extract(zip_info.filename, root)
+def _download_and_extract(root, url):
+    if "manylinux" in url or "macosx" in url or "win_amd64" in url:
+        root = os.getcwd() if root is None or root == "." else root
+        print(url)
+        with url_lib.urlopen(url) as response:
+            data = response.read()
+            with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
+                for zip_info in wheel.infolist():
+                    # Ignore dist info since we are merging multiple wheels
+                    if ".dist-info/" in zip_info.filename:
+                        continue
+                    print("\t" + zip_info.filename)
+                    wheel.extract(zip_info.filename, root)
 
 
 def _install_package(root, package_name, version="latest"):
@@ -173,7 +175,7 @@ def _install_package(root, package_name, version="latest"):
         use_version = version
 
     for url in _get_urls(data, use_version):
-        _download_and_extract(root, url, use_version)
+        _download_and_extract(root, url)
 
 
 @nox.session()

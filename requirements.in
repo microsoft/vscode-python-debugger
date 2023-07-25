@@ -5,4 +5,3 @@
 # 2) pip-compile --generate-hashes --upgrade ./requirements.in
 
 packaging
-debugpy
