@@ -22,7 +22,6 @@ import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { Architecture } from '../../../extension/common/platform';
 import * as pythonApi from '../../../extension/common/python';
-import { debug } from 'vscode';
 import { DebugConfigStrings } from '../../../extension/common/utils/localize';
 
 use(chaiAsPromised);
@@ -36,7 +35,6 @@ suite('Debugging - Adapter Factory', () => {
     let getInterpretersStub: sinon.SinonStub;
     let getActiveEnvironmentPathStub: sinon.SinonStub;
     let hasInterpretersStub: sinon.SinonStub;
-    let stopDebuggingStub: sinon.SinonStub;
 
     const nodeExecutable = undefined;
     const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
@@ -75,7 +73,6 @@ suite('Debugging - Adapter Factory', () => {
         getInterpretersStub = sinon.stub(pythonApi, 'getInterpreters');
         getActiveEnvironmentPathStub = sinon.stub(pythonApi, 'getActiveEnvironmentPath');
         hasInterpretersStub = sinon.stub(pythonApi, 'hasInterpreters');
-        stopDebuggingStub = sinon.stub(debug, 'stopDebugging');
 
         when(
             stateFactory.createGlobalPersistentState<boolean | undefined>(debugStateKeys.doNotShowAgain, false),
