@@ -6,7 +6,7 @@
 import * as sinon from 'sinon';
 import * as typemoq from 'typemoq';
 import * as vscode from 'vscode';
-import { IExtensionContext, IPersistentStateFactory } from '../../extension/common/types';
+import { IExtensionContext } from '../../extension/common/types';
 import { registerDebugger } from '../../extension/extensionInit';
 import * as vscodeapi from '../../extension/common/vscodeapi';
 import { Commands } from '../../extension/common/constants';
@@ -19,7 +19,6 @@ import { DebugSessionLoggingFactory } from '../../extension/debugger/adapter/log
 import { OutdatedDebuggerPromptFactory } from '../../extension/debugger/adapter/outdatedDebuggerPrompt';
 import { DebugAdapterDescriptorFactory } from '../../extension/debugger/adapter/factory';
 import { expect } from 'chai';
-import { PersistentStateFactory } from '../../extension/common/persistentState';
 import { DebugSessionTelemetry } from '../../extension/common/application/debugSessionTelemetry';
 import { LaunchJsonCompletionProvider } from '../../extension/debugger/configuration/launch.json/completionProvider';
 

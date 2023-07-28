@@ -19,10 +19,9 @@ import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getActiveEnvironmentPath, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
+import { getActiveEnvironmentPath, resolveEnvironment } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
-import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
-import { IPersistentStateFactory } from '../../common/types';
+import { DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { Environment } from '../../common/pythonTypes';
 
 // persistent state names, exported to make use of in testing
