@@ -13,6 +13,26 @@ import zipfile
 import nox  # pylint: disable=import-error
 
 
+def _install_bundle(session: nox.Session) -> None:
+    session.install(
+        "-t",
+        "./bundled/libs",
+        "--no-cache-dir",
+        "--implementation",
+        "py",
+        "--no-deps",
+        "--upgrade",
+        "-r",
+        "./requirements.txt",
+    )
+    session.install("packaging")
+    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", "1.5.1")
+
+
+def _update_pip_packages(session: nox.Session) -> None:
+    session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
+
+
 @nox.session()
 def lint(session: nox.Session) -> None:
     """Runs linter and formatter checks on python files."""
