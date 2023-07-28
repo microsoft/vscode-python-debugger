@@ -13,7 +13,7 @@ import zipfile
 import nox  # pylint: disable=import-error
 
 
-def _install_bundle(session: nox.Session) -> None:
+def _install_bundle(session: nox.Session, version="latest") -> None:
     session.install(
         "-t",
         "./bundled/libs",
@@ -26,7 +26,7 @@ def _install_bundle(session: nox.Session) -> None:
         "./requirements.txt",
     )
     session.install("packaging")
-    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", "1.5.1")
+    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", version)
 
 
 def _update_pip_packages(session: nox.Session) -> None:
