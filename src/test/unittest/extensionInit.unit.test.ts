@@ -49,7 +49,7 @@ suite('Debugging - register Debugging', () => {
         completionProvider = new LaunchJsonCompletionProvider();
         persistantState = new PersistentStateFactory(context.object.globalState, context.object.workspaceState);
         registerCompletionItemProviderStub = sinon.stub(vscode.languages, 'registerCompletionItemProvider');
-        descriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
+        descriptorFactory = new DebugAdapterDescriptorFactory();
         context.setup((c) => c.subscriptions).returns(() => []);
     });
     teardown(() => {

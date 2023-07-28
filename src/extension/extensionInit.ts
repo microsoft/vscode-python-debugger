@@ -86,7 +86,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         }),
     );
 
-    const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
+    const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory();
     const debugSessionLoggingFactory = new DebugSessionLoggingFactory();
     const debuggerPromptFactory = new OutdatedDebuggerPromptFactory();
     context.subscriptions.push(debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory));

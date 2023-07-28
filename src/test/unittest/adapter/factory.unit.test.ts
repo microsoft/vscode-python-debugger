@@ -80,7 +80,7 @@ suite('Debugging - Adapter Factory', () => {
 
         getInterpretersStub.returns([interpreter]);
         hasInterpretersStub.returns(true);
-        factory = new DebugAdapterDescriptorFactory(instance(stateFactory));
+        factory = new DebugAdapterDescriptorFactory();
     });
 
     teardown(() => {
@@ -137,7 +137,7 @@ suite('Debugging - Adapter Factory', () => {
         sinon.assert.calledOnce(showErrorMessageStub);
     });
 
-    test('Display a message if python version is less than 3.7', async () => {
+    test.skip('Display a message if python version is less than 3.7', async () => {
         getInterpretersStub.returns([]);
         const session = createSession({});
         const deprecatedInterpreter = {

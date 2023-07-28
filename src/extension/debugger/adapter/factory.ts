@@ -4,7 +4,6 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
 import * as path from 'path';
 import {
     DebugAdapterDescriptor,
@@ -31,9 +30,8 @@ export enum debugStateKeys {
     doNotShowAgain = 'doNotShowPython36DebugDeprecatedAgain',
 }
 
-@injectable()
 export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFactory {
-    constructor(@inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory) {}
+    constructor() {}
 
     public async createDebugAdapterDescriptor(
         session: DebugSession,
@@ -140,45 +138,43 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         return [];
     }
 
-    private async showDeprecatedPythonMessage() {
-        const notificationPromptEnabled = this.persistentState.createGlobalPersistentState(
-            debugStateKeys.doNotShowAgain,
-            false,
-        );
-        if (notificationPromptEnabled.value) {
-            return;
-        }
-        const prompts = [Interpreters.changePythonInterpreter, Common.doNotShowAgain];
-        const selection = await showErrorMessage(
-            l10n.t('The debugger in the python extension no longer supports python versions minor than 3.7.'),
-            { modal: true },
-            ...prompts,
-        );
-        if (!selection) {
-            return;
-        }
-        if (selection === Interpreters.changePythonInterpreter) {
-            await runPythonExtensionCommand(Commands.Set_Interpreter);
-        }
-        if (selection === Common.doNotShowAgain) {
-            // Never show the message again
-            await this.persistentState
-                .createGlobalPersistentState(debugStateKeys.doNotShowAgain, false)
-                .updateValue(true);
-        }
-    }
+    // private async showDeprecatedPythonMessage() {
+    //     const notificationPromptEnabled = this.persistentState.createGlobalPersistentState(
+    //         debugStateKeys.doNotShowAgain,
+    //         false,
+    //     );
+    //     if (notificationPromptEnabled.value) {
+    //         return;
+    //     }
+    //     const prompts = [Interpreters.changePythonInterpreter, Common.doNotShowAgain];
+    //     const selection = await showErrorMessage(
+    //         l10n.t('The debugger in the python extension no longer supports python versions minor than 3.7.'),
+    //         { modal: true },
+    //         ...prompts,
+    //     );
+    //     if (!selection) {
+    //         return;
+    //     }
+    //     if (selection === Interpreters.changePythonInterpreter) {
+    //         await runPythonExtensionCommand(Commands.Set_Interpreter);
+    //     }
+    //     if (selection === Common.doNotShowAgain) {
+    //         // Never show the message again
+    //         await this.persistentState
+    //             .createGlobalPersistentState(debugStateKeys.doNotShowAgain, false)
+    //             .updateValue(true);
+    //     }
+    // }
 
     private async getExecutableCommand(interpreter: Environment | undefined): Promise<string[]> {
-        const debugpyVersionPath = path.join(EXTENSION_ROOT_DIR, 'pythonFiles', 'get_debugpy_version.py');
-
-
         if (interpreter) {
-            if (
-                (interpreter.version?.major ?? 0) < 3 ||
-                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 6)
-            ) {
-                this.showDeprecatedPythonMessage();
-            }
+            // This is going to be implemented later, in order to check the debugpy version
+            // if (
+            //     (interpreter.version?.major ?? 0) < 3 ||
+            //     ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 6)
+            // ) {
+            //     this.showDeprecatedPythonMessage();
+            // }
             return interpreter.path.length > 0 ? [interpreter.path] : [];
         }
         return [];
