@@ -74,10 +74,10 @@ suite('Debugging - register Debugging', () => {
     test('Activation will register the Debug adapter factories', async () => {
         registerDebugger(context.object);
 
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', loggingFactory);
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debuggerPromptFactory);
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debugSessionTelemetry);
-        sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, 'debugpy', descriptorFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'python-debugger', loggingFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'python-debugger', debuggerPromptFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'python-debugger', debugSessionTelemetry);
+        sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, 'python-debugger', descriptorFactory);
 
         expect(registerDebugAdapterTrackerFactoryStub.callCount).to.be.equal(3);
     });
