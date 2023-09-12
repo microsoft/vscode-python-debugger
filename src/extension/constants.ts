@@ -4,4 +4,4 @@
 'use strict';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const DebuggerTypeName = 'debugpy';
+export const DebuggerTypeName = 'python-debugger';

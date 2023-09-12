@@ -51,7 +51,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     );
     context.subscriptions.push(debug.registerDebugConfigurationProvider(DebuggerTypeName, debugConfigProvider));
 
-    // register a dynamic configuration provider for 'debugpy' debug type
+    // register a dynamic configuration provider for 'python-debugger' debug type
     context.subscriptions.push(
         debug.registerDebugConfigurationProvider(
             DebuggerTypeName,

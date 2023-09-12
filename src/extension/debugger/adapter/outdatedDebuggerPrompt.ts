@@ -30,7 +30,7 @@ class OutdatedDebuggerPrompt implements DebugAdapterTracker {
             if (eventMessage.event === 'output') {
                 const outputMessage = eventMessage as DebugProtocol.OutputEvent;
                 if (outputMessage.body.category === 'telemetry') {
-                    // debugpy sends telemetry as both ptvsd and debugpy. This was done to help with
+                    // python-debugger sends telemetry as both ptvsd and debugpy. This was done to help with
                     // transition from ptvsd to debugpy while analyzing usage telemetry.
                     if (
                         outputMessage.body.output === 'ptvsd' &&
@@ -39,7 +39,7 @@ class OutdatedDebuggerPrompt implements DebugAdapterTracker {
                         this.promptCheck.setShowPrompt(false);
                         return true;
                     }
-                    if (outputMessage.body.output === 'debugpy') {
+                    if (outputMessage.body.output === 'python-debugger') {
                         this.promptCheck.setShowPrompt(false);
                     }
                 }

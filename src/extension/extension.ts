@@ -24,8 +24,8 @@ export async function activate(context: IExtensionContext): Promise<void> {
     context.subscriptions.push(outputChannel, registerLogger(outputChannel));
     context.subscriptions.push(registerCommand(Commands.ViewOutput, () => outputChannel.show()));
 
-    traceLog(`Name: Debugpy`);
-    traceLog(`Module: debugpy`);
+    traceLog(`Name: Python Debugger`);
+    traceLog(`Module: python-debugger`);
 
     try {
         await registerDebugger(context);

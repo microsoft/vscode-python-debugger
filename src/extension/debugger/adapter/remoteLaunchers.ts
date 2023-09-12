@@ -8,7 +8,7 @@ import '../../common/promiseUtils';
 import { EXTENSION_ROOT_DIR } from '../../common/constants';
 import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 
-const pathToPythonLibDir = path.join(EXTENSION_ROOT_DIR, 'pythonFiles', 'lib', 'python');
+const pathToPythonLibDir = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs');
 const pathToDebugger = path.join(pathToPythonLibDir, 'debugpy');
 
 type RemoteDebugOptions = {
