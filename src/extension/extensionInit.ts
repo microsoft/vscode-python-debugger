@@ -4,7 +4,7 @@
 'use strict';
 
 import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window, workspace } from 'vscode';
-import { executeCommand, getConfiguration, registerCommand, showInformationMessage, startDebugging } from './common/vscodeapi';
+import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
 import { IExtensionContext } from './common/types';
@@ -128,10 +128,5 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     );
 
     const debugPortAttributesProvider = new DebugPortAttributesProvider();
-    context.subscriptions.push(
-        workspace.registerPortAttributesProvider(
-            {},
-            debugPortAttributesProvider,
-        ),
-    );
+    context.subscriptions.push(workspace.registerPortAttributesProvider({}, debugPortAttributesProvider));
 }
