@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { EXTENSION_ROOT_DIR } from '../../extension/common/constants';
-import { getDebugpyLauncherArgs } from '../../extension/debugger/adapter/remoteLaunchers';
+import { getPythonDebuggerLauncherArgs } from '../../extension/debugger/adapter/remoteLaunchers';
 import { sleep } from '../core';
 import { PythonFixture } from '../fixtures';
 import { Proc, ProcOutput, ProcResult } from '../proc';
@@ -353,7 +353,7 @@ export class DebuggerFixture extends PythonFixture {
     }
 
     public runDebugger(port: number, filename: string, ...scriptArgs: string[]) {
-        const args = getDebugpyLauncherArgs({
+        const args = getPythonDebuggerLauncherArgs({
             host: 'localhost',
             port: port,
             // This causes problems if we set it to true.

@@ -1,4 +1,4 @@
-# Debugpy extension for Visual Studio Code
+# Python Debugger extension for Visual Studio Code
 
 A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marketplace.visualstudio.com/VSCode) that supports Python debugging with debugpy. Python Debugger provides a seamless debugging experience by allowing you to set breakpoints, step through code, inspect variables, and perform other essential debugging tasks. The debugy extension offers debugging support for various types of Python applications including scripts, web applications, remote processes, and multi-threaded processes. 
 
@@ -10,7 +10,7 @@ Note:
 
 Once installed in Visual Studio Code, python-debugger will be automatically activated when you open a Python file.
 
-## Disabling the Debugpy extension
+## Disabling the Python Debugger extension
 If you want to disable the Python Debugger extension, you can [disable this extension](https://code.visualstudio.com/docs/editor/extension-marketplace#_disable-an-extension) per workspace in Visual Studio Code.
 
 ## Commands

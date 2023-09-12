@@ -19,12 +19,12 @@ export namespace DebugConfigStrings {
         placeholder: l10n.t('Debug Configuration'),
     };
     export const launchJsonCompletions = {
-        label: l10n.t('Debugpy'),
-        description: l10n.t('Select a Debugpy debug configuration'),
+        label: l10n.t('Python Debugger'),
+        description: l10n.t('Select a Python Debugger debug configuration'),
     };
     export namespace file {
         export const snippet = {
-            name: l10n.t('Debugpy: Current File'),
+            name: l10n.t('Python Debugger: Current File'),
         };
         export const selectConfiguration = {
             label: l10n.t('Python File'),
@@ -33,7 +33,7 @@ export namespace DebugConfigStrings {
     }
     export namespace fileWithArgs {
         export const snippet = {
-            name: l10n.t('Debugpy: Current File with Arguments'),
+            name: l10n.t('Python Debugger: Current File with Arguments'),
         };
         export const selectConfiguration = {
             label: l10n.t('Python File with Arguments'),
@@ -42,7 +42,7 @@ export namespace DebugConfigStrings {
     }
     export namespace module {
         export const snippet = {
-            name: l10n.t('Debugpy: Module'),
+            name: l10n.t('Python Debugger: Module'),
             default: l10n.t('enter-your-module-name'),
         };
         export const selectConfiguration = {
@@ -58,7 +58,7 @@ export namespace DebugConfigStrings {
     }
     export namespace attach {
         export const snippet = {
-            name: l10n.t('Debugpy: Remote Attach'),
+            name: l10n.t('Python Debugger: Remote Attach'),
         };
         export const selectConfiguration = {
             label: l10n.t('Remote Attach'),
@@ -77,7 +77,7 @@ export namespace DebugConfigStrings {
     }
     export namespace attachPid {
         export const snippet = {
-            name: l10n.t('Debugpy: Attach using Process Id'),
+            name: l10n.t('Python Debugger: Attach using Process Id'),
         };
         export const selectConfiguration = {
             label: l10n.t('Attach using Process ID'),
@@ -86,7 +86,7 @@ export namespace DebugConfigStrings {
     }
     export namespace django {
         export const snippet = {
-            name: l10n.t('Debugpy: Django'),
+            name: l10n.t('Python Debugger: Django'),
         };
         export const selectConfiguration = {
             label: l10n.t('Django'),
@@ -102,7 +102,7 @@ export namespace DebugConfigStrings {
     }
     export namespace fastapi {
         export const snippet = {
-            name: l10n.t('Debugpy: FastAPI'),
+            name: l10n.t('Python Debugger: FastAPI'),
         };
         export const selectConfiguration = {
             label: l10n.t('FastAPI'),
@@ -116,7 +116,7 @@ export namespace DebugConfigStrings {
     }
     export namespace flask {
         export const snippet = {
-            name: l10n.t('Debugpy: Flask'),
+            name: l10n.t('Python Debugger: Flask'),
         };
         export const selectConfiguration = {
             label: l10n.t('Flask'),
@@ -124,13 +124,13 @@ export namespace DebugConfigStrings {
         };
         export const enterAppPathOrNamePath = {
             title: l10n.t('Debug Flask'),
-            prompt: l10n.t('Debugpy: Flask'),
+            prompt: l10n.t('Python Debugger: Flask'),
             invalid: l10n.t('Enter a valid name'),
         };
     }
     export namespace pyramid {
         export const snippet = {
-            name: l10n.t('Debugpy: Pyramid Application'),
+            name: l10n.t('Python Debugger: Pyramid Application'),
         };
         export const selectConfiguration = {
             label: l10n.t('Pyramid'),
