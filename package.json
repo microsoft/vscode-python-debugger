@@ -1,6 +1,6 @@
 {
-    "name": "debugpy",
-    "displayName": "Debugpy",
+    "name": "python-debugger",
+    "displayName": "Python Debugger",
     "description": "Python Debugger extension using `debugpy`.",
     "version": "2023.3.0-dev",
     "publisher": "ms-python",
@@ -27,8 +27,8 @@
     ],
     "activationEvents": [
         "onDebugInitialConfigurations",
-        "onDebugDynamicConfigurations:debugpy",
-        "onDebugResolve:debugpy",
+        "onDebugDynamicConfigurations:python-debugger",
+        "onDebugResolve:python-debugger",
         "onLanguage:python"
     ],
     "main": "./dist/extension.js",
@@ -36,43 +36,43 @@
     "contributes": {
         "commands": [
             {
-                "category": "Debugpy",
-                "command": "debugpy.debugInTerminal",
+                "category": "Python Debugger",
+                "command": "python-debugger.debugInTerminal",
                 "icon": "$(debug-alt)",
-                "title": "%debugpy.command.debugInTerminal.title%"
+                "title": "%python-debugger.command.debugInTerminal.title%"
             },
             {
-                "category": "Debugpy",
-                "command": "debugpy.clearCacheAndReload",
-                "title": "%debugpy.command.clearCacheAndReload.title%"
+                "category": "Python Debugger",
+                "command": "python-debugger.clearCacheAndReload",
+                "title": "%python-debugger.command.clearCacheAndReload.title%"
             },
             {
-                "category": "Debugpy",
-                "command": "debugpy.viewOutput",
+                "category": "Python Debugger",
+                "command": "python-debugger.viewOutput",
                 "icon": {
                     "dark": "resources/dark/repl.svg",
                     "light": "resources/light/repl.svg"
                 },
-                "title": "%debugpy.command.viewOutput.title%"
+                "title": "%python-debugger.command.viewOutput.title%"
             }
         ],
         "menus": {
             "commandPalette": [
                 {
-                    "category": "Debugpy",
-                    "command": "debugpy.clearCacheAndReload",
-                    "title": "%debugpy.command.clearCacheAndReload.title%"
+                    "category": "Python Debugger",
+                    "command": "python-debugger.clearCacheAndReload",
+                    "title": "%python-debugger.command.clearCacheAndReload.title%"
                 },
                 {
-                    "category": "Debugpy",
-                    "command": "debugpy.debugInTerminal",
+                    "category": "Python Debugger",
+                    "command": "python-debugger.debugInTerminal",
                     "icon": "$(debug-alt)",
-                    "title": "%debugpy.command.debugInTerminal.title%"
+                    "title": "%python-debugger.command.debugInTerminal.title%"
                 },
                 {
-                    "category": "Debugpy",
-                    "command": "debugpy.viewOutput",
-                    "title": "%debugpy.command.viewOutput.title%"
+                    "category": "Python Debugger",
+                    "command": "python-debugger.viewOutput",
+                    "title": "%python-debugger.command.viewOutput.title%"
                 }
             ]
         },
@@ -419,14 +419,14 @@
                     }
                 },
                 "configurationSnippets": [],
-                "label": "Debugpy",
+                "label": "Python Debugger",
                 "languages": [
                     "python"
                 ],
-                "type": "debugpy",
+                "type": "python-debugger",
                 "variables": {
-                    "pickProcess": "debugpy.pickLocalProcess",
-                    "pickArgs": "debugpy.pickArgs"
+                    "pickProcess": "python-debugger.pickLocalProcess",
+                    "pickArgs": "python-debugger.pickArgs"
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }

@@ -1,5 +1,5 @@
 {
-    "debugpy.command.debugInTerminal.title": "Debug Python File",
-    "debugpy.command.clearCacheAndReload.title": "Clear Cache and Reload Window",
-    "debugpy.command.viewOutput.title": "Show Output"
+    "python-debugger.command.debugInTerminal.title": "Debug Python File",
+    "python-debugger.command.clearCacheAndReload.title": "Clear Cache and Reload Window",
+    "python-debugger.command.viewOutput.title": "Show Output"
 }
