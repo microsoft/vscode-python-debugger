@@ -31,8 +31,7 @@ import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configur
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
-import { DebugPortAttributesProvider, DefaultPythonDebugPorts } from './debugger/debugPort/portAttributesProvider';
-import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -131,19 +130,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const debugPortAttributesProvider = new DebugPortAttributesProvider();
     context.subscriptions.push(
         workspace.registerPortAttributesProvider(
-            { portRange: [DefaultPythonDebugPorts.Min, DefaultPythonDebugPorts.Max] },
+            {},
             debugPortAttributesProvider,
         ),
-    );
-    context.subscriptions.push(
-        registerCommand('debugpy.helloWorld', () => {
-            showInformationMessage('Hello World!');
-        
-            const server = createServer((request: IncomingMessage, response: ServerResponse) => {
-                response.end('Hello world!');
-            });
-            
-            server.listen(55100);
-        })
     );
 }
