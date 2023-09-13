@@ -1,5 +1,5 @@
 {
-    "name": "python-debugger",
+    "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using `debugpy`.",
     "version": "2023.3.0-dev",
@@ -27,8 +27,8 @@
     ],
     "activationEvents": [
         "onDebugInitialConfigurations",
-        "onDebugDynamicConfigurations:python-debugger",
-        "onDebugResolve:python-debugger",
+        "onDebugDynamicConfigurations:debugpy",
+        "onDebugResolve:debugpy",
         "onLanguage:python"
     ],
     "main": "./dist/extension.js",
@@ -37,42 +37,42 @@
         "commands": [
             {
                 "category": "Python Debugger",
-                "command": "python-debugger.debugInTerminal",
+                "command": "debugpy.debugInTerminal",
                 "icon": "$(debug-alt)",
-                "title": "%python-debugger.command.debugInTerminal.title%"
+                "title": "%debugpy.command.debugInTerminal.title%"
             },
             {
                 "category": "Python Debugger",
-                "command": "python-debugger.clearCacheAndReload",
-                "title": "%python-debugger.command.clearCacheAndReload.title%"
+                "command": "debugpy.clearCacheAndReload",
+                "title": "%debugpy.command.clearCacheAndReload.title%"
             },
             {
                 "category": "Python Debugger",
-                "command": "python-debugger.viewOutput",
+                "command": "debugpy.viewOutput",
                 "icon": {
                     "dark": "resources/dark/repl.svg",
                     "light": "resources/light/repl.svg"
                 },
-                "title": "%python-debugger.command.viewOutput.title%"
+                "title": "%debugpy.command.viewOutput.title%"
             }
         ],
         "menus": {
             "commandPalette": [
                 {
                     "category": "Python Debugger",
-                    "command": "python-debugger.clearCacheAndReload",
-                    "title": "%python-debugger.command.clearCacheAndReload.title%"
+                    "command": "debugpy.clearCacheAndReload",
+                    "title": "%debugpy.command.clearCacheAndReload.title%"
                 },
                 {
                     "category": "Python Debugger",
-                    "command": "python-debugger.debugInTerminal",
+                    "command": "debugpy.debugInTerminal",
                     "icon": "$(debug-alt)",
-                    "title": "%python-debugger.command.debugInTerminal.title%"
+                    "title": "%debugpy.command.debugInTerminal.title%"
                 },
                 {
                     "category": "Python Debugger",
-                    "command": "python-debugger.viewOutput",
-                    "title": "%python-debugger.command.viewOutput.title%"
+                    "command": "debugpy.viewOutput",
+                    "title": "%debugpy.command.viewOutput.title%"
                 }
             ]
         },
@@ -423,10 +423,10 @@
                 "languages": [
                     "python"
                 ],
-                "type": "python-debugger",
+                "type": "debugpy",
                 "variables": {
-                    "pickProcess": "python-debugger.pickLocalProcess",
-                    "pickArgs": "python-debugger.pickArgs"
+                    "pickProcess": "debugpy.pickLocalProcess",
+                    "pickArgs": "debugpy.pickArgs"
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }
