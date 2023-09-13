@@ -29,7 +29,7 @@ suite('Debug - Attach to Child Process', () => {
     test('Message is not displayed if debugger is launched', async () => {
         const data: AttachRequestArguments = {
             name: 'Attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             port: 1234,
             subProcessId: 2,
@@ -48,7 +48,7 @@ suite('Debug - Attach to Child Process', () => {
     test('Message is displayed if debugger is not launched', async () => {
         const data: AttachRequestArguments = {
             name: 'Attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             port: 1234,
             subProcessId: 2,
@@ -72,7 +72,7 @@ suite('Debug - Attach to Child Process', () => {
 
         const data: AttachRequestArguments = {
             name: 'Attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             port: 1234,
             subProcessId: 2,
@@ -96,7 +96,7 @@ suite('Debug - Attach to Child Process', () => {
 
         const data: AttachRequestArguments = {
             name: 'Attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             port: 1234,
             subProcessId: 2,
@@ -116,7 +116,7 @@ suite('Debug - Attach to Child Process', () => {
     test('Validate debug config is passed with the correct params', async () => {
         const data: LaunchRequestArguments | AttachRequestArguments = {
             request: 'attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             name: 'Attach',
             port: 1234,
             subProcessId: 2,
@@ -141,7 +141,7 @@ suite('Debug - Attach to Child Process', () => {
     });
     test('Pass data as is if data is attach debug configuration', async () => {
         const data: AttachRequestArguments = {
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             name: '',
         };
@@ -163,7 +163,7 @@ suite('Debug - Attach to Child Process', () => {
     test('Validate debug config when parent/root parent was attached', async () => {
         const data: AttachRequestArguments = {
             request: 'attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             name: 'Attach',
             host: '123.123.123.123',
             port: 1234,

@@ -78,7 +78,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         const attach: Partial<AttachRequestArguments> = {
             name: 'Python attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
         };
 

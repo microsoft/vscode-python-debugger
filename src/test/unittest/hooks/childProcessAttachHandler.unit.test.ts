@@ -47,7 +47,7 @@ suite('Debug - Child Process', () => {
         const handler = new ChildProcessAttachEventHandler(instance(attachService));
         const body: AttachRequestArguments = {
             name: 'Attach',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'attach',
             port: 1234,
             subProcessId: 2,

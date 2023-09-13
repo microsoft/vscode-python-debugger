@@ -88,7 +88,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         const launch: LaunchRequestArguments = {
             name: 'Python launch',
-            type: 'python-debugger',
+            type: 'debugpy',
             request: 'launch',
         };
 
@@ -134,7 +134,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(workspaceFolder, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -163,7 +163,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             });
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -191,7 +191,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const filePath = Uri.file(path.dirname('')).fsPath;
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -217,7 +217,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(undefined, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
             expect(debugConfig).to.have.property('python', pythonPath);
@@ -242,7 +242,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(undefined, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -269,7 +269,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const filePath = Uri.file(defaultWorkspace).fsPath;
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'python-debugger');
+            expect(debugConfig).to.have.property('type', 'debugpy');
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -686,7 +686,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         });
 
         test('Test defaults of python debugger', async () => {
-            if (DebuggerTypeName === 'python-debugger') {
+            if (DebuggerTypeName === 'debugpy') {
                 return;
             }
             const pythonPath = `PythonPath_${new Date().toString()}`;
