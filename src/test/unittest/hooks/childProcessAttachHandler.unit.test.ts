@@ -10,6 +10,7 @@ import { ChildProcessAttachService } from '../../../extension/debugger/hooks/chi
 import { DebuggerEvents } from '../../../extension/debugger/hooks/constants';
 import { AttachRequestArguments } from '../../../extension/types';
 import { DebuggerTypeName } from '../../../extension/constants';
+import { debuggerTypeName } from '../../common';
 
 suite('Debug - Child Process', () => {
     test('Do not attach if the event is undefined', async () => {
@@ -47,7 +48,7 @@ suite('Debug - Child Process', () => {
         const handler = new ChildProcessAttachEventHandler(instance(attachService));
         const body: AttachRequestArguments = {
             name: 'Attach',
-            type: 'debugpy',
+            type: debuggerTypeName,
             request: 'attach',
             port: 1234,
             subProcessId: 2,

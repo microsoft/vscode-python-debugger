@@ -93,4 +93,6 @@ function getPythonPath(): string {
     return 'python';
 }
 
-export interface IExtensionTestApi extends IExtensionApi {}
+export interface IExtensionTestApi extends IExtensionApi {};
+
+export const debuggerTypeName = "python-debugger";

@@ -22,6 +22,7 @@ import { expect } from 'chai';
 import { PersistentStateFactory } from '../../extension/common/persistentState';
 import { DebugSessionTelemetry } from '../../extension/common/application/debugSessionTelemetry';
 import { LaunchJsonCompletionProvider } from '../../extension/debugger/configuration/launch.json/completionProvider';
+import { debuggerTypeName } from '../common';
 
 suite('Debugging - register Debugging', () => {
     let context: typemoq.IMock<IExtensionContext>;
@@ -74,10 +75,10 @@ suite('Debugging - register Debugging', () => {
     test('Activation will register the Debug adapter factories', async () => {
         registerDebugger(context.object);
 
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', loggingFactory);
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debuggerPromptFactory);
-        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, 'debugpy', debugSessionTelemetry);
-        sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, 'debugpy', descriptorFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, loggingFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, debuggerPromptFactory);
+        sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, debugSessionTelemetry);
+        sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, debuggerTypeName, descriptorFactory);
 
         expect(registerDebugAdapterTrackerFactoryStub.callCount).to.be.equal(3);
     });
