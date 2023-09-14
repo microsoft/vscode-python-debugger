@@ -78,7 +78,11 @@ suite('Debugging - register Debugging', () => {
         sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, loggingFactory);
         sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, debuggerPromptFactory);
         sinon.assert.calledWithExactly(registerDebugAdapterTrackerFactoryStub, debuggerTypeName, debugSessionTelemetry);
-        sinon.assert.calledOnceWithMatch(registerDebugAdapterDescriptorFactoryStub, debuggerTypeName, descriptorFactory);
+        sinon.assert.calledOnceWithMatch(
+            registerDebugAdapterDescriptorFactoryStub,
+            debuggerTypeName,
+            descriptorFactory,
+        );
 
         expect(registerDebugAdapterTrackerFactoryStub.callCount).to.be.equal(3);
     });

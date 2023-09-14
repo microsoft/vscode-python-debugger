@@ -423,7 +423,7 @@
                 "languages": [
                     "python"
                 ],
-                "type": "debugpy",
+                "type": "python-debugger",
                 "variables": {
                     "pickProcess": "debugpy.pickLocalProcess",
                     "pickArgs": "debugpy.pickArgs"

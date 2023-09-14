@@ -4,7 +4,7 @@
 'use strict';
 
 import { IExtensionApi } from './apiTypes';
-import { getPythonDebuggerLauncherArgs, getPythonDebuggerPackagePath } from './debugger/adapter/remoteLaunchers';
+import { getDebugpyLauncherArgs, getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
 
 export function buildApi(): IExtensionApi {
     const api: IExtensionApi = {
@@ -14,14 +14,14 @@ export function buildApi(): IExtensionApi {
                 port: number,
                 waitUntilDebuggerAttaches: boolean = true,
             ): Promise<string[]> {
-                return getPythonDebuggerLauncherArgs({
+                return getDebugpyLauncherArgs({
                     host,
                     port,
                     waitUntilDebuggerAttaches,
                 });
             },
             async getDebuggerPackagePath(): Promise<string | undefined> {
-                return getPythonDebuggerPackagePath();
+                return getDebugpyPackagePath();
             },
         },
     };

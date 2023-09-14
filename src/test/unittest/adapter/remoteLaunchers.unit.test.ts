@@ -24,7 +24,7 @@ suite('External debugpy Debugger Launcher', () => {
     ].forEach((testParams) => {
         suite(testParams.testName, async () => {
             test('Test remote debug launcher args (and do not wait for debugger to attach)', async () => {
-                const args = launchers.getPythonDebuggerLauncherArgs(
+                const args = launchers.getDebugpyLauncherArgs(
                     {
                         host: 'something',
                         port: 1234,
@@ -36,7 +36,7 @@ suite('External debugpy Debugger Launcher', () => {
                 expect(args).to.be.deep.equal(expectedArgs);
             });
             test('Test remote debug launcher args (and wait for debugger to attach)', async () => {
-                const args = launchers.getPythonDebuggerLauncherArgs(
+                const args = launchers.getDebugpyLauncherArgs(
                     {
                         host: 'something',
                         port: 1234,
@@ -54,7 +54,7 @@ suite('External debugpy Debugger Launcher', () => {
 suite('Path To Debugger Package', () => {
     const pathToPythonLibDir = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs');
     test('Path to debugpy debugger package', () => {
-        const actual = launchers.getPythonDebuggerPackagePath();
+        const actual = launchers.getDebugpyPackagePath();
         const expected = path.join(pathToPythonLibDir, 'debugpy');
         expect(actual).to.be.deep.equal(expected);
     });
