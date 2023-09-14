@@ -17,7 +17,7 @@ If you want to disable the Python Debugger extension, you can [disable this exte
 
 | Command                | Description                       |
 | ---------------------- | --------------------------------- |
-| Python Debugger: viewOutput | Show the python-debugger extension output. |
+| Python Debugger: viewOutput | Show the Python Debugger Extension output. |
 | Python Debugger: clearCacheAndReload | Allows you to clear the global values set in the extension. |
 | Python Debugger: debugInTerminal | Allows you to debug a simple Python file in the terminal. |
 

@@ -95,4 +95,4 @@ function getPythonPath(): string {
 
 export interface IExtensionTestApi extends IExtensionApi {}
 
-export const debuggerTypeName = 'python-debugger';
+export const debuggerTypeName = 'debugpy';
