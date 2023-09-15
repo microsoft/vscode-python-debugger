@@ -130,7 +130,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const debugPortAttributesProvider = new DebugPortAttributesProvider();
     context.subscriptions.push(
         workspace.registerPortAttributesProvider(
-            { commandPattern: /extensions.ms-python.debugpy.*debugpy.launcher/ },
+            { commandPattern: /extensions.ms-python.debugpy.*debugpy.(launcher|adapter)/ },
             debugPortAttributesProvider,
         ),
     );
