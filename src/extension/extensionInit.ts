@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window } from 'vscode';
+import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window, workspace } from 'vscode';
 import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
@@ -31,6 +31,7 @@ import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configur
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
+import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -123,6 +124,14 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         languages.registerCompletionItemProvider(
             { language: JsonLanguages.jsonWithComments },
             launchJsonCompletionProvider,
+        ),
+    );
+
+    const debugPortAttributesProvider = new DebugPortAttributesProvider();
+    context.subscriptions.push(
+        workspace.registerPortAttributesProvider(
+            { commandPattern: /extensions.ms-python.debugpy.*debugpy.(launcher|adapter)/ },
+            debugPortAttributesProvider,
         ),
     );
 }
