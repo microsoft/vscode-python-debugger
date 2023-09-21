@@ -89,6 +89,8 @@ extends:
         displayName: Install libraries
         env:
           npm_config_arch: ${{ variables.packageArch }}
+          parameters: ${{ parameters }}
+          variables: ${{ variables }}
 
       - script: python ./build/update_ext_version.py --for-publishing
         displayName: Update build number
