@@ -84,7 +84,7 @@ extends:
       - script: python -m pip install nox
         displayName: Install nox
       
-      - script: echo ${{ variables }} & echo ${{ parameters }}
+      - script: echo ${{ convertToJson(variables) }} & echo ${{ convertToJson(parameters) }}
 
       # update according packageArch
       - script: python -m nox --session install_bundled_libs -- ${{ variables.vsceTarget }} ${{ variables.packageArch }}
