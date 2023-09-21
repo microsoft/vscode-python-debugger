@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 """All the action we need during build"""
+from hashlib import sha256
 import io
 import json
 import os
@@ -11,6 +12,25 @@ import zipfile
 
 import nox  # pylint: disable=import-error
 
+debugpy_urls = {
+    "macOS": {
+        "url": "https://files.pythonhosted.org/packages/b1/46/0304622c2c81215298294eba53c038c6d339b783928117687e756ade7def/debugpy-1.8.0-cp310-cp310-macosx_11_0_x86_64.whl",
+        "hash": "7fb95ca78f7ac43393cd0e0f2b6deda438ec7c5e47fa5d38553340897d2fbdfb"
+
+    },
+    "Windows64": {
+        "url": "https://files.pythonhosted.org/packages/61/ad/ba48c35ed40238f05dcf81a10dcafb743ee90f23d2d1a41ba4f030dc0626/debugpy-1.8.0-cp310-cp310-win_amd64.whl",
+        "hash": "5d9de202f5d42e62f932507ee8b21e30d49aae7e46d5b1dd5c908db1d7068637"
+    },
+    "Linux": {
+        "url": "https://files.pythonhosted.org/packages/01/18/4be69e4b466f6452ac42b2a2cb7e581a3f1af194f1dd563d5bdabdcd8c21/debugpy-1.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "hash": "ef9ab7df0b9a42ed9c878afd3eaaff471fce3fa73df96022e1f5c9f8f8c87ada"
+    },
+    "Windows32": {
+        "ulr": "https://files.pythonhosted.org/packages/1a/62/325e4b4b512b8b17fa10769bd7e8c64bc3e9957155c1f5eac70df7660e14/debugpy-1.8.0-cp310-cp310-win32.whl",
+        "hash": "a8b7a2fd27cd9f3553ac112f356ad4ca93338feadd8910277aff71ab24d8775f"
+    }
+}
 
 def _install_bundle(session: nox.Session) -> None:
     session.install(
@@ -25,7 +45,6 @@ def _install_bundle(session: nox.Session) -> None:
         "./requirements.txt",
     )
     session.install("packaging")
-    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", "1.7.0")
 
 
 def _update_pip_packages(session: nox.Session) -> None:
@@ -112,9 +131,41 @@ def _setup_template_environment(session: nox.Session) -> None:
 
 @nox.session(python="3.7")
 def install_bundled_libs(session):
+    #install debugpy by url and platform
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     _install_bundle(session)
+
+    if session.posargs[0] == "Linux":
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
+    elif session.posargs[0] == "Windows":
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Windows64"])
+    
+    elif session.posargs[0] == "MacOS":
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["MacOS"])
+    else:
+        _install_package(f"{os.getcwd()}/bundled/libs", "debugpy")
+
+    
+
+
+    
+@nox.session()
+def install_bundled_libs_win64(session):
+    download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Windows64"])
+
+def install_bundled_libs_win32(session):
+    _install_bundle(session)
+    download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Windows64"])
+
+
+def install_bundled_libs_linux(session):
+    _install_bundle(session)
+
+def install_bundled_libs_macos(session):
+    _install_bundle(session)
+
+
 
 
 @nox.session(python="3.7")
@@ -145,11 +196,26 @@ def _get_pypi_package_data(package_name):
 
 def _get_urls(data, version):
     return list(
-        r["url"] for r in data["releases"][version] if _contains(r["url"], ("cp37",))
+        r["url"] for r in data["releases"][version] if _contains(r["url"], ("cp310",))
     )
 
 
+def download_url(root, value):
+    print(value["url"])
+    with url_lib.urlopen(value["url"]) as response:
+        data = response.read()
+        if sha256(data) == value["hash"]:
+            with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
+                for zip_info in wheel.infolist():
+                    # Ignore dist info since we are merging multiple wheels
+                    if ".dist-info/" in zip_info.filename:
+                        continue
+                    print("\t" + zip_info.filename)
+                    wheel.extract(zip_info.filename, root)
+
+
 def _download_and_extract(root, url):
+    print("donload and extract")
     if "manylinux" in url or "macosx" in url or "win_amd64" in url:
         root = os.getcwd() if root is None or root == "." else root
         print(url)
@@ -160,11 +226,12 @@ def _download_and_extract(root, url):
                     # Ignore dist info since we are merging multiple wheels
                     if ".dist-info/" in zip_info.filename:
                         continue
-                    print("\t" + zip_info.filename)
+                    # print("\t" + zip_info.filename)
                     wheel.extract(zip_info.filename, root)
 
 
 def _install_package(root, package_name, version="latest"):
+    print("package")
     from packaging.version import parse as version_parser
 
     data = _get_pypi_package_data(package_name)
@@ -173,7 +240,7 @@ def _install_package(root, package_name, version="latest"):
         use_version = max(data["releases"].keys(), key=version_parser)
     else:
         use_version = version
-
+    print(_get_urls(data, use_version))
     for url in _get_urls(data, use_version):
         _download_and_extract(root, url)
 
