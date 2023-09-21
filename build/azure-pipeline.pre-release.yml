@@ -82,7 +82,7 @@ extends:
         displayName: Install nox
 
       # update according packageArch
-      - script: python -m nox --session install_bundled_libs -- ${{ variables.VSCETARGET }}
+      - script: python -m nox --session install_bundled_libs
         displayName: Install Python dependencies
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}
