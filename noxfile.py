@@ -135,17 +135,14 @@ def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     _install_bundle(session)
-    print("args: ", session.posargs)
-    print("enviro: ", os.environ.items)
-    print("enviro: ", os.environ)
+    target = os.environ.get('VSCETARGET')
+    print("target: ", target)
 
-
-    if session.posargs[0] == "Linux":
+    if "linux" in target:
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
-    elif session.posargs[0] == "Windows":
+    elif "win32" in target:
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Windows64"])
-    
-    elif session.posargs[0] == "MacOS":
+    elif "darwin" in target:
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["MacOS"])
     else:
         _install_package(f"{os.getcwd()}/bundled/libs", "debugpy")
