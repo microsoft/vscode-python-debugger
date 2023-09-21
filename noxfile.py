@@ -13,21 +13,25 @@ import zipfile
 import nox  # pylint: disable=import-error
 
 debugpy_urls = {
-    "MacOS": {
-        "url": "https://files.pythonhosted.org/packages/b1/46/0304622c2c81215298294eba53c038c6d339b783928117687e756ade7def/debugpy-1.8.0-cp310-cp310-macosx_11_0_x86_64.whl",
-        "hash": "7fb95ca78f7ac43393cd0e0f2b6deda438ec7c5e47fa5d38553340897d2fbdfb",
+    "any": {
+        "url": "https://files.pythonhosted.org/packages/39/2f/c8a8cfac6c7fa3d9e163a6bf46e6d27d027b7a1331028e99a6ef7fd3699d/debugpy-1.7.0-py2.py3-none-any.whl",
+        "hash": "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d2989005005502",
     },
-    "Windows64": {
-        "url": "https://files.pythonhosted.org/packages/61/ad/ba48c35ed40238f05dcf81a10dcafb743ee90f23d2d1a41ba4f030dc0626/debugpy-1.8.0-cp310-cp310-win_amd64.whl",
-        "hash": "5d9de202f5d42e62f932507ee8b21e30d49aae7e46d5b1dd5c908db1d7068637",
+    "macOS": {
+        "url": "https://files.pythonhosted.org/packages/bd/a3/5e37ce13c7dd850b72a52be544a058ed49606ebbbf8b95b2ba3c1db5620a/debugpy-1.7.0-cp311-cp311-macosx_11_0_universal2.whl",
+        "hash": "538765a41198aa88cc089295b39c7322dd598f9ef1d52eaae12145c63bf9430a",
     },
-    "Linux": {
-        "url": "https://files.pythonhosted.org/packages/01/18/4be69e4b466f6452ac42b2a2cb7e581a3f1af194f1dd563d5bdabdcd8c21/debugpy-1.8.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-        "hash": "ef9ab7df0b9a42ed9c878afd3eaaff471fce3fa73df96022e1f5c9f8f8c87ada",
+    "linux": {
+        "url": "https://files.pythonhosted.org/packages/b4/fc/087324d46dab8e21e084ce2cf670fa7e524ab5e7691692438e4987bd3ecb/debugpy-1.7.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "hash": "c7e8cf91f8f3f9b5fad844dd88427b85d398bda1e2a0cd65d5a21312fcbc0c6f",
     },
-    "Windows32": {
-        "ulr": "https://files.pythonhosted.org/packages/1a/62/325e4b4b512b8b17fa10769bd7e8c64bc3e9957155c1f5eac70df7660e14/debugpy-1.8.0-cp310-cp310-win32.whl",
-        "hash": "a8b7a2fd27cd9f3553ac112f356ad4ca93338feadd8910277aff71ab24d8775f",
+    "win32": {
+        "ulr": "https://files.pythonhosted.org/packages/52/59/3591e9f709b7ee4d3a926a8903a395669cd0e0279204a94b6acccf6ed6ee/debugpy-1.7.0-cp311-cp311-win32.whl",
+        "hash": "18a69f8e142a716310dd0af6d7db08992aed99e2606108732efde101e7c65e2a",
+    },
+    "win64": {
+        "url": "https://files.pythonhosted.org/packages/51/59/84ebd58d3e9de33a54ca8aa4532e03906e5458092dafe240264c2937a99b/debugpy-1.7.0-cp311-cp311-win_amd64.whl",
+        "hash": "7515a5ba5ee9bfe956685909c5f28734c1cecd4ee813523363acfe3ca824883a",
     },
 }
 
@@ -138,14 +142,16 @@ def install_bundled_libs(session):
 
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
-    if "linux" in target:
-        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
-    elif "win32" in target:
-        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Windows64"])
-    elif "darwin" in target:
-        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["MacOS"])
+    if "darwin" in target:
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["macOS"])
+    elif "win32-ia32" == target:
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["win32"])
+    elif "win32-x64" == target:
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["win64"])
+    elif "linux-x64" == target:
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["linux"])
     else:
-        _install_package(f"{os.getcwd()}/bundled/libs", "debugpy")
+        download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["any"])
 
 
 @nox.session(python="3.7")
