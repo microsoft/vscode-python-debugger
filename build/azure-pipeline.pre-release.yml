@@ -85,13 +85,10 @@ extends:
         displayName: Install nox
 
       # update according packageArch
-      - script: python -m nox --session install_bundled_libs
-        displayName: Install Python dependencies
-        args:
-          [
-            ${{ parameters.buildPlatforms.name }},
-            ${{ parameters.packageArch }}
-          ]
+      - run: python -m nox --session install_bundled_libs
+        name: Install Python dependencies
+        shell: bash
+        arguments: $(parameters.buildPlatforms.name) ${{ parameters.packageArch }}
 
       - script: python ./build/update_ext_version.py --for-publishing
         displayName: Update build number
