@@ -136,7 +136,7 @@ def install_bundled_libs(session):
     session.install("wheel")
     _install_bundle(session)
 
-    target = os.environ.get("VSCETARGET")
+    target = os.environ.get("VSCETARGET", "")
     print("target:", target)
     if "linux" in target:
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
