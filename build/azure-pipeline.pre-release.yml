@@ -87,7 +87,7 @@ extends:
       - script: echo $variables & echo $parameters
 
       # update according packageArch
-      - script: python -m nox --session install_bundled_libs -- ${ variables.vsceTarget } ${{ variables.packageArch }} ${{ parameters }} ${{ variables }}
+      - script: python -m nox --session install_bundled_libs -- ${ variables.vsceTarget } ${{ variables.packageArch }}
         displayName: Install Python dependencies
 
       - script: python ./build/update_ext_version.py --for-publishing
