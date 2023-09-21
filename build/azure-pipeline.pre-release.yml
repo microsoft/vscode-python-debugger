@@ -88,8 +88,7 @@ extends:
       - script: python -m nox --session install_bundled_libs -- ${{ variables.packageArch }}
         displayName: Install libraries
         env:
-          VSCETARGET: ${{ parameters.VSCETARGET }}
-          VSCETARGET2: ${{ variables.VSCETARGET }}
+          VSCETARGET: ${{ variables.VSCETARGET }}
 
       - script: python ./build/update_ext_version.py --for-publishing
         displayName: Update build number
