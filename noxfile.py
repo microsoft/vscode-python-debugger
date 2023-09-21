@@ -135,6 +135,7 @@ def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     _install_bundle(session)
+    print("args: ", session.posargs)
 
     if session.posargs[0] == "Linux":
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
