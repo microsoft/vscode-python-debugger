@@ -85,7 +85,7 @@ extends:
         displayName: Install nox
 
       # update according packageArch
-      - run: python -m nox --session install_bundled_libs
+      - run: python -m nox --session install_bundled_libs -- ${{ parameters.packageArch }}
         name: Install Python dependencies
         shell: bash
         arguments: $(parameters.buildPlatforms.name) ${{ parameters.packageArch }}
