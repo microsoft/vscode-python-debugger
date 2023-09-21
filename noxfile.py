@@ -13,7 +13,7 @@ import zipfile
 import nox  # pylint: disable=import-error
 
 debugpy_urls = {
-    "macOS": {
+    "MacOS": {
         "url": "https://files.pythonhosted.org/packages/b1/46/0304622c2c81215298294eba53c038c6d339b783928117687e756ade7def/debugpy-1.8.0-cp310-cp310-macosx_11_0_x86_64.whl",
         "hash": "7fb95ca78f7ac43393cd0e0f2b6deda438ec7c5e47fa5d38553340897d2fbdfb"
 
@@ -135,9 +135,9 @@ def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     _install_bundle(session)
-    target = os.environ.get('VSCETARGET')
-    print("target: ", target)
 
+    target = os.environ.get('VSCETARGET')
+    print("target:", target)
     if "linux" in target:
         download_url(f"{os.getcwd()}/bundled/libs", debugpy_urls["Linux"])
     elif "win32" in target:

@@ -32,9 +32,6 @@ extends:
       - name: Linux
         vsceTarget: ''
       - name: Linux
-        packageArch: x64
-        vsceTarget: linux-alpine
-      - name: Linux
         packageArch: arm64
         vsceTarget: linux-arm64
       - name: Linux
@@ -85,8 +82,8 @@ extends:
         displayName: Install nox
 
       # update according packageArch
-      - script: python -m nox --session install_bundled_libs -- ${{ variables.packageArch }}
-        displayName: Install libraries
+      - script: python -m nox --session install_bundled_libs -- ${{ variables.VSCETARGET }}
+        displayName: Install Python dependencies
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}
 
