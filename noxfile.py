@@ -181,10 +181,10 @@ def _get_urls(data, version):
 
 
 def download_url(root, value):
-    print(value["url"])
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
-        if hashlib.sha256(data) == value["hash"]:
+        if hashlib.sha256(data).hexdigest() == value["hash"]:
+            print("Download: ", value["url"])
             with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
                 for zip_info in wheel.infolist():
                     # Ignore dist info since we are merging multiple wheels
@@ -195,7 +195,6 @@ def download_url(root, value):
 
 
 def _download_and_extract(root, url):
-    print("donload and extract")
     if "manylinux" in url or "macosx" in url or "win_amd64" in url:
         root = os.getcwd() if root is None or root == "." else root
         print(url)
@@ -206,12 +205,11 @@ def _download_and_extract(root, url):
                     # Ignore dist info since we are merging multiple wheels
                     if ".dist-info/" in zip_info.filename:
                         continue
-                    # print("\t" + zip_info.filename)
+                    print("\t" + zip_info.filename)
                     wheel.extract(zip_info.filename, root)
 
 
 def _install_package(root, package_name, version="latest"):
-    print("package")
     from packaging.version import parse as version_parser
 
     data = _get_pypi_package_data(package_name)
@@ -220,7 +218,7 @@ def _install_package(root, package_name, version="latest"):
         use_version = max(data["releases"].keys(), key=version_parser)
     else:
         use_version = version
-    print(_get_urls(data, use_version))
+
     for url in _get_urls(data, use_version):
         _download_and_extract(root, url)
 
