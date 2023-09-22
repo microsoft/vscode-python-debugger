@@ -26,7 +26,7 @@ debugpy_urls = {
         "hash": "c7e8cf91f8f3f9b5fad844dd88427b85d398bda1e2a0cd65d5a21312fcbc0c6f",
     },
     "win32": {
-        "ulr": "https://files.pythonhosted.org/packages/52/59/3591e9f709b7ee4d3a926a8903a395669cd0e0279204a94b6acccf6ed6ee/debugpy-1.7.0-cp311-cp311-win32.whl",
+        "url": "https://files.pythonhosted.org/packages/52/59/3591e9f709b7ee4d3a926a8903a395669cd0e0279204a94b6acccf6ed6ee/debugpy-1.7.0-cp311-cp311-win32.whl",
         "hash": "18a69f8e142a716310dd0af6d7db08992aed99e2606108732efde101e7c65e2a",
     },
     "win64": {
