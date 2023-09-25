@@ -11,6 +11,7 @@ import { DebugOptions, DebugPurpose, LaunchRequestArguments } from '../../../typ
 import { resolveVariables } from '../utils/common';
 import { BaseConfigurationResolver } from './base';
 import { getDebugEnvironmentVariables, getProgram } from './helper';
+import { getConfiguration } from '../../../common/vscodeapi';
 
 export class LaunchConfigurationResolver extends BaseConfigurationResolver<LaunchRequestArguments> {
     public async resolveDebugConfiguration(
@@ -102,15 +103,11 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
             debugConfiguration.debugOptions = [];
         }
         if (debugConfiguration.justMyCode === undefined) {
-            // Populate justMyCode using debugStdLib
-            debugConfiguration.justMyCode = !debugConfiguration.debugStdLib;
+            debugConfiguration.justMyCode = getConfiguration('debugpy').get<boolean>('debugJustMyCode', true);
         }
         // Pass workspace folder so we can get this when we get debug events firing.
         debugConfiguration.workspaceFolder = workspaceFolder ? workspaceFolder.fsPath : undefined;
         const debugOptions = debugConfiguration.debugOptions!;
-        if (!debugConfiguration.justMyCode) {
-            LaunchConfigurationResolver.debugOption(debugOptions, DebugOptions.DebugStdLib);
-        }
         if (debugConfiguration.stopOnEntry) {
             LaunchConfigurationResolver.debugOption(debugOptions, DebugOptions.StopOnEntry);
         }
