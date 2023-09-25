@@ -21,6 +21,7 @@ import { AttachRequestArguments, DebugOptions } from '../../../../extension/type
 import { AttachConfigurationResolver } from '../../../../extension/debugger/configuration/resolvers/attach';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
 import * as platform from '../../../../extension/common/platform';
+import { debuggerTypeName } from '../../../common';
 
 getInfoPerOS().forEach(([osName, osType, path]) => {
     if (osType === platform.OSType.Unknown) {
@@ -97,7 +98,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         const attach: Partial<AttachRequestArguments> = {
             name: 'Python attach',
-            type: 'debugpy',
+            type: debuggerTypeName,
             request: 'attach',
         };
 

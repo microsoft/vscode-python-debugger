@@ -30,7 +30,7 @@ class OutdatedDebuggerPrompt implements DebugAdapterTracker {
             if (eventMessage.event === 'output') {
                 const outputMessage = eventMessage as DebugProtocol.OutputEvent;
                 if (outputMessage.body.category === 'telemetry') {
-                    // debugpy sends telemetry as both ptvsd and debugpy. This was done to help with
+                    // Python Debugger sends telemetry as both ptvsd and debugpy. This was done to help with
                     // transition from ptvsd to debugpy while analyzing usage telemetry.
                     if (
                         outputMessage.body.output === 'ptvsd' &&

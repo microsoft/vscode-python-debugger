@@ -1,6 +1,6 @@
 {
     "name": "debugpy",
-    "displayName": "Debugpy",
+    "displayName": "Python Debugger",
     "description": "Python Debugger extension using `debugpy`.",
     "version": "2023.3.0-dev",
     "publisher": "ms-python",
@@ -39,18 +39,18 @@
     "contributes": {
         "commands": [
             {
-                "category": "Debugpy",
+                "category": "Python Debugger",
                 "command": "debugpy.debugInTerminal",
                 "icon": "$(debug-alt)",
                 "title": "%debugpy.command.debugInTerminal.title%"
             },
             {
-                "category": "Debugpy",
+                "category": "Python Debugger",
                 "command": "debugpy.clearCacheAndReload",
                 "title": "%debugpy.command.clearCacheAndReload.title%"
             },
             {
-                "category": "Debugpy",
+                "category": "Python Debugger",
                 "command": "debugpy.viewOutput",
                 "icon": {
                     "dark": "resources/dark/repl.svg",
@@ -62,18 +62,18 @@
         "menus": {
             "commandPalette": [
                 {
-                    "category": "Debugpy",
+                    "category": "Python Debugger",
                     "command": "debugpy.clearCacheAndReload",
                     "title": "%debugpy.command.clearCacheAndReload.title%"
                 },
                 {
-                    "category": "Debugpy",
+                    "category": "Python Debugger",
                     "command": "debugpy.debugInTerminal",
                     "icon": "$(debug-alt)",
                     "title": "%debugpy.command.debugInTerminal.title%"
                 },
                 {
-                    "category": "Debugpy",
+                    "category": "Python Debugger",
                     "command": "debugpy.viewOutput",
                     "title": "%debugpy.command.viewOutput.title%"
                 }
@@ -434,7 +434,7 @@
                     }
                 },
                 "configurationSnippets": [],
-                "label": "Debugpy",
+                "label": "Python Debugger",
                 "languages": [
                     "python"
                 ],

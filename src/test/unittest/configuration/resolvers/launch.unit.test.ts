@@ -25,6 +25,7 @@ import { DebuggerTypeName } from '../../../../extension/constants';
 import * as pythonApi from '../../../../extension/common/python';
 import * as settings from '../../../../extension/common/settings';
 import * as helper from '../../../../extension/debugger/configuration/resolvers/helper';
+import { debuggerTypeName } from '../../../common';
 
 getInfoPerOS().forEach(([osName, osType, path]) => {
     if (osType === platform.OSType.Unknown) {
@@ -107,7 +108,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         const launch: LaunchRequestArguments = {
             name: 'Python launch',
-            type: 'debugpy',
+            type: debuggerTypeName,
             request: 'launch',
         };
 
@@ -153,7 +154,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(workspaceFolder, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -182,7 +183,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             });
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -210,7 +211,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const filePath = Uri.file(path.dirname('')).fsPath;
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -236,7 +237,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(undefined, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
             expect(debugConfig).to.have.property('python', pythonPath);
@@ -261,7 +262,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const debugConfig = await resolveDebugConfiguration(undefined, {});
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -288,7 +289,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const filePath = Uri.file(defaultWorkspace).fsPath;
 
             expect(Object.keys(debugConfig!)).to.have.lengthOf.above(3);
-            expect(debugConfig).to.have.property('type', 'debugpy');
+            expect(debugConfig).to.have.property('type', debuggerTypeName);
             expect(debugConfig).to.have.property('request', 'launch');
             expect(debugConfig).to.have.property('clientOS', getClientOS());
             expect(debugConfig).to.not.have.property('pythonPath');
@@ -705,7 +706,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         });
 
         test('Test defaults of python debugger', async () => {
-            if (DebuggerTypeName === 'debugpy') {
+            if (DebuggerTypeName === debuggerTypeName) {
                 return;
             }
             const pythonPath = `PythonPath_${new Date().toString()}`;
