@@ -17,7 +17,7 @@ DEBUGPY_WHEEL_URLS = {
         "url": "https://files.pythonhosted.org/packages/39/2f/c8a8cfac6c7fa3d9e163a6bf46e6d27d027b7a1331028e99a6ef7fd3699d/debugpy-1.7.0-py2.py3-none-any.whl",
         "hash": (
             "sha256",
-            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d298900500550",
+            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d2989005005502",
         ),
     },
     "macOS": {
