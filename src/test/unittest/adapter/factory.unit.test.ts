@@ -126,7 +126,7 @@ suite('Debugging - Adapter Factory', () => {
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
 
-    test.only('Display a message if no python interpreter is set', async () => {
+    test('Display a message if no python interpreter is set', async () => {
         getActiveEnvironmentPathStub.resolves(undefined);
         const session = createSession({});
         const promise = factory.createDebugAdapterDescriptor(session, nodeExecutable);
