@@ -6,7 +6,15 @@
 import { expect } from 'chai';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugConfigurationProvider, TextDocument, TextEditor, Uri, WorkspaceConfiguration, WorkspaceFolder } from 'vscode';
+import {
+    DebugConfiguration,
+    DebugConfigurationProvider,
+    TextDocument,
+    TextEditor,
+    Uri,
+    WorkspaceConfiguration,
+    WorkspaceFolder,
+} from 'vscode';
 import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
 import { LaunchConfigurationResolver } from '../../../../extension/debugger/configuration/resolvers/launch';
 import { getInfoPerOS } from './common';
@@ -57,7 +65,9 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         function createMoqConfiguration(justMyCode: boolean) {
             const debugpySettings = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
-            debugpySettings.setup((p) => p.get<boolean>('debugJustMyCode', TypeMoq.It.isAny())).returns(() => (justMyCode));
+            debugpySettings
+                .setup((p) => p.get<boolean>('debugJustMyCode', TypeMoq.It.isAny()))
+                .returns(() => justMyCode);
             return debugpySettings.object;
         }
 
@@ -735,10 +745,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             expect(debugConfig).to.have.property('redirectOutput', true);
             expect(debugConfig).to.have.property('justMyCode', false);
             expect(debugConfig).to.have.property('debugOptions');
-            const expectedOptions = [
-                DebugOptions.ShowReturnValue,
-                DebugOptions.RedirectOutput,
-            ];
+            const expectedOptions = [DebugOptions.ShowReturnValue, DebugOptions.RedirectOutput];
             if (osType === platform.OSType.Windows) {
                 expectedOptions.push(DebugOptions.FixFilePathCase);
             }
@@ -787,7 +794,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(testParams.justMyCodeSetting));
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...launch,
-                justMyCode: testParams.justMyCode,
+                    justMyCode: testParams.justMyCode,
                 });
                 expect(debugConfig).to.have.property('justMyCode', testParams.expectedResult);
             });
@@ -923,7 +930,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 request: requestType,
                 type: 'python',
                 name: '',
-                justMyCode: false, 
+                justMyCode: false,
                 ...settings,
             };
             const workspaceFolder = createMoqWorkspaceFolder(__dirname);

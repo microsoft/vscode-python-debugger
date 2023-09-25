@@ -6,7 +6,15 @@
 import { expect } from 'chai';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugConfigurationProvider, TextDocument, TextEditor, Uri, WorkspaceConfiguration, WorkspaceFolder } from 'vscode';
+import {
+    DebugConfiguration,
+    DebugConfigurationProvider,
+    TextDocument,
+    TextEditor,
+    Uri,
+    WorkspaceConfiguration,
+    WorkspaceFolder,
+} from 'vscode';
 import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
 import { getInfoPerOS } from './common';
 import { AttachRequestArguments, DebugOptions } from '../../../../extension/types';
@@ -59,7 +67,9 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         function createMoqConfiguration(justMyCode: boolean) {
             const debugpySettings = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
-            debugpySettings.setup((p) => p.get<boolean>('debugJustMyCode', TypeMoq.It.isAny())).returns(() => (justMyCode));
+            debugpySettings
+                .setup((p) => p.get<boolean>('debugJustMyCode', TypeMoq.It.isAny()))
+                .returns(() => justMyCode);
             return debugpySettings.object;
         }
 
@@ -538,11 +548,11 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 setupActiveEditor(activeFile, PYTHON_LANGUAGE);
                 const defaultWorkspace = path.join('usr', 'desktop');
                 setupWorkspaces([defaultWorkspace]);
-    
+
                 const debugOptions = debugOptionsAvailable
                     .slice()
                     .concat(DebugOptions.Jinja, DebugOptions.Sudo) as DebugOptions[];
-    
+
                 getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(testParams.justMyCodeSetting));
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...attach,
