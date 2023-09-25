@@ -17,12 +17,12 @@ DEBUGPY_WHEEL_URLS = {
         "url": "https://files.pythonhosted.org/packages/39/2f/c8a8cfac6c7fa3d9e163a6bf46e6d27d027b7a1331028e99a6ef7fd3699d/debugpy-1.7.0-py2.py3-none-any.whl",
         "hash": (
             "sha256",
-            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d2989005005502",
+            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d298900500550",
         ),
     },
     "macOS": {
         "url": "https://files.pythonhosted.org/packages/bd/a3/5e37ce13c7dd850b72a52be544a058ed49606ebbbf8b95b2ba3c1db5620a/debugpy-1.7.0-cp311-cp311-macosx_11_0_universal2.whl",
-        "sha256": (
+        "hash": (
             "sha256",
             "538765a41198aa88cc089295b39c7322dd598f9ef1d52eaae12145c63bf9430a",
         ),
@@ -79,7 +79,6 @@ def tests(session: nox.Session) -> None:
 
 @nox.session()
 def install_bundled_libs(session):
-    # Install debugpy by URL and platform
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     session.install(
@@ -112,15 +111,15 @@ def install_bundled_libs(session):
 def download_url(value):
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
-        if hashlib.sha256(data).hexdigest() != value["hash"][1]:
-            raise Exception("Failed hash verification for {}.".format(value["url"]))
+        hash_algorithm, hash_digest = value["hash"]
+        if hashlib.new(hash_algorithm, data).hexdigest() != hash_digest:
+            raise ValueError("Failed hash verification for {}.".format(value["url"]))
         print("Download: ", value["url"])
         with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
+            libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
             for zip_info in wheel.infolist():
                 print("\t" + zip_info.filename)
-                wheel.extract(
-                    zip_info.filename, pathlib.Path.cwd() / "bundled" / "libs"
-                )
+                wheel.extract(zip_info.filename, libs_dir)
 
 
 @nox.session()
