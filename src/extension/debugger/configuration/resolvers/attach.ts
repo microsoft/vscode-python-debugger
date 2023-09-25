@@ -7,6 +7,7 @@ import { CancellationToken, Uri, WorkspaceFolder } from 'vscode';
 import { getOSType, OSType } from '../../../common/platform';
 import { AttachRequestArguments, DebugOptions, PathMapping } from '../../../types';
 import { BaseConfigurationResolver } from './base';
+import { getConfiguration } from '../../../common/vscodeapi';
 
 export class AttachConfigurationResolver extends BaseConfigurationResolver<AttachRequestArguments> {
     public async resolveDebugConfigurationWithSubstitutedVariables(
@@ -42,16 +43,13 @@ export class AttachConfigurationResolver extends BaseConfigurationResolver<Attac
             debugConfiguration.host = 'localhost';
         }
         if (debugConfiguration.justMyCode === undefined) {
-            // Populate justMyCode using debugStdLib
-            debugConfiguration.justMyCode = !debugConfiguration.debugStdLib;
-        }
+            const config = getConfiguration('debugpy');
+            debugConfiguration.justMyCode = config.get<boolean>('debugJustMyCode', false);
+        } 
         debugConfiguration.showReturnValue = debugConfiguration.showReturnValue !== false;
         // Pass workspace folder so we can get this when we get debug events firing.
         debugConfiguration.workspaceFolder = workspaceFolder ? workspaceFolder.fsPath : undefined;
         const debugOptions = debugConfiguration.debugOptions!;
-        if (!debugConfiguration.justMyCode) {
-            AttachConfigurationResolver.debugOption(debugOptions, DebugOptions.DebugStdLib);
-        }
         if (debugConfiguration.django) {
             AttachConfigurationResolver.debugOption(debugOptions, DebugOptions.Django);
         }
