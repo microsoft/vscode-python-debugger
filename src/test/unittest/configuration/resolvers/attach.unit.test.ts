@@ -6,7 +6,15 @@
 import { expect } from 'chai';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugConfigurationProvider, TextDocument, TextEditor, Uri, WorkspaceFolder } from 'vscode';
+import {
+    DebugConfiguration,
+    DebugConfigurationProvider,
+    TextDocument,
+    TextEditor,
+    Uri,
+    WorkspaceConfiguration,
+    WorkspaceFolder,
+} from 'vscode';
 import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
 import { getInfoPerOS } from './common';
 import { AttachRequestArguments, DebugOptions } from '../../../../extension/types';
@@ -35,6 +43,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         let getActiveTextEditorStub: sinon.SinonStub;
         let getWorkspaceFoldersStub: sinon.SinonStub;
         let getOSTypeStub: sinon.SinonStub;
+        let getConfigurationStub: sinon.SinonStub;
         const debugOptionsAvailable = getAvailableOptions();
 
         setup(() => {
@@ -43,6 +52,8 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getOSTypeStub = sinon.stub(platform, 'getOSType');
             getWorkspaceFoldersStub = sinon.stub(vscodeapi, 'getWorkspaceFolders');
             getOSTypeStub.returns(osType);
+            getConfigurationStub = sinon.stub(vscodeapi, 'getConfiguration');
+            getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(true));
         });
 
         teardown(() => {
@@ -53,6 +64,14 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const folder = TypeMoq.Mock.ofType<WorkspaceFolder>();
             folder.setup((f) => f.uri).returns(() => Uri.file(folderPath));
             return folder.object;
+        }
+
+        function createMoqConfiguration(justMyCode: boolean) {
+            const debugpySettings = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+            debugpySettings
+                .setup((p) => p.get<boolean>('debugJustMyCode', TypeMoq.It.isAny()))
+                .returns(() => justMyCode);
+            return debugpySettings.object;
         }
 
         function setupActiveEditor(fileName: string | undefined, languageId: string) {
@@ -494,67 +513,52 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         const testsForJustMyCode = [
             {
                 justMyCode: false,
-                debugStdLib: true,
+                justMyCodeSetting: true,
                 expectedResult: false,
             },
             {
                 justMyCode: false,
-                debugStdLib: false,
-                expectedResult: false,
-            },
-            {
-                justMyCode: false,
-                debugStdLib: undefined,
+                justMyCodeSetting: false,
                 expectedResult: false,
             },
             {
                 justMyCode: true,
-                debugStdLib: false,
+                justMyCodeSetting: false,
                 expectedResult: true,
             },
             {
                 justMyCode: true,
-                debugStdLib: true,
-                expectedResult: true,
-            },
-            {
-                justMyCode: true,
-                debugStdLib: undefined,
+                justMyCodeSetting: true,
                 expectedResult: true,
             },
             {
                 justMyCode: undefined,
-                debugStdLib: false,
-                expectedResult: true,
-            },
-            {
-                justMyCode: undefined,
-                debugStdLib: true,
+                justMyCodeSetting: false,
                 expectedResult: false,
             },
             {
                 justMyCode: undefined,
-                debugStdLib: undefined,
+                justMyCodeSetting: true,
                 expectedResult: true,
             },
         ];
-        test('Ensure justMyCode property is correctly derived from debugStdLib', async () => {
-            const activeFile = 'xyz.py';
-            const workspaceFolder = createMoqWorkspaceFolder(__dirname);
-            setupActiveEditor(activeFile, PYTHON_LANGUAGE);
-            const defaultWorkspace = path.join('usr', 'desktop');
-            setupWorkspaces([defaultWorkspace]);
+        testsForJustMyCode.forEach(async (testParams) => {
+            test('Ensure justMyCode property is correctly derived from global settings', async () => {
+                const activeFile = 'xyz.py';
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                setupActiveEditor(activeFile, PYTHON_LANGUAGE);
+                const defaultWorkspace = path.join('usr', 'desktop');
+                setupWorkspaces([defaultWorkspace]);
 
-            const debugOptions = debugOptionsAvailable
-                .slice()
-                .concat(DebugOptions.Jinja, DebugOptions.Sudo) as DebugOptions[];
+                const debugOptions = debugOptionsAvailable
+                    .slice()
+                    .concat(DebugOptions.Jinja, DebugOptions.Sudo) as DebugOptions[];
 
-            testsForJustMyCode.forEach(async (testParams) => {
+                getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(testParams.justMyCodeSetting));
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...attach,
                     debugOptions,
                     justMyCode: testParams.justMyCode,
-                    debugStdLib: testParams.debugStdLib,
                 });
                 expect(debugConfig).to.have.property('justMyCode', testParams.expectedResult);
             });

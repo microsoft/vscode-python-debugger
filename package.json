@@ -79,6 +79,18 @@
                 }
             ]
         },
+        "configuration": {
+            "properties": {
+                "debugpy.debugJustMyCode": {
+                    "default": true,
+                    "description": "%debugpy.debugJustMyCode%",
+                    "scope": "resource",
+                    "type": "boolean"
+                }
+            },
+            "title": "Python Debugger",
+            "type": "object"
+        },
         "debuggers": [
             {
                 "configurationAttributes": {
