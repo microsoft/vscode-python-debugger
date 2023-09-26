@@ -25,7 +25,7 @@ def _install_bundle(session: nox.Session, version="latest") -> None:
         "./requirements.txt",
     )
     session.install("packaging")
-    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", version)
+    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", "1.7.0")
 
 
 def _update_pip_packages(session: nox.Session) -> None:
