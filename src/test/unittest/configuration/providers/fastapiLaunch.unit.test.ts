@@ -55,7 +55,6 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             module: 'uvicorn',
             args: ['main:app', '--reload'],
             jinja: true,
-            justMyCode: true,
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -75,7 +74,6 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             module: 'uvicorn',
             args: ['main:app', '--reload'],
             jinja: true,
-            justMyCode: true,
         };
 
         expect(state.config).to.be.deep.equal(config);

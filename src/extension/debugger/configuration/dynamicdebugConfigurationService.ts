@@ -27,7 +27,6 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
             type: DebuggerTypeName,
             request: 'launch',
             program: '${file}',
-            justMyCode: true,
         });
 
         const djangoManagePath = await DynamicPythonDebugConfigurationService.getDjangoPath(folder);
@@ -39,7 +38,6 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
                 program: `${workspaceFolderToken}${path.sep}${djangoManagePath}`,
                 args: ['runserver'],
                 django: true,
-                justMyCode: true,
             });
         }
 
@@ -56,7 +54,6 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
                 },
                 args: ['run', '--no-debugger', '--no-reload'],
                 jinja: true,
-                justMyCode: true,
             });
         }
 
@@ -70,7 +67,6 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
                 module: 'uvicorn',
                 args: [`${fastApiPath}:app`, '--reload'],
                 jinja: true,
-                justMyCode: true,
             });
         }
 

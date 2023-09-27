@@ -27,7 +27,6 @@ export async function buildFastAPILaunchDebugConfiguration(
         module: 'uvicorn',
         args: ['main:app', '--reload'],
         jinja: true,
-        justMyCode: true,
     };
 
     if (!application) {

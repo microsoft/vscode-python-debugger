@@ -21,7 +21,6 @@ export async function buildFileLaunchDebugConfiguration(
         request: 'launch',
         program: '${file}',
         console: 'integratedTerminal',
-        justMyCode: true,
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPI,

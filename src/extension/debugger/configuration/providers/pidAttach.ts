@@ -20,7 +20,6 @@ export async function buildPidAttachConfiguration(
         type: DebuggerTypeName,
         request: 'attach',
         processId: '${command:pickProcess}',
-        justMyCode: true,
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.pidAttach,

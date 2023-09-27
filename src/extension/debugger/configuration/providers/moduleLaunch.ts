@@ -21,7 +21,6 @@ export async function buildModuleLaunchConfiguration(
         type: DebuggerTypeName,
         request: 'launch',
         module: DebugConfigStrings.module.snippet.default,
-        justMyCode: true,
     };
     const selectedModule = await input.showInputBox({
         title: DebugConfigStrings.module.enterModule.title,
