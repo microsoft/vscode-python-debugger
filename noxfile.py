@@ -97,21 +97,27 @@ def install_bundled_libs(session):
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
     if "darwin" in target:
-        download_url(DEBUGPY_WHEEL_URLS["macOS"])
+        # download_url(DEBUGPY_WHEEL_URLS["macOS"])
+        _get_debugpy_url("1.7.0", "macosx")
     elif "win32-ia32" == target:
-        download_url(DEBUGPY_WHEEL_URLS["win32"])
+        _get_debugpy_url("1.7.0", "win32")
+        # download_url(DEBUGPY_WHEEL_URLS["win32"])
     elif "win32-x64" == target:
-        download_url(DEBUGPY_WHEEL_URLS["win64"])
+        _get_debugpy_url("1.7.0", "win_amd64")
+        # download_url(DEBUGPY_WHEEL_URLS["win64"])
     elif "linux-x64" == target:
-        download_url(DEBUGPY_WHEEL_URLS["linux"])
+        _get_debugpy_url("1.7.0", "manylinux")
+        # download_url(DEBUGPY_WHEEL_URLS["linux"])
     else:
-        download_url(DEBUGPY_WHEEL_URLS["any"])
+        _get_debugpy_url("1.7.0")
+        # download_url(DEBUGPY_WHEEL_URLS["any"])
 
 
 def download_url(value):
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
         hash_algorithm, hash_digest = value["hash"]
+        print(hash_digest)
         if hashlib.new(hash_algorithm, data).hexdigest() != hash_digest:
             raise ValueError("Failed hash verification for {}.".format(value["url"]))
         print("Download: ", value["url"])
@@ -143,3 +149,28 @@ def update_build_number(session: nox.Session) -> None:
     session.log(f"Updating version from {package_json['version']} to {version}")
     package_json["version"] = version
     package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
+
+def _get_pypi_package_data(package_name):
+    json_uri = "https://pypi.org/pypi/{0}/json".format(package_name)
+    # Response format: https://warehouse.readthedocs.io/api-reference/json/#project
+    # Release metadata format: https://github.com/pypa/interoperability-peps/blob/master/pep-0426-core-metadata.rst
+    with url_lib.urlopen(json_uri) as response:
+        return json.loads(response.read())
+    
+def _get_debugpy_url(version="latest", platform="none-any", cp="cp311"):
+    from packaging.version import parse as version_parser
+
+    data = _get_pypi_package_data('debugpy')
+
+    if version == "latest":
+        use_version = max(data["releases"].keys(), key=version_parser)
+    else:
+        use_version = version
+
+    data = list(
+        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["filename"], ("{}-{}".format(cp, platform),))
+    )[0]
+    download_url(data)
+    
+def _contains(s, parts=()):
+    return any(p for p in parts if p in s)
