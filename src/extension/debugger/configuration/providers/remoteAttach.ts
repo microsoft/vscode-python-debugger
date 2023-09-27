@@ -33,7 +33,6 @@ export async function buildRemoteAttachConfiguration(
                 remoteRoot: '.',
             },
         ],
-        justMyCode: true,
     };
 
     const connect = config.connect!;

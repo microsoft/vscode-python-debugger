@@ -31,7 +31,6 @@ export async function buildDjangoLaunchDebugConfiguration(
         program: program || defaultProgram,
         args: ['runserver'],
         django: true,
-        justMyCode: true,
     };
     if (!program) {
         const selectedProgram = await input.showInputBox({

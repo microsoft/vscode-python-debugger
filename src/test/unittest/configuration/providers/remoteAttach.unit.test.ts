@@ -87,7 +87,6 @@ suite('Debugging - Configuration Provider Remote Attach', () => {
                     remoteRoot: '.',
                 },
             ],
-            justMyCode: true,
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -121,7 +120,6 @@ suite('Debugging - Configuration Provider Remote Attach', () => {
                     remoteRoot: '.',
                 },
             ],
-            justMyCode: true,
         };
 
         expect(state.config).to.be.deep.equal(config);
