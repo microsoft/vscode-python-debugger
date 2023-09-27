@@ -25,7 +25,6 @@ suite('Debugging - Configuration Provider File', () => {
             request: 'launch',
             program: '${file}',
             console: 'integratedTerminal',
-            justMyCode: true,
         };
 
         expect(state.config).to.be.deep.equal(config);

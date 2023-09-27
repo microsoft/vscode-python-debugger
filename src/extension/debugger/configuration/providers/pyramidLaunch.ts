@@ -33,7 +33,6 @@ export async function buildPyramidLaunchConfiguration(
         args: [iniPath || defaultIni],
         pyramid: true,
         jinja: true,
-        justMyCode: true,
     };
 
     if (!iniPath) {
