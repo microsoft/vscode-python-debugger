@@ -43,7 +43,10 @@ export class AttachConfigurationResolver extends BaseConfigurationResolver<Attac
             debugConfiguration.host = 'localhost';
         }
         if (debugConfiguration.justMyCode === undefined) {
-            debugConfiguration.justMyCode = getConfiguration('debugpy', workspaceFolder).get<boolean>('debugJustMyCode', true);
+            debugConfiguration.justMyCode = getConfiguration('debugpy', workspaceFolder).get<boolean>(
+                'debugJustMyCode',
+                true,
+            );
         }
         debugConfiguration.showReturnValue = debugConfiguration.showReturnValue !== false;
         // Pass workspace folder so we can get this when we get debug events firing.

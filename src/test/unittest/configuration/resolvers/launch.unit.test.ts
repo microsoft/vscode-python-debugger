@@ -51,7 +51,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getEnvFileStub = sinon.stub(settings, 'getEnvFile');
             getDebugEnvironmentVariablesStub = sinon.stub(helper, 'getDebugEnvironmentVariables');
             getConfigurationStub = sinon.stub(vscodeapi, 'getConfiguration');
-            getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(true));
+            getConfigurationStub.withArgs('debugpy', sinon.match.any).returns(createMoqConfiguration(true));
         });
 
         teardown(() => {
@@ -792,7 +792,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 const pythonFile = 'xyz.py';
                 setupIoc(pythonPath);
                 setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
-                getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(testParams.justMyCodeSetting));
+                getConfigurationStub.withArgs('debugpy', sinon.match.any).returns(createMoqConfiguration(testParams.justMyCodeSetting));
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...launch,
                     justMyCode: testParams.justMyCode,
