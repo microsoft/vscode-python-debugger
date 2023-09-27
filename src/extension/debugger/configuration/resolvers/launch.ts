@@ -103,7 +103,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
             debugConfiguration.debugOptions = [];
         }
         if (debugConfiguration.justMyCode === undefined) {
-            debugConfiguration.justMyCode = getConfiguration('debugpy').get<boolean>('debugJustMyCode', true);
+            debugConfiguration.justMyCode = getConfiguration('debugpy', workspaceFolder).get<boolean>('debugJustMyCode', true);
         }
         // Pass workspace folder so we can get this when we get debug events firing.
         debugConfiguration.workspaceFolder = workspaceFolder ? workspaceFolder.fsPath : undefined;
