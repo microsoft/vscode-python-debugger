@@ -554,7 +554,9 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     .slice()
                     .concat(DebugOptions.Jinja, DebugOptions.Sudo) as DebugOptions[];
 
-                getConfigurationStub.withArgs('debugpy', sinon.match.any).returns(createMoqConfiguration(testParams.justMyCodeSetting));
+                getConfigurationStub
+                    .withArgs('debugpy', sinon.match.any)
+                    .returns(createMoqConfiguration(testParams.justMyCodeSetting));
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...attach,
                     debugOptions,
