@@ -396,7 +396,7 @@ suite('Debugging - launch.json Updater Service', () => {
         const position = new Position(1, 0);
         document
             .setup((doc) => doc.lineAt(1))
-            .returns(() => ({ range: new Range(1, 0, 1, 1) } as TextLine))
+            .returns(() => ({ range: new Range(1, 0, 1, 1) }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.getText(typemoq.It.isAny()))
@@ -414,7 +414,7 @@ suite('Debugging - launch.json Updater Service', () => {
         const position = new Position(2, 2);
         document
             .setup((doc) => doc.lineAt(2))
-            .returns(() => ({ range: new Range(2, 0, 1, 5) } as TextLine))
+            .returns(() => ({ range: new Range(2, 0, 1, 5) }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.getText(typemoq.It.isAny()))
@@ -432,7 +432,7 @@ suite('Debugging - launch.json Updater Service', () => {
         const position = new Position(2, 2);
         document
             .setup((doc) => doc.lineAt(2))
-            .returns(() => ({ range: new Range(2, 0, 2, 3) } as TextLine))
+            .returns(() => ({ range: new Range(2, 0, 2, 3) }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.getText(typemoq.It.isAny()))
@@ -450,11 +450,11 @@ suite('Debugging - launch.json Updater Service', () => {
         const position = new Position(2, 2);
         document
             .setup((doc) => doc.lineAt(1))
-            .returns(() => ({ range: new Range(1, 0, 1, 3), text: '}, ' } as TextLine))
+            .returns(() => ({ range: new Range(1, 0, 1, 3), text: '}, ' }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.lineAt(2))
-            .returns(() => ({ range: new Range(2, 0, 2, 3), text: '   ' } as TextLine))
+            .returns(() => ({ range: new Range(2, 0, 2, 3), text: '   ' }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.getText(typemoq.It.isAny()))
@@ -472,11 +472,11 @@ suite('Debugging - launch.json Updater Service', () => {
         const position = new Position(2, 2);
         document
             .setup((doc) => doc.lineAt(1))
-            .returns(() => ({ range: new Range(1, 0, 1, 3), text: '} ' } as TextLine))
+            .returns(() => ({ range: new Range(1, 0, 1, 3), text: '} ' }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.lineAt(2))
-            .returns(() => ({ range: new Range(2, 0, 2, 3), text: '   ' } as TextLine))
+            .returns(() => ({ range: new Range(2, 0, 2, 3), text: '   ' }) as TextLine)
             .verifiable(typemoq.Times.atLeastOnce());
         document
             .setup((doc) => doc.getText(typemoq.It.isAny()))
