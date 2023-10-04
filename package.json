@@ -478,10 +478,10 @@
         "@vscode/vsce": "^2.19.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
-        "eslint": "^8.20.0",
+        "eslint": "^8.50.0",
         "glob": "^8.0.3",
         "mocha": "^10.0.0",
-        "prettier": "^2.7.1",
+        "prettier": "^3.0.3",
         "rewiremock": "^3.13.0",
         "semver": "^7.5.4",
         "sinon": "^15.0.2",
@@ -494,7 +494,7 @@
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
-        "@vscode/extension-telemetry": "^0.7.7",
+        "@vscode/extension-telemetry": "^0.8.5",
         "fs-extra": "^11.1.0",
         "iconv-lite": "^0.6.3",
         "inversify": "^6.0.1",
