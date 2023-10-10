@@ -1,0 +1,37 @@
+{
+    "macos": {
+        "url": "https://files.pythonhosted.org/packages/bd/a3/5e37ce13c7dd850b72a52be544a058ed49606ebbbf8b95b2ba3c1db5620a/debugpy-1.7.0-cp311-cp311-macosx_11_0_universal2.whl",
+        "hash": [
+            "sha256",
+            "538765a41198aa88cc089295b39c7322dd598f9ef1d52eaae12145c63bf9430a"
+        ]
+    },
+    "win32": {
+        "url": "https://files.pythonhosted.org/packages/52/59/3591e9f709b7ee4d3a926a8903a395669cd0e0279204a94b6acccf6ed6ee/debugpy-1.7.0-cp311-cp311-win32.whl",
+        "hash": [
+            "sha256",
+            "18a69f8e142a716310dd0af6d7db08992aed99e2606108732efde101e7c65e2a"
+        ]
+    },
+    "win64": {
+        "url": "https://files.pythonhosted.org/packages/51/59/84ebd58d3e9de33a54ca8aa4532e03906e5458092dafe240264c2937a99b/debugpy-1.7.0-cp311-cp311-win_amd64.whl",
+        "hash": [
+            "sha256",
+            "7515a5ba5ee9bfe956685909c5f28734c1cecd4ee813523363acfe3ca824883a"
+        ]
+    },
+    "linux": {
+        "url": "https://files.pythonhosted.org/packages/b4/fc/087324d46dab8e21e084ce2cf670fa7e524ab5e7691692438e4987bd3ecb/debugpy-1.7.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "hash": [
+            "sha256",
+            "c7e8cf91f8f3f9b5fad844dd88427b85d398bda1e2a0cd65d5a21312fcbc0c6f"
+        ]
+    },
+    "any": {
+        "url": "https://files.pythonhosted.org/packages/39/2f/c8a8cfac6c7fa3d9e163a6bf46e6d27d027b7a1331028e99a6ef7fd3699d/debugpy-1.7.0-py2.py3-none-any.whl",
+        "hash": [
+            "sha256",
+            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d2989005005502"
+        ]
+    }
+}

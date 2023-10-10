@@ -157,7 +157,7 @@ def _get_pypi_package_data(package_name):
     with url_lib.urlopen(json_uri) as response:
         return json.loads(response.read())
     
-def _get_debugpy_url(version="latest", platform="none-any", cp="cp311"):
+def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
     from packaging.version import parse as version_parser
 
     data = _get_pypi_package_data('debugpy')
@@ -167,10 +167,32 @@ def _get_debugpy_url(version="latest", platform="none-any", cp="cp311"):
     else:
         use_version = version
 
-    data = list(
-        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["filename"], ("{}-{}".format(cp, platform),))
+    try:
+        return list(
+        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["url"], ("{}-{}".format(cp, platform),))
     )[0]
-    download_url(data)
     
+    except:
+         return list(
+        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["url"], ("{}-{}".format("py3", platform),))
+    )[0]
+    
+
+@nox.session()
+def create_debugpy_json(session: nox.Session, version="1.7.0", cp="cp311"):
+    platforms = [("macos", "macosx"), ("win32", "win32"), ("win64", "win_amd64"), ("linux", "manylinux"),("any", "none-any")]
+
+    debugpy_platforms_json_path = pathlib.Path(__file__).parent / "debugpy_platforms.json"
+    debugpy_platforms = json.loads(debugpy_platforms_json_path.read_text(encoding="utf-8"))
+    for p, id in platforms:
+        print(p, id)
+        data = _get_debugpy_info(version, id, cp)
+        print(data)
+        debugpy_platforms[p] = data 
+        # debugpy_platforms[]
+    debugpy_platforms_json_path.write_text(json.dumps(debugpy_platforms, indent=4), encoding="utf-8")
+
+    
+
 def _contains(s, parts=()):
     return any(p for p in parts if p in s)
