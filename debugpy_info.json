@@ -1,5 +1,5 @@
 {
-    "macos": {
+    "macOS": {
         "url": "https://files.pythonhosted.org/packages/bd/a3/5e37ce13c7dd850b72a52be544a058ed49606ebbbf8b95b2ba3c1db5620a/debugpy-1.7.0-cp311-cp311-macosx_11_0_universal2.whl",
         "hash": [
             "sha256",

@@ -12,44 +12,6 @@ import zipfile
 
 import nox  # pylint: disable=import-error
 
-DEBUGPY_WHEEL_URLS = {
-    "any": {
-        "url": "https://files.pythonhosted.org/packages/39/2f/c8a8cfac6c7fa3d9e163a6bf46e6d27d027b7a1331028e99a6ef7fd3699d/debugpy-1.7.0-py2.py3-none-any.whl",
-        "hash": (
-            "sha256",
-            "f6de2e6f24f62969e0f0ef682d78c98161c4dca29e9fb05df4d2989005005502",
-        ),
-    },
-    "macOS": {
-        "url": "https://files.pythonhosted.org/packages/bd/a3/5e37ce13c7dd850b72a52be544a058ed49606ebbbf8b95b2ba3c1db5620a/debugpy-1.7.0-cp311-cp311-macosx_11_0_universal2.whl",
-        "hash": (
-            "sha256",
-            "538765a41198aa88cc089295b39c7322dd598f9ef1d52eaae12145c63bf9430a",
-        ),
-    },
-    "linux": {
-        "url": "https://files.pythonhosted.org/packages/b4/fc/087324d46dab8e21e084ce2cf670fa7e524ab5e7691692438e4987bd3ecb/debugpy-1.7.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-        "hash": (
-            "sha256",
-            "c7e8cf91f8f3f9b5fad844dd88427b85d398bda1e2a0cd65d5a21312fcbc0c6f",
-        ),
-    },
-    "win32": {
-        "url": "https://files.pythonhosted.org/packages/52/59/3591e9f709b7ee4d3a926a8903a395669cd0e0279204a94b6acccf6ed6ee/debugpy-1.7.0-cp311-cp311-win32.whl",
-        "hash": (
-            "sha256",
-            "18a69f8e142a716310dd0af6d7db08992aed99e2606108732efde101e7c65e2a",
-        ),
-    },
-    "win64": {
-        "url": "https://files.pythonhosted.org/packages/51/59/84ebd58d3e9de33a54ca8aa4532e03906e5458092dafe240264c2937a99b/debugpy-1.7.0-cp311-cp311-win_amd64.whl",
-        "hash": (
-            "sha256",
-            "7515a5ba5ee9bfe956685909c5f28734c1cecd4ee813523363acfe3ca824883a",
-        ),
-    },
-}
-
 
 @nox.session()
 def lint(session: nox.Session) -> None:
@@ -94,30 +56,27 @@ def install_bundled_libs(session):
     )
     session.install("packaging")
 
+    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
+    debugpy_info = json.loads(debugpy_info_json_path.read_text(encoding="utf-8"))
+
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
     if "darwin" in target:
-        # download_url(DEBUGPY_WHEEL_URLS["macOS"])
-        _get_debugpy_url("1.7.0", "macosx")
+        download_url(debugpy_info["macOS"])
     elif "win32-ia32" == target:
-        _get_debugpy_url("1.7.0", "win32")
-        # download_url(DEBUGPY_WHEEL_URLS["win32"])
+        download_url(debugpy_info["win32"])
     elif "win32-x64" == target:
-        _get_debugpy_url("1.7.0", "win_amd64")
-        # download_url(DEBUGPY_WHEEL_URLS["win64"])
+        download_url(debugpy_info["win64"])
     elif "linux-x64" == target:
-        _get_debugpy_url("1.7.0", "manylinux")
-        # download_url(DEBUGPY_WHEEL_URLS["linux"])
+        download_url(debugpy_info["linux"])
     else:
-        _get_debugpy_url("1.7.0")
-        # download_url(DEBUGPY_WHEEL_URLS["any"])
+        download_url(debugpy_info["any"])
 
 
 def download_url(value):
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
         hash_algorithm, hash_digest = value["hash"]
-        print(hash_digest)
         if hashlib.new(hash_algorithm, data).hexdigest() != hash_digest:
             raise ValueError("Failed hash verification for {}.".format(value["url"]))
         print("Download: ", value["url"])
@@ -150,17 +109,19 @@ def update_build_number(session: nox.Session) -> None:
     package_json["version"] = version
     package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
 
+
 def _get_pypi_package_data(package_name):
     json_uri = "https://pypi.org/pypi/{0}/json".format(package_name)
     # Response format: https://warehouse.readthedocs.io/api-reference/json/#project
     # Release metadata format: https://github.com/pypa/interoperability-peps/blob/master/pep-0426-core-metadata.rst
     with url_lib.urlopen(json_uri) as response:
         return json.loads(response.read())
-    
+
+
 def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
     from packaging.version import parse as version_parser
 
-    data = _get_pypi_package_data('debugpy')
+    data = _get_pypi_package_data("debugpy")
 
     if version == "latest":
         use_version = max(data["releases"].keys(), key=version_parser)
@@ -169,30 +130,34 @@ def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
 
     try:
         return list(
-        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["url"], ("{}-{}".format(cp, platform),))
-    )[0]
-    
+            {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])}
+            for r in data["releases"][use_version]
+            if _contains(r["url"], ("{}-{}".format(cp, platform),))
+        )[0]
+
     except:
-         return list(
-        {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])} for r in data["releases"][use_version] if _contains(r["url"], ("{}-{}".format("py3", platform),))
-    )[0]
-    
+        return list(
+            {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])}
+            for r in data["releases"][use_version]
+            if _contains(r["url"], ("{}-{}".format("py3", platform),))
+        )[0]
+
 
 @nox.session()
 def create_debugpy_json(session: nox.Session, version="1.7.0", cp="cp311"):
-    platforms = [("macos", "macosx"), ("win32", "win32"), ("win64", "win_amd64"), ("linux", "manylinux"),("any", "none-any")]
+    platforms = [
+        ("macOS", "macosx"),
+        ("win32", "win32"),
+        ("win64", "win_amd64"),
+        ("linux", "manylinux"),
+        ("any", "none-any"),
+    ]
+    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
+    debugpy_info = {p: _get_debugpy_info(version, id, cp) for p, id in platforms}
+    debugpy_info_json_path.write_text(
+        json.dumps(debugpy_info, indent=4), encoding="utf-8"
+    )
 
-    debugpy_platforms_json_path = pathlib.Path(__file__).parent / "debugpy_platforms.json"
-    debugpy_platforms = json.loads(debugpy_platforms_json_path.read_text(encoding="utf-8"))
-    for p, id in platforms:
-        print(p, id)
-        data = _get_debugpy_info(version, id, cp)
-        print(data)
-        debugpy_platforms[p] = data 
-        # debugpy_platforms[]
-    debugpy_platforms_json_path.write_text(json.dumps(debugpy_platforms, indent=4), encoding="utf-8")
-
-    
 
 def _contains(s, parts=()):
     return any(p for p in parts if p in s)
