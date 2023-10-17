@@ -70,17 +70,11 @@ extends:
       - script: npm ci
         displayName: Install NPM dependencies
 
-      - script: python -m pip install -U pip
-        displayName: Upgrade pip
-
-      - script: python -m pip install wheel
-        displayName: Install wheel
-
-      - script: python -m pip install nox
-        displayName: Install nox
+      -install wheel script: python -m pip install -U pip pipx wheel
+        displayName: Update pip, install pipx and install wheel
 
       # update according packageArch
-      - script: python -m nox --session install_bundled_libs
+      - script: pipx run nox --session install_bundled_libs
         displayName: Install Python dependencies
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}

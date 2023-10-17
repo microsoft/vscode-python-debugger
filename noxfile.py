@@ -50,7 +50,9 @@ def install_bundled_libs(session):
         "--implementation",
         "py",
         "--no-deps",
-        "--upgrade",
+        "--require-hashes",
+        "--only-binary",
+        ":all:",
         "-r",
         "./requirements.txt",
     )
@@ -73,11 +75,13 @@ def install_bundled_libs(session):
         download_url(debugpy_info["any"])
 
 
-def download_url(value):
+def download_url(value, hash_algorithm="sha256"):
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
-        hash_algorithm, hash_digest = value["hash"]
-        if hashlib.new(hash_algorithm, data).hexdigest() != hash_digest:
+        if (
+            hashlib.new(hash_algorithm, data).hexdigest()
+            != value["hash"][hash_algorithm]
+        ):
             raise ValueError("Failed hash verification for {}.".format(value["url"]))
         print("Download: ", value["url"])
         with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
@@ -90,7 +94,7 @@ def download_url(value):
 @nox.session()
 def update_build_number(session: nox.Session) -> None:
     """Updates build number for the extension."""
-    if len(session.posargs) == 0:
+    if not len(session.posargs):
         session.log("No updates to package version")
         return
 
@@ -99,7 +103,7 @@ def update_build_number(session: nox.Session) -> None:
 
     package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
 
-    parts = re.split("\\.|-", package_json["version"])
+    parts = re.split(r"\.|-", package_json["version"])
     major, minor = parts[:2]
 
     version = f"{major}.{minor}.{session.posargs[0]}"
@@ -128,19 +132,11 @@ def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
     else:
         use_version = version
 
-    try:
-        return list(
-            {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])}
-            for r in data["releases"][use_version]
-            if _contains(r["url"], ("{}-{}".format(cp, platform),))
-        )[0]
-
-    except:
-        return list(
-            {"url": r["url"], "hash": ("sha256", r["digests"]["sha256"])}
-            for r in data["releases"][use_version]
-            if _contains(r["url"], ("{}-{}".format("py3", platform),))
-        )[0]
+    return list(
+        {"url": r["url"], "hash": {"sha256": r["digests"]["sha256"]}}
+        for r in data["releases"][use_version]
+        if f"{cp}-{platform}" in r["url"] or f"py3-{platform}" in r["url"]
+    )[0]
 
 
 @nox.session()
@@ -157,7 +153,3 @@ def create_debugpy_json(session: nox.Session, version="1.7.0", cp="cp311"):
     debugpy_info_json_path.write_text(
         json.dumps(debugpy_info, indent=4), encoding="utf-8"
     )
-
-
-def _contains(s, parts=()):
-    return any(p for p in parts if p in s)
