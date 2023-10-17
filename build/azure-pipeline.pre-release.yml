@@ -70,7 +70,7 @@ extends:
       - script: npm ci
         displayName: Install NPM dependencies
 
-      -install wheel script: python -m pip install -U pip pipx wheel
+      - script: python -m pip install -U pip pipx wheel
         displayName: Update pip, install pipx and install wheel
 
       # update according packageArch
