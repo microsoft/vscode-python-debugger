@@ -77,7 +77,7 @@ extends:
         displayName: Install wheel and nox
 
       # update according packageArch
-      - script: pipx run nox --session install_bundled_libs
+      - script: python -m nox --session install_bundled_libs
         displayName: Install Python dependencies
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}
