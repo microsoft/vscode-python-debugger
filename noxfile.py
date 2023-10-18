@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 """All the action we need during build"""
+import hashlib
 import io
 import json
 import os
@@ -10,26 +11,6 @@ import urllib.request as url_lib
 import zipfile
 
 import nox  # pylint: disable=import-error
-
-
-def _install_bundle(session: nox.Session, version="latest") -> None:
-    session.install(
-        "-t",
-        "./bundled/libs",
-        "--no-cache-dir",
-        "--implementation",
-        "py",
-        "--no-deps",
-        "--upgrade",
-        "-r",
-        "./requirements.txt",
-    )
-    session.install("packaging")
-    _install_package(f"{os.getcwd()}/bundled/libs", "debugpy", "1.7.0")
-
-
-def _update_pip_packages(session: nox.Session) -> None:
-    session.run("pip-compile", "--generate-hashes", "--upgrade", "./requirements.in")
 
 
 @nox.session()
@@ -58,88 +39,80 @@ def tests(session: nox.Session) -> None:
     session.run("npm", "run", "test")
 
 
-def _get_package_data(package):
-    json_uri = f"https://registry.npmjs.org/{package}"
-    with url_lib.urlopen(json_uri) as response:
-        return json.loads(response.read())
-
-
-def _update_npm_packages(session: nox.Session) -> None:
-    pinned = {
-        "vscode-languageclient",
-        "@types/vscode",
-        "@types/node",
-    }
-    package_json_path = pathlib.Path(__file__).parent / "package.json"
-    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-
-    for package in package_json["dependencies"]:
-        if package not in pinned:
-            data = _get_package_data(package)
-            latest = "^" + data["dist-tags"]["latest"]
-            package_json["dependencies"][package] = latest
-
-    for package in package_json["devDependencies"]:
-        if package not in pinned:
-            data = _get_package_data(package)
-            latest = "^" + data["dist-tags"]["latest"]
-            package_json["devDependencies"][package] = latest
-
-    # Ensure engine matches the package
-    if (
-        package_json["engines"]["vscode"]
-        != package_json["devDependencies"]["@types/vscode"]
-    ):
-        print(
-            "Please check VS Code engine version and @types/vscode version in package.json."
-        )
-
-    new_package_json = json.dumps(package_json, indent=4)
-    # JSON dumps uses \n for line ending on all platforms by default
-    if not new_package_json.endswith("\n"):
-        new_package_json += "\n"
-    package_json_path.write_text(new_package_json, encoding="utf-8")
-
-    session.run("npm", "audit", "fix", external=True)
-    session.run("npm", "install", external=True)
-
-
-def _setup_template_environment(session: nox.Session) -> None:
-    session.install("wheel", "pip-tools")
-    _update_pip_packages(session)
-    _install_bundle(session)
-
-
-@nox.session(python="3.7")
+@nox.session()
 def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
-    _install_bundle(session)
+    session.install(
+        "-t",
+        "./bundled/libs",
+        "--no-cache-dir",
+        "--implementation",
+        "py",
+        "--no-deps",
+        "--require-hashes",
+        "--only-binary",
+        ":all:",
+        "-r",
+        "./requirements.txt",
+    )
+    session.install("packaging")
+
+    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
+    debugpy_info = json.loads(debugpy_info_json_path.read_text(encoding="utf-8"))
+
+    target = os.environ.get("VSCETARGET", "")
+    print("target:", target)
+    if "darwin" in target:
+        download_url(debugpy_info["macOS"])
+    elif "win32-ia32" == target:
+        download_url(debugpy_info["win32"])
+    elif "win32-x64" == target:
+        download_url(debugpy_info["win64"])
+    elif "linux-x64" == target:
+        download_url(debugpy_info["linux"])
+    else:
+        download_url(debugpy_info["any"])
 
 
-@nox.session(python="3.6")
-def install_old_bundled_libs(session):
-    """Installs the libraries that will be bundled with the extension."""
-    session.install("wheel")
-    _install_bundle(session, "1.5.1")
+def download_url(value):
+    with url_lib.urlopen(value["url"]) as response:
+        data = response.read()
+        hash_algorithm, hash_value = [
+            (key, value) for key, value in value["hash"].items()
+        ][0]
+        if hashlib.new(hash_algorithm, data).hexdigest() != hash_value:
+            raise ValueError("Failed hash verification for {}.".format(value["url"]))
 
-
-@nox.session(python="3.7")
-def setup(session: nox.Session) -> None:
-    """Sets up the extension for development."""
-    _setup_template_environment(session)
+        print("Download: ", value["url"])
+        with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
+            libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
+            for zip_info in wheel.infolist():
+                print("\t" + zip_info.filename)
+                wheel.extract(zip_info.filename, libs_dir)
 
 
 @nox.session()
-def update_packages(session: nox.Session) -> None:
-    """Update pip and npm packages."""
-    session.install("wheel", "pip-tools")
-    _update_pip_packages(session)
-    _update_npm_packages(session)
+def update_build_number(session: nox.Session) -> None:
+    """Updates build number for the extension."""
+    if not len(session.posargs):
+        session.log("No updates to package version")
+        return
 
+    package_json_path = pathlib.Path(__file__).parent / "package.json"
+    session.log(f"Reading package.json at: {package_json_path}")
 
-def _contains(s, parts=()):
-    return any(p for p in parts if p in s)
+    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
+
+    parts = re.split(r"\.|-", package_json["version"])
+    major, minor = parts[:2]
+
+    version = f"{major}.{minor}.{session.posargs[0]}"
+    version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
+
+    session.log(f"Updating version from {package_json['version']} to {version}")
+    package_json["version"] = version
+    package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
 
 
 def _get_pypi_package_data(package_name):
@@ -150,59 +123,34 @@ def _get_pypi_package_data(package_name):
         return json.loads(response.read())
 
 
-def _get_urls(data, version):
-    return list(
-        r["url"] for r in data["releases"][version] if _contains(r["url"], ("cp37",))
-    )
-
-
-def _download_and_extract(root, url):
-    if "manylinux" in url or "macosx" in url or "win_amd64" in url:
-        root = os.getcwd() if root is None or root == "." else root
-        print(url)
-        with url_lib.urlopen(url) as response:
-            data = response.read()
-            with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
-                for zip_info in wheel.infolist():
-                    # Ignore dist info since we are merging multiple wheels
-                    if ".dist-info/" in zip_info.filename:
-                        continue
-                    print("\t" + zip_info.filename)
-                    wheel.extract(zip_info.filename, root)
-
-
-def _install_package(root, package_name, version="latest"):
+def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
     from packaging.version import parse as version_parser
 
-    data = _get_pypi_package_data(package_name)
+    data = _get_pypi_package_data("debugpy")
 
     if version == "latest":
         use_version = max(data["releases"].keys(), key=version_parser)
     else:
         use_version = version
 
-    for url in _get_urls(data, use_version):
-        _download_and_extract(root, url)
+    return list(
+        {"url": r["url"], "hash": {"sha256": r["digests"]["sha256"]}}
+        for r in data["releases"][use_version]
+        if f"{cp}-{platform}" in r["url"] or f"py3-{platform}" in r["url"]
+    )[0]
 
 
 @nox.session()
-def update_build_number(session: nox.Session) -> None:
-    """Updates build number for the extension."""
-    if len(session.posargs) == 0:
-        session.log("No updates to package version")
-        return
-
-    package_json_path = pathlib.Path(__file__).parent / "package.json"
-    session.log(f"Reading package.json at: {package_json_path}")
-
-    package_json = json.loads(package_json_path.read_text(encoding="utf-8"))
-
-    parts = re.split("\\.|-", package_json["version"])
-    major, minor = parts[:2]
-
-    version = f"{major}.{minor}.{session.posargs[0]}"
-    version = version if len(parts) == 3 else f"{version}-{''.join(parts[3:])}"
-
-    session.log(f"Updating version from {package_json['version']} to {version}")
-    package_json["version"] = version
-    package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
+def create_debugpy_json(session: nox.Session, version="1.7.0", cp="cp311"):
+    platforms = [
+        ("macOS", "macosx"),
+        ("win32", "win32"),
+        ("win64", "win_amd64"),
+        ("linux", "manylinux"),
+        ("any", "none-any"),
+    ]
+    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
+    debugpy_info = {p: _get_debugpy_info(version, id, cp) for p, id in platforms}
+    debugpy_info_json_path.write_text(
+        json.dumps(debugpy_info, indent=4), encoding="utf-8"
+    )
