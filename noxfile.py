@@ -75,14 +75,15 @@ def install_bundled_libs(session):
         download_url(debugpy_info["any"])
 
 
-def download_url(value, hash_algorithm="sha256"):
+def download_url(value):
     with url_lib.urlopen(value["url"]) as response:
         data = response.read()
-        if (
-            hashlib.new(hash_algorithm, data).hexdigest()
-            != value["hash"][hash_algorithm]
-        ):
+        hash_algorithm, hash_value = [
+            (key, value) for key, value in value["hash"].items()
+        ][0]
+        if hashlib.new(hash_algorithm, data).hexdigest() != hash_value:
             raise ValueError("Failed hash verification for {}.".format(value["url"]))
+
         print("Download: ", value["url"])
         with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
             libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
