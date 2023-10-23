@@ -265,7 +265,7 @@ export interface IEventNamePropertyMapping {
     /* __GDPR__
        "debug.success_activation" : {
           "codeloadingtime" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-\         "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
+          "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
        }
      */
     [EventName.DEBUG_SUCCESS_ACTIVATION]: {};
@@ -573,26 +573,26 @@ export interface IEventNamePropertyMapping {
        }
      */
     [EventName.DEBUGGER_ATTACH_TO_CHILD_PROCESS]: never | undefined;
-    // /**
-    //  * Telemetry event sent when attaching to a local process.
-    //  */
-    // /* __GDPR__
-    //    "debugger.attach_to_local_process" : { "owner": "paulacamargo25" }
-    //  */
+    /**
+     * Telemetry event sent when attaching to a local process.
+     */
+    /* __GDPR__
+       "debugger.attach_to_local_process" : { "owner": "paulacamargo25" }
+     */
     [EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS]: never | undefined;
-    // /**
-    //  * Telemetry sent after building configuration for debugger
-    //  */
-    // /* __GDPR__
-    //    "debugger.configuration.prompts" : {
-    //       "configurationtype" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-    //       "autodetecteddjangomanagepypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-    //       "autodetectedpyramidinipath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-    //       "autodetectedfastapimainpypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-    //       "autodetectedflaskapppypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-    //       "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
-    //    }
-    //  */
+    /**
+     * Telemetry sent after building configuration for debugger
+     */
+    /* __GDPR__
+       "debugger.configuration.prompts" : {
+          "configurationtype" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "autodetecteddjangomanagepypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "autodetectedpyramidinipath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "autodetectedfastapimainpypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "autodetectedflaskapppypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
+       }
+     */
 
     [EventName.DEBUGGER_CONFIGURATION_PROMPTS]: {
         /**
