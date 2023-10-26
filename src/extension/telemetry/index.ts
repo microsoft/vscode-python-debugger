@@ -574,7 +574,7 @@ export interface IEventNamePropertyMapping {
      */
     [EventName.DEBUGGER_ATTACH_TO_CHILD_PROCESS]: never | undefined;
     /**
-     * Telemetry event sent when attaching to a local process.
+     * Telemetry event sent when attaching to a local process. Test PR
      */
     /* __GDPR__
        "debugger.attach_to_local_process" : { "owner": "paulacamargo25" }
