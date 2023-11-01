@@ -50,7 +50,7 @@ extends:
       - script: python -m pip install nox
         displayName: Install wheel
 
-      - script: python -m nox --session install_old_bundled_libs
+      - script: python -m nox --session install_bundled_libs
         displayName: Install Python dependencies
 
       - script: python ./build/update_ext_version.py --release --for-publishing
