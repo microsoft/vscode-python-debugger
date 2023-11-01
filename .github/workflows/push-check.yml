@@ -21,7 +21,6 @@ jobs:
     # In order to use Python 3.6 here in the test, we can only use up to Ubuntu 20.
     # https://github.com/rwth-i6/returnn/issues/1226
     runs-on: ubuntu-20.04
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -52,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-20.04, windows-latest]
         python: ['3.6']
 
     steps:
