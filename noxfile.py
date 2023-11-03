@@ -140,8 +140,10 @@ def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
     )[0]
 
 
-@nox.session()
-def create_debugpy_json(session: nox.Session, version="1.7.0", cp="cp311"):
+@nox.session
+@nox.parametrize("version", ["1.5.1", "1.7.0", "latest"])
+@nox.parametrize("cp", ["cp39", "cp311"])
+def create_debugpy_json(session: nox.Session, version, cp):
     platforms = [
         ("macOS", "macosx"),
         ("win32", "win32"),
