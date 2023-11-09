@@ -58,10 +58,13 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
                         configuration.connect.port
                     }`,
                 );
-                return new DebugAdapterServer(configuration.connect.port, configuration.connect.host ?? '127.0.0.1');
+                return new DebugAdapterServer(
+                    Number(configuration.connect.port),
+                    configuration.connect.host ?? '127.0.0.1',
+                );
             } else if (configuration.port !== undefined) {
                 traceLog(`Connecting to DAP Server at:  ${configuration.host ?? '127.0.0.1'}:${configuration.port}`);
-                return new DebugAdapterServer(configuration.port, configuration.host ?? '127.0.0.1');
+                return new DebugAdapterServer(Number(configuration.port), configuration.host ?? '127.0.0.1');
             } else if (configuration.listen === undefined && configuration.processId === undefined) {
                 throw new Error('"request":"attach" requires either "connect", "listen", or "processId"');
             }
