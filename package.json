@@ -106,7 +106,7 @@
                                     },
                                     "port": {
                                         "description": "Port to connect to.",
-                                        "type": "number"
+                                        "type": ["number", "string"]
                                     }
                                 },
                                 "required": [
@@ -147,7 +147,7 @@
                                     },
                                     "port": {
                                         "description": "Port to listen on.",
-                                        "type": "number"
+                                        "type": ["number", "string"]
                                     }
                                 },
                                 "required": [

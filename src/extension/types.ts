@@ -45,7 +45,7 @@ export type PathMapping = {
 
 type Connection = {
     host?: string;
-    port?: number;
+    port?: number | string;
 };
 
 export interface IAutomaticCodeReload {
@@ -64,7 +64,7 @@ interface ICommonDebugArguments {
     justMyCode?: boolean;
     logToFile?: boolean;
     debugOptions?: DebugOptions[];
-    port?: number;
+    port?: number | string;
     host?: string;
     // Show return values of functions while stepping.
     showReturnValue?: boolean;

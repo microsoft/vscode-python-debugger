@@ -182,6 +182,16 @@ suite('Debugging - Adapter Factory', () => {
         assert.deepStrictEqual(descriptor, debugServer);
     });
 
+    test('Return Debug Adapter server if request is "attach", and connect is specified with port as string', async () => {
+        const session = createSession({ request: 'attach', connect: { port: '5678', host: 'localhost' } });
+        const debugServer = new DebugAdapterServer(5678, session.configuration.connect.host);
+        const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+
+        // Interpreter not needed for connect
+        sinon.assert.neverCalledWith(getInterpretersStub);
+        assert.deepStrictEqual(descriptor, debugServer);
+    });
+
     test('Return Debug Adapter executable if request is "attach", and listen is specified', async () => {
         const session = createSession({ request: 'attach', listen: { port: 5678, host: 'localhost' } });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
