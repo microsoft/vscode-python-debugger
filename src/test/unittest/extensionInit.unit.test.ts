@@ -61,6 +61,7 @@ suite('Debugging - register Debugging', () => {
         registerDebugger(context.object);
 
         sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_In_Terminal, sinon.match.any);
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_Using_Launch_Config, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.PickArguments, sinon.match.any);
         sinon.assert.calledWithExactly(
