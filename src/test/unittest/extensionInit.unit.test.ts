@@ -71,7 +71,7 @@ suite('Debugging - register Debugging', () => {
             sinon.match.any,
         );
         sinon.assert.calledWithExactly(registerCommandStub, Commands.ClearStorage, sinon.match.any);
-        expect(registerCommandStub.callCount).to.be.equal(5);
+        expect(registerCommandStub.callCount).to.be.equal(6);
     });
 
     test('Activation will register the Debug adapter factories', async () => {
