@@ -41,15 +41,15 @@ runs:
           ${{ runner.os }}-pip-lint-
 
     # For faster/better builds of sdists.
-    - name: Update pip, install pipx and install wheel
-      run: python -m pip install -U pip pipx wheel
+    - name: Update pip, install nox and install wheel
+      run: python -m pip install -U pip nox wheel
       shell: bash
 
     # This will install libraries to a target directory.
     - name: Install bundled python libraries
-      run: pipx run nox --session install_bundled_libs
+      run: python -m nox --session install_bundled_libs
       shell: bash
 
     - name: Check linting and formatting
-      run: pipx run nox --session lint
+      run: python -m nox --session lint
       shell: bash
