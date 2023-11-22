@@ -49,7 +49,7 @@ extends:
       - name: Windows
         packageArch: x64
         vsceTarget: win32-x64
-    
+
     publishExtension: ${{ parameters.publishExtension }}
     buildSteps:
       - task: NodeTool@0
