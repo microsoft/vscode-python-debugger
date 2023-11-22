@@ -5,13 +5,17 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { parse } from 'jsonc-parser';
 import { DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
-import { getWorkspaceFolder } from '../../../common/vscodeapi';
+import { getConfiguration, getWorkspaceFolder } from '../../../common/vscodeapi';
 
 export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder): Promise<DebugConfiguration[]> {
     const filename = path.join(workspace.uri.fsPath, '.vscode', 'launch.json');
-
     if (!(await fs.pathExists(filename))) {
-        return [];
+        // Check launch config in the workspace file
+        const codeWorkspaceConfig = getConfiguration('launch');
+        if (!codeWorkspaceConfig.configurations || !Array.isArray(codeWorkspaceConfig.configurations)) {
+            return [];
+        }
+        return codeWorkspaceConfig.configurations;
     }
 
     const text = await fs.readFile(filename, 'utf-8');

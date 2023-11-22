@@ -32,6 +32,7 @@ import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.
 import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
 import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
+import { getConfigurationsByUri } from './debugger/configuration/launch.json/launchJsonReader';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -71,6 +72,25 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             }
             const config = await getDebugConfiguration(file);
             startDebugging(undefined, config);
+        }),
+    );
+
+    context.subscriptions.push(
+        registerCommand(Commands.Debug_Using_Launch_Config, async (file?: Uri) => {
+            sendTelemetryEvent(EventName.DEBUG_USING_LAUNCH_CONFIG_BUTTON);
+            const interpreter = await getInterpreterDetails(file);
+
+            if (!interpreter.path) {
+                runPythonExtensionCommand(Commands.TriggerEnvironmentSelection, file).then(noop, noop);
+                return;
+            }
+            const configs = await getConfigurationsByUri(file);
+            if (configs.length > 0) {
+                executeCommand('workbench.action.debug.selectandstart');
+            } else {
+                await executeCommand('debug.addConfiguration');
+                executeCommand('workbench.action.debug.start');
+            }
         }),
     );
 

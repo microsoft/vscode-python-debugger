@@ -30,6 +30,7 @@ export function isUnitTestExecution(): boolean {
 
 export namespace Commands {
     export const Debug_In_Terminal = 'debugpy.debugInTerminal';
+    export const Debug_Using_Launch_Config = 'debugpy.debugUsingLaunchConfig';
     export const TriggerEnvironmentSelection = 'debugpy.triggerEnvSelection';
     export const PickLocalProcess = 'debugpy.pickLocalProcess';
     export const PickArguments = 'debugpy.pickArgs';

@@ -46,6 +46,12 @@
             },
             {
                 "category": "Python Debugger",
+                "command": "debugpy.debugUsingLaunchConfig",
+                "icon": "$(debug-alt)",
+                "title": "%debugpy.command.debugUsingLaunchConfig.title%"
+            },
+            {
+                "category": "Python Debugger",
                 "command": "debugpy.clearCacheAndReload",
                 "title": "%debugpy.command.clearCacheAndReload.title%"
             },
@@ -70,12 +76,32 @@
                     "category": "Python Debugger",
                     "command": "debugpy.debugInTerminal",
                     "icon": "$(debug-alt)",
-                    "title": "%debugpy.command.debugInTerminal.title%"
+                    "title": "%debugpy.command.debugInTerminal.title%",
+                    "when": "!virtualWorkspace && shellExecutionSupported && editorLangId == python"
+                },
+                {
+                    "category": "Python Debugger",
+                    "command": "debugpy.debugUsingLaunchConfig",
+                    "icon": "$(debug-alt)",
+                    "title": "%debugpy.command.debugUsingLaunchConfig.title%",
+                    "when": "!virtualWorkspace && shellExecutionSupported && editorLangId == python"
                 },
                 {
                     "category": "Python Debugger",
                     "command": "debugpy.viewOutput",
                     "title": "%debugpy.command.viewOutput.title%"
+                }
+            ],
+            "editor/title/run": [
+                {
+                    "command": "debugpy.debugInTerminal",
+                    "title": "%debugpy.command.debugInTerminal.title%",
+                    "when": "resourceLangId == python && !isInDiffEditor && !virtualWorkspace && shellExecutionSupported"
+                },
+                {
+                    "command": "debugpy.debugUsingLaunchConfig",
+                    "title": "%debugpy.command.debugUsingLaunchConfig.title%",
+                    "when": "resourceLangId == python && !isInDiffEditor && !virtualWorkspace && shellExecutionSupported"
                 }
             ]
         },
