@@ -33,6 +33,7 @@ import { ignoreErrors } from './common/promiseUtils';
 import { pickArgsInput } from './common/utils/localize';
 import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 import { getConfigurationsByUri } from './debugger/configuration/launch.json/launchJsonReader';
+import { DebugpySocketsHandler } from './debugger/hooks/debugpySocketsHandler';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -153,5 +154,12 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             { commandPattern: /extensions.ms-python.debugpy.*debugpy.(launcher|adapter)/ },
             debugPortAttributesProvider,
         ),
+    );
+
+    const debugpySocketsHandler = new DebugpySocketsHandler(debugPortAttributesProvider)
+    context.subscriptions.push(
+        debug.onDidReceiveDebugSessionCustomEvent((e) => {
+            ignoreErrors(debugpySocketsHandler.handleCustomEvent(e));
+        }),
     );
 }
