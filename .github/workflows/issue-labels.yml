@@ -11,7 +11,7 @@ jobs:
   # From https://github.com/marketplace/actions/github-script#apply-a-label-to-an-issue.
   add-triage-label:
     name: "Add 'triage-needed'"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/github-script@v6
         with:

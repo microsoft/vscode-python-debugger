@@ -18,7 +18,7 @@ env:
 jobs:
   build-vsix:
     name: Create VSIX
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
 
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,8 +49,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python: ['3.7']
+        os: [ubuntu-20.04, windows-latest]
+        python: ['3.6']
 
     steps:
       - name: Checkout
@@ -58,10 +58,10 @@ jobs:
         with:
           path: ${{ env.special-working-directory-relative }}
 
-      - name: Use Python 3.7
+      - name: Use Python 3.6
         uses: actions/setup-python@v3
         with:
-          python-version: '3.7'
+          python-version: '3.6'
 
       - name: Update pip, install nox and install wheel
         run: python -m pip install -U pip nox wheel
@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci
 
-      # Now that the bundle is installed to target using python 3.7
+      # Now that the bundle is installed to target using python 3.6
       # switch back the python we want to test with
       - name: Use Python ${{ matrix.python }}
         uses: actions/setup-python@v3

@@ -2,7 +2,7 @@
     "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using `debugpy`.",
-    "version": "2023.3.0-dev",
+    "version": "2023.1.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes"
