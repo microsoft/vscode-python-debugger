@@ -164,7 +164,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     );
 
     context.subscriptions.push(
-        debug.onDidTerminateDebugSession((e) => {
+        debug.onDidTerminateDebugSession(() => {
             debugPortAttributesProvider.resetPortAttribute();
         }),
     );
