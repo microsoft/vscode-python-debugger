@@ -8,11 +8,13 @@ export class DebugPortAttributesProvider implements PortAttributesProvider {
     private knownPorts: number[] = [];
 
     public setPortAttribute(port: number): void {
-        this.knownPorts.push(port);
+        if (!this.knownPorts.includes(port)) {
+            this.knownPorts.push(port);
+        }
     }
 
-    public resetPortAttribute(port: number): void {
-        this.knownPorts = this.knownPorts.filter((p) => p !== port);
+    public resetPortAttribute(): void {
+        this.knownPorts.pop();
     }
     
     public providePortAttributes(

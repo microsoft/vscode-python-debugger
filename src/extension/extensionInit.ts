@@ -151,7 +151,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     const debugPortAttributesProvider = new DebugPortAttributesProvider();
     context.subscriptions.push(
         workspace.registerPortAttributesProvider(
-            { commandPattern: /extensions.ms-python.debugpy.*debugpy.(launcher|adapter)/ },
+            {},
             debugPortAttributesProvider,
         ),
     );
@@ -160,6 +160,12 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     context.subscriptions.push(
         debug.onDidReceiveDebugSessionCustomEvent((e) => {
             ignoreErrors(debugpySocketsHandler.handleCustomEvent(e));
+        }),
+    );
+
+    context.subscriptions.push(
+        debug.onDidTerminateDebugSession((e) => {
+            debugPortAttributesProvider.resetPortAttribute();
         }),
     );
 }
