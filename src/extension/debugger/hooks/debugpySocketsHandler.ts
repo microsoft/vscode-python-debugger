@@ -30,7 +30,7 @@ export class DebugpySocketsHandler implements IDebugSessionEventHandlers {
         }
 
         if (event.event == DebuggerEvents.DebugpySockets) {
-            let portSocket = event.body.sockets.find((socket: { [x: string]: any; }) => {
+            let portSocket = event.body.sockets.find((socket: { [x: string]: any }) => {
                 return socket['internal'] == false;
             });
             if (portSocket != undefined) {

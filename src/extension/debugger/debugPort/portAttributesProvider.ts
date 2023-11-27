@@ -2,7 +2,13 @@
  * Copyright (C) Microsoft Corporation. All rights reserved.
  *--------------------------------------------------------*/
 
-import { CancellationToken, PortAttributes, PortAttributesProvider, PortAutoForwardAction, ProviderResult } from 'vscode';
+import {
+    CancellationToken,
+    PortAttributes,
+    PortAttributesProvider,
+    PortAutoForwardAction,
+    ProviderResult,
+} from 'vscode';
 
 export class DebugPortAttributesProvider implements PortAttributesProvider {
     private knownPorts: number[] = [];
@@ -16,7 +22,7 @@ export class DebugPortAttributesProvider implements PortAttributesProvider {
     public resetPortAttribute(): void {
         this.knownPorts.pop();
     }
-    
+
     public providePortAttributes(
         attributes: { port: number; pid?: number; commandLine?: string },
         _token: CancellationToken,
