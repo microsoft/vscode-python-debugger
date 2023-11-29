@@ -89,8 +89,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
                 executeCommand('workbench.action.debug.selectandstart');
             } else {
                 await executeCommand('debug.addConfiguration');
-                if (file)
-                    await window.showTextDocument(file);
+                if (file) await window.showTextDocument(file);
                 executeCommand('workbench.action.debug.start', file?.toString());
             }
         }),
