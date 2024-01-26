@@ -33,5 +33,21 @@ If you want to disable the Python Debugger extension, you can [disable this exte
 | Python Debugger: clearCacheAndReload | Allows you to clear the global values set in the extension. |
 | Python Debugger: debugInTerminal | Allows you to debug a simple Python file in the terminal. |
 
+## Limited support for deprecated Python versions
+
+Older versions of the Python Debugger extension are available for debugging Python projects that use outdated Python versions like Python 2.7 and Python 3.6. However, it’s important to note that our team is no longer maintaining these extension versions. We strongly advise you to update your project to a supported Python version if possible.
+
+You can reference the table below to find the most recent Python Debugger extension version that offers debugging support for projects using deprecated Python versions.
+
+| Python version | Latest supported Python Debugger extension version |
+| -------------- | -------------------------------------------------- |
+| 2.7            | 2023.1.XXX                                         |
+| 3.6            | 2023.1.XXX                                         |
+| 3.7            | 2023.3.XXX                                         |
+
+
+> **Note**: Once you install an older version of the Python Debugger extension in VS Code, you may want to disable auto update by changing the value of the `"extensions.autoUpdate"` setting in your `settings.json` file.
+
+
 ## Data and telemetry
 The Debubpy Extension for Visual Studio Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://privacy.microsoft.com/privacystatement) to learn more. This extension respects the `telemetry.enableTelemetry` setting which you can learn more about at https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting.
