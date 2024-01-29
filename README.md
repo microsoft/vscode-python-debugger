@@ -37,7 +37,7 @@ If you want to disable the Python Debugger extension, you can [disable this exte
 
 Older versions of the Python Debugger extension are available for debugging Python projects that use outdated Python versions like Python 2.7 and Python 3.6. However, it’s important to note that our team is no longer maintaining these extension versions. We strongly advise you to update your project to a supported Python version if possible.
 
-You can reference the table below to find the most recent Python Debugger extension version that offers debugging support for projects using deprecated Python versions, as well as the debugpy version that is shipped in each  extension version. 
+You can reference the table below to find the most recent Python Debugger extension version that offers debugging support for projects using deprecated Python versions, as well as the debugpy version that is shipped in each extension version. 
 
 | Python version | Latest supported Python Debugger extension version |  debugpy version |
 | -------------- | -------------------------------------------------- | ---------------- |
