@@ -132,7 +132,10 @@
                                     },
                                     "port": {
                                         "description": "Port to connect to.",
-                                        "type": ["number", "string"]
+                                        "type": [
+                                            "number",
+                                            "string"
+                                        ]
                                     }
                                 },
                                 "required": [
@@ -173,7 +176,10 @@
                                     },
                                     "port": {
                                         "description": "Port to listen on.",
-                                        "type": ["number", "string"]
+                                        "type": [
+                                            "number",
+                                            "string"
+                                        ]
                                     }
                                 },
                                 "required": [
@@ -500,7 +506,7 @@
         "@types/vscode": "^1.78.0",
         "@typescript-eslint/eslint-plugin": "^5.31.0",
         "@typescript-eslint/parser": "^5.62.0",
-        "@vscode/test-electron": "^2.1.5",
+        "@vscode/test-electron": "^2.3.9",
         "@vscode/vsce": "^2.19.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
