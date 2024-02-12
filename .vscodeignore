@@ -1,5 +1,6 @@
 .vscode/**
 .vscode-test/**
+build/**
 out/**
 node_modules/**
 src/**

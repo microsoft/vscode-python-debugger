@@ -28,10 +28,36 @@ extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
     l10nSourcePaths: ./src
+    buildPlatforms:
+      - name: Linux
+        packageArch: arm64
+        vsceTarget: linux-arm64
+      - name: Linux
+        packageArch: arm
+        vsceTarget: linux-armhf
+      - name: Linux
+        packageArch: x64
+        vsceTarget: linux-x64
+      - name: MacOS
+        packageArch: arm64
+        vsceTarget: darwin-arm64
+      - name: MacOS
+        packageArch: x64
+        vsceTarget: darwin-x64
+      - name: Windows
+        packageArch: arm
+        vsceTarget: win32-arm64
+      - name: Windows
+        packageArch: ia32
+        vsceTarget: win32-ia32
+      - name: Windows
+        packageArch: x64
+        vsceTarget: win32-x64
+
     buildSteps:
       - task: NodeTool@0
         inputs:
-          versionSpec: '16.17.1'
+          versionSpec: '18.17.1'
         displayName: Select Node version
 
       - task: UsePythonVersion@0
@@ -47,14 +73,14 @@ extends:
       - script: python -m pip install -U pip
         displayName: Upgrade pip
 
-      - script: python -m pip install wheel
-        displayName: Install wheel
+      - script: python -m pip install wheel nox
+        displayName: Install wheel and nox
 
-      - script: python -m pip install nox
-        displayName: Install wheel
-
+      # update according packageArch
       - script: python -m nox --session install_bundled_libs
         displayName: Install Python dependencies
+        env:
+          VSCETARGET: ${{ variables.VSCETARGET }}
 
       - script: python ./build/update_ext_version.py --for-publishing
         displayName: Update build number
