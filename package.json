@@ -1,7 +1,7 @@
 {
     "name": "debugpy",
     "displayName": "Python Debugger",
-    "description": "Python Debugger extension using `debugpy`.",
+    "description": "Python Debugger extension using debugpy.",
     "version": "2024.1.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
@@ -23,7 +23,7 @@
         "debugpy"
     ],
     "engines": {
-        "vscode": "^1.78.0"
+        "vscode": "^1.86.0"
     },
     "categories": [
         "Debuggers"
