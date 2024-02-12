@@ -496,7 +496,7 @@
     "devDependencies": {
         "@types/chai": "^4.3.4",
         "@types/chai-as-promised": "^7.1.5",
-        "@types/fs-extra": "^11.0.1",
+        "@types/fs-extra": "^11.0.4",
         "@types/glob": "^7.2.0",
         "@types/lodash": "^4.14.191",
         "@types/mocha": "^10.0.1",
@@ -527,7 +527,7 @@
     },
     "dependencies": {
         "@vscode/extension-telemetry": "^0.8.5",
-        "fs-extra": "^11.1.0",
+        "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
         "inversify": "^6.0.1",
         "jsonc-parser": "^3.2.0",
