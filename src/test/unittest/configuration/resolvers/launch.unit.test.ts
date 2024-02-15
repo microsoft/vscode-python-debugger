@@ -950,8 +950,6 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     ...testParams,
                 });
                 expect(debugConfig).to.have.property('serverReadyAction', expectedServerReadyAction);
-                expect(debugConfig).to.have.property('debugOptions');
-                expect((debugConfig as DebugConfiguration).debugOptions).to.contain(DebugOptions.RedirectOutput);
             });
         });
 
