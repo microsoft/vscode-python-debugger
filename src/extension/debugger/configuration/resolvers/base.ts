@@ -245,10 +245,11 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             stopOnEntry: !!debugConfiguration.stopOnEntry,
             showReturnValue: !!debugConfiguration.showReturnValue,
             subProcess: !!debugConfiguration.subProcess,
+            autoStartBrowser: !!debugConfiguration,
             watson: name.toLowerCase().indexOf('watson') >= 0,
             pyspark: name.toLowerCase().indexOf('pyspark') >= 0,
             gevent: name.toLowerCase().indexOf('gevent') >= 0,
-            scrapy: moduleName.toLowerCase() === 'scrapy',
+            scrapy: moduleName.toLowerCase() === 'scrapy'
         };
         sendTelemetryEvent(EventName.DEBUGGER, undefined, telemetryProps);
     }
