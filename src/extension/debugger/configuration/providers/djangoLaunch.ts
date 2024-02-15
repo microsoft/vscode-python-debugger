@@ -14,6 +14,7 @@ import { LaunchRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
 import { resolveVariables } from '../utils/common';
 import { DebugConfigStrings } from '../../../common/utils/localize';
+import { getDjangoPaths } from '../utils/configuration';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -21,14 +22,15 @@ export async function buildDjangoLaunchDebugConfiguration(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {
-    const program = await getManagePyPath(state.folder);
+    // const program = await getManagePyPath(state.folder);
+    let djangoPaths = await getDjangoPaths(state.folder)
+
     let manuallyEnteredAValue: boolean | undefined;
-    const defaultProgram = `${workspaceFolderToken}${path.sep}manage.py`;
+
     const config: Partial<LaunchRequestArguments> = {
         name: DebugConfigStrings.django.snippet.name,
         type: DebuggerTypeName,
         request: 'launch',
-        program: program || defaultProgram,
         args: ['runserver'],
         django: true,
         autoStartBrowser: false,
