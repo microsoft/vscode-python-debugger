@@ -933,7 +933,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             },
         ];
 
-        test.only('Add serverReadyAction for Django and Flask', async () => {
+        test('Add serverReadyAction for Django and Flask', async () => {
             const pythonPath = `PythonPath_${new Date().toString()}`;
             const workspaceFolder = createMoqWorkspaceFolder(__dirname);
             const pythonFile = 'xyz.py';
