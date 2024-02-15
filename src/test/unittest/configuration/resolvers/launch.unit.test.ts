@@ -921,18 +921,17 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             expect(debugConfig).to.have.property('debugOptions');
             expect((debugConfig as DebugConfiguration).debugOptions).contains(DebugOptions.Jinja);
         });
-        
-        const testsForautoStartBrowser= [
+
+        const testsForautoStartBrowser = [
             {
                 autoStartBrowser: true,
-                module: "flask",
+                module: 'flask',
             },
             {
                 autoStartBrowser: true,
                 django: true,
             },
-
-        ]
+        ];
 
         test.only('Add serverReadyAction for Django and Flask', async () => {
             const pythonPath = `PythonPath_${new Date().toString()}`;
@@ -941,9 +940,9 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             setupIoc(pythonPath);
             setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
             const expectedServerReadyAction = {
-                "pattern": ".*(https?:\\/\\/\\S+:[0-9]+\\/?).*",
-                "uriFormat": "%s",
-                "action": "openExternally"
+                pattern: '.*(https?:\\/\\/\\S+:[0-9]+\\/?).*',
+                uriFormat: '%s',
+                action: 'openExternally',
             };
             testsForautoStartBrowser.forEach(async (testParams) => {
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
