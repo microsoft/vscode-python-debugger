@@ -249,7 +249,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             watson: name.toLowerCase().indexOf('watson') >= 0,
             pyspark: name.toLowerCase().indexOf('pyspark') >= 0,
             gevent: name.toLowerCase().indexOf('gevent') >= 0,
-            scrapy: moduleName.toLowerCase() === 'scrapy'
+            scrapy: moduleName.toLowerCase() === 'scrapy',
         };
         sendTelemetryEvent(EventName.DEBUGGER, undefined, telemetryProps);
     }
