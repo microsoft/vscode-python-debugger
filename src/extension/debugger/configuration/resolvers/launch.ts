@@ -50,6 +50,8 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         const workspaceFolder = LaunchConfigurationResolver.getWorkspaceFolder(folder);
         await this.provideLaunchDefaults(workspaceFolder, debugConfiguration);
 
+        
+
         if (Array.isArray(debugConfiguration.debugOptions)) {
             debugConfiguration.debugOptions = debugConfiguration.debugOptions!.filter(
                 (item, pos) => debugConfiguration.debugOptions!.indexOf(item) === pos,
@@ -140,6 +142,13 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         }
         const isFastAPI = LaunchConfigurationResolver.isDebuggingFastAPI(debugConfiguration);
         const isFlask = LaunchConfigurationResolver.isDebuggingFlask(debugConfiguration);
+        if (debugConfiguration.autoStartBrowser && (debugConfiguration.django || isFlask)) {
+            debugConfiguration.serverReadyAction = {
+                "pattern": ".*(https?:\\/\\/\\S+:[0-9]+\\/?).*",
+                "uriFormat": "%s",
+                "action": "openExternally"
+            }
+        }
         if (
             (debugConfiguration.pyramid || isFlask || isFastAPI) &&
             debugOptions.indexOf(DebugOptions.Jinja) === -1 &&

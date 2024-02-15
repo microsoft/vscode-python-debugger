@@ -327,6 +327,11 @@
                                 "description": "Path (fully qualified) to the Python debug adapter executable.",
                                 "type": "string"
                             },
+                            "autoStartBrowser": {
+                                "default": false,
+                                "description": "Open external browser to launch the application",
+                                "type": "boolean"
+                            },
                             "django": {
                                 "default": false,
                                 "description": "Django debugging.",
