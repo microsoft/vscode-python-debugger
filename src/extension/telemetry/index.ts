@@ -235,7 +235,7 @@ export function sendTelemetryWhenDone<P extends IEventNamePropertyMapping, E ext
             },
         );
     } else {
-        throw new Error('Method is neither a Promise nor a Theneable');
+        throw new Error('Method is neither a Promise nor a Thenable');
     }
 }
 
@@ -553,7 +553,7 @@ export interface IEventNamePropertyMapping {
          */
         watson: boolean;
         /**
-         * Whether degbugging `pyspark`.
+         * Whether debugging `pyspark`.
          *
          * @type {boolean}
          */
@@ -571,7 +571,7 @@ export interface IEventNamePropertyMapping {
          */
         scrapy: boolean;
         /**
-         * Whether degbugging with autoStartBrowser.
+         * Whether debugging with autoStartBrowser.
          *
          * @type {boolean}
          */

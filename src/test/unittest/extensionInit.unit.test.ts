@@ -33,7 +33,7 @@ suite('Debugging - register Debugging', () => {
     let loggingFactory: IDebugSessionLoggingFactory;
     let debuggerPromptFactory: IOutdatedDebuggerPromptFactory;
     let descriptorFactory: IDebugAdapterDescriptorFactory;
-    let persistantState: IPersistentStateFactory;
+    let persistentState: IPersistentStateFactory;
     let debugSessionTelemetry: vscode.DebugAdapterTrackerFactory;
     let completionProvider: LaunchJsonCompletionProvider;
 
@@ -48,9 +48,9 @@ suite('Debugging - register Debugging', () => {
         debuggerPromptFactory = new OutdatedDebuggerPromptFactory();
         debugSessionTelemetry = new DebugSessionTelemetry();
         completionProvider = new LaunchJsonCompletionProvider();
-        persistantState = new PersistentStateFactory(context.object.globalState, context.object.workspaceState);
+        persistentState = new PersistentStateFactory(context.object.globalState, context.object.workspaceState);
         registerCompletionItemProviderStub = sinon.stub(vscode.languages, 'registerCompletionItemProvider');
-        descriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
+        descriptorFactory = new DebugAdapterDescriptorFactory(persistentState);
         context.setup((c) => c.subscriptions).returns(() => []);
     });
     teardown(() => {

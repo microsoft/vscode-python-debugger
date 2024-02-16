@@ -97,8 +97,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
     );
 
     //PersistentStateFactory
-    const persistantState = new PersistentStateFactory(context.globalState, context.workspaceState);
-    persistantState.activate();
+    const persistentState = new PersistentStateFactory(context.globalState, context.workspaceState);
+    persistentState.activate();
 
     const attachProcessProvider = new AttachProcessProvider();
     const attachPicker = new AttachPicker(attachProcessProvider);
@@ -109,7 +109,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         }),
     );
 
-    const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory(persistantState);
+    const debugAdapterDescriptorFactory = new DebugAdapterDescriptorFactory(persistentState);
     const debugSessionLoggingFactory = new DebugSessionLoggingFactory();
     const debuggerPromptFactory = new OutdatedDebuggerPromptFactory();
     context.subscriptions.push(debug.registerDebugAdapterTrackerFactory(DebuggerTypeName, debugSessionLoggingFactory));
