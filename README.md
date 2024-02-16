@@ -39,6 +39,8 @@ Older versions of the Python Debugger extension are available for debugging Pyth
 
 You can reference the table below to find the most recent Python Debugger extension version that offers debugging support for projects using deprecated Python versions, as well as the debugpy version that is shipped in each extension version. 
 
+> **Note**: To use versions prior to `2024.0.0`, you should opt-in to pre-releases. You can do so on the extension page by clicking `Switch to Pre-Release Version`. 
+
 | Python version | Latest supported Python Debugger extension version |  debugpy version |
 | -------------- | -------------------------------------------------- | ---------------- |
 | 2.7, >= 3.5    | 2023.1.XXX                                         |  1.5.1           |
