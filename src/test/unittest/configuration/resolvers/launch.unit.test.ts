@@ -922,6 +922,37 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             expect((debugConfig as DebugConfiguration).debugOptions).contains(DebugOptions.Jinja);
         });
 
+        const testsForautoStartBrowser = [
+            {
+                autoStartBrowser: true,
+                module: 'flask',
+            },
+            {
+                autoStartBrowser: true,
+                django: true,
+            },
+        ];
+
+        test('Add serverReadyAction for Django and Flask', async () => {
+            const pythonPath = `PythonPath_${new Date().toString()}`;
+            const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+            const pythonFile = 'xyz.py';
+            setupIoc(pythonPath);
+            setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+            const expectedServerReadyAction = {
+                pattern: '.*(https?:\\/\\/\\S+:[0-9]+\\/?).*',
+                uriFormat: '%s',
+                action: 'openExternally',
+            };
+            testsForautoStartBrowser.forEach(async (testParams) => {
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    ...testParams,
+                });
+                expect(debugConfig).to.have.property('serverReadyAction', expectedServerReadyAction);
+            });
+        });
+
         async function testSetting(
             requestType: 'launch' | 'attach',
             settings: Record<string, boolean>,

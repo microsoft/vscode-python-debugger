@@ -570,6 +570,12 @@ export interface IEventNamePropertyMapping {
          * @type {boolean}
          */
         scrapy: boolean;
+        /**
+         * Whether degbugging with autoStartBrowser.
+         *
+         * @type {boolean}
+         */
+        autoStartBrowser: boolean;
     };
     /**
      * Telemetry event sent when attaching to child process
