@@ -47,9 +47,8 @@ export async function buildRemoteAttachConfiguration(
                 value && value.trim().length > 0 ? undefined : DebugConfigStrings.attach.enterRemoteHost.invalid,
             ),
     });
+
     if (!connect.host) {
-        connect.host = defaultHost;
-    } else {
         return;
     }
 
