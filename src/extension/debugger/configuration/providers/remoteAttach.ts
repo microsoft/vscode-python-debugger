@@ -49,7 +49,7 @@ export async function buildRemoteAttachConfiguration(
     });
     if (!connect.host) {
         connect.host = defaultHost;
-    }  else {
+    } else {
         return;
     }
 
