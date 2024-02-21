@@ -42,6 +42,8 @@ export async function buildDjangoLaunchDebugConfiguration(
         if (selectedProgram) {
             manuallyEnteredAValue = true;
             config.program = selectedProgram;
+        } else {
+            return;
         }
     }
 

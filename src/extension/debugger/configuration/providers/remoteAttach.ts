@@ -49,6 +49,8 @@ export async function buildRemoteAttachConfiguration(
     });
     if (!connect.host) {
         connect.host = defaultHost;
+    }  else {
+        return;
     }
 
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {

@@ -44,6 +44,8 @@ export async function buildFastAPILaunchDebugConfiguration(
         if (selectedPath) {
             manuallyEnteredAValue = true;
             config.args = [`${path.basename(selectedPath, '.py').replace('/', '.')}:app`, '--reload'];
+        } else {
+            return;
         }
     }
 

@@ -48,6 +48,8 @@ export async function buildPyramidLaunchConfiguration(
         if (selectedIniPath) {
             manuallyEnteredAValue = true;
             config.args = [selectedIniPath];
+        } else {
+            return;
         }
     }
 
