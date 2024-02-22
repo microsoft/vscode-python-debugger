@@ -60,6 +60,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             },
             args: ['run', '--no-debugger', '--no-reload'],
             jinja: true,
+            autoStartBrowser: false
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -82,6 +83,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             },
             args: ['run', '--no-debugger', '--no-reload'],
             jinja: true,
+            autoStartBrowser: false
         };
 
         expect(state.config).to.be.deep.equal(config);
