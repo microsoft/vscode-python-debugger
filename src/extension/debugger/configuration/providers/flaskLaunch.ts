@@ -32,7 +32,7 @@ export async function buildFlaskLaunchDebugConfiguration(
         },
         args: ['run', '--no-debugger', '--no-reload'],
         jinja: true,
-        autoStartBrowser: false
+        autoStartBrowser: false,
     };
 
     if (!application) {

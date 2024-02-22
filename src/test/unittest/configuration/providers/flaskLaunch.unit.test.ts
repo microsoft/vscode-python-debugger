@@ -41,6 +41,28 @@ suite('Debugging - Configuration Provider Flask', () => {
 
         expect(file).to.be.equal('app.py');
     });
+    test('Launch JSON with valid python path', async () => {
+        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
+        const state = { config: {}, folder };
+
+        await flaskLaunch.buildFlaskLaunchDebugConfiguration(instance(input), state);
+
+        const config = {
+            name: DebugConfigStrings.flask.snippet.name,
+            type: DebuggerTypeName,
+            request: 'launch',
+            module: 'flask',
+            env: {
+                FLASK_APP: 'app.py',
+                FLASK_DEBUG: '1',
+            },
+            args: ['run', '--no-debugger', '--no-reload'],
+            jinja: true,
+            autoStartBrowser: false,
+        };
+
+        expect(state.config).to.be.deep.equal(config);
+    });
     test('Launch JSON with selected app path', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
@@ -60,7 +82,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             },
             args: ['run', '--no-debugger', '--no-reload'],
             jinja: true,
-            autoStartBrowser: false
+            autoStartBrowser: false,
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -83,7 +105,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             },
             args: ['run', '--no-debugger', '--no-reload'],
             jinja: true,
-            autoStartBrowser: false
+            autoStartBrowser: false,
         };
 
         expect(state.config).to.be.deep.equal(config);
