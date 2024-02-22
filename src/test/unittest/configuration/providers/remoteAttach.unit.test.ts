@@ -62,7 +62,7 @@ suite('Debugging - Configuration Provider Remote Attach', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         let portConfigured = false;
-        when(input.showInputBox(anything())).thenResolve();
+        when(input.showInputBox(anything())).thenResolve('localhost');
 
         sinon.stub(configuration, 'configurePort').callsFake(async () => {
             portConfigured = true;

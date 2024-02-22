@@ -19,7 +19,7 @@ suite('Debugging - Configuration Provider Module', () => {
         const state = { config: {}, folder };
         const input = mock<MultiStepInput<DebugConfigurationState>>(MultiStepInput);
 
-        when(input.showInputBox(anything())).thenResolve();
+        when(input.showInputBox(anything())).thenResolve('enter-your-module-name');
 
         await buildModuleLaunchConfiguration(instance(input), state);
 

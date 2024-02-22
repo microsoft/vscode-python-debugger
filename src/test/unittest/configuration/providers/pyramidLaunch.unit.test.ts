@@ -99,6 +99,7 @@ suite('Debugging - Configuration Provider Pyramid', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         pathSeparatorStub.value('-');
+        when(input.showInputBox(anything())).thenResolve('${workspaceFolder}-development.ini');
 
         await pyramidLaunch.buildPyramidLaunchConfiguration(instance(input), state);
 
@@ -141,7 +142,7 @@ suite('Debugging - Configuration Provider Pyramid', () => {
         const defaultIni = `${workspaceFolderToken}-development.ini`;
 
         pathSeparatorStub.value('-');
-        when(input.showInputBox(anything())).thenResolve();
+        when(input.showInputBox(anything())).thenResolve(defaultIni);
 
         await pyramidLaunch.buildPyramidLaunchConfiguration(instance(input), state);
 

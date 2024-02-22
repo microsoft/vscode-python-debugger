@@ -119,7 +119,7 @@ suite('Debugging - Configuration Provider Django', () => {
         const workspaceFolderToken = '${workspaceFolder}';
         const defaultProgram = `${workspaceFolderToken}-manage.py`;
         pathSeparatorStub.value('-');
-        when(input.showInputBox(anything())).thenResolve();
+        when(input.showInputBox(anything())).thenResolve(defaultProgram);
         await djangoLaunch.buildDjangoLaunchDebugConfiguration(instance(input), state);
 
         const config = {

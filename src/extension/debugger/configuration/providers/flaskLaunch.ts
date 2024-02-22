@@ -49,6 +49,8 @@ export async function buildFlaskLaunchDebugConfiguration(
         if (selectedApp) {
             manuallyEnteredAValue = true;
             config.env!.FLASK_APP = selectedApp;
+        } else {
+            return;
         }
     }
 
