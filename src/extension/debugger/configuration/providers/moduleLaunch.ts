@@ -34,6 +34,8 @@ export async function buildModuleLaunchConfiguration(
     if (selectedModule) {
         manuallyEnteredAValue = true;
         config.module = selectedModule;
+    } else {
+        return;
     }
 
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {

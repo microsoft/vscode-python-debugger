@@ -39,10 +39,13 @@ Older versions of the Python Debugger extension are available for debugging Pyth
 
 You can reference the table below to find the most recent Python Debugger extension version that offers debugging support for projects using deprecated Python versions, as well as the debugpy version that is shipped in each extension version. 
 
+> **Note**: If you do not see older extension versions to install (<=`2024.0.0`), try opting-in to pre-releases. You can do so on the extension page by clicking `Switch to Pre-Release Version`. 
+
 | Python version | Latest supported Python Debugger extension version |  debugpy version |
 | -------------- | -------------------------------------------------- | ---------------- |
-| 2.7, >= 3.5    | 2023.1.XXX                                         |  1.5.1           |
-| >= 3.7         | 2023.3.XXX                                         | 1.7.0            |
+| 2.7, >= 3.5    | 2023.1.XXX                                         | 1.5.1            |
+| >= 3.7         | 2024.0.XXX                                         | 1.7.0            |
+| >= 3.8         | 2024.2.XXX                                         | 1.8.1            |
 
 
 > **Note**: Once you install an older version of the Python Debugger extension in VS Code, you may want to disable auto update by changing the value of the `"extensions.autoUpdate"` setting in your `settings.json` file.

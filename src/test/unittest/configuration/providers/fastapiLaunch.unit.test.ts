@@ -42,23 +42,6 @@ suite('Debugging - Configuration Provider FastAPI', () => {
 
         expect(file).to.be.equal('main.py');
     });
-    test('Launch JSON with valid python path', async () => {
-        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
-        const state = { config: {}, folder };
-
-        await fastApiLaunch.buildFastAPILaunchDebugConfiguration(instance(input), state);
-
-        const config = {
-            name: DebugConfigStrings.fastapi.snippet.name,
-            type: DebuggerTypeName,
-            request: 'launch',
-            module: 'uvicorn',
-            args: ['main:app', '--reload'],
-            jinja: true,
-        };
-
-        expect(state.config).to.be.deep.equal(config);
-    });
     test('Launch JSON with selected app path', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };

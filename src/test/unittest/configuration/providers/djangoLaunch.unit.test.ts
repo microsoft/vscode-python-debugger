@@ -109,6 +109,7 @@ suite('Debugging - Configuration Provider Django', () => {
             program: 'hello',
             args: ['runserver'],
             django: true,
+            autoStartBrowser: false,
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -119,7 +120,7 @@ suite('Debugging - Configuration Provider Django', () => {
         const workspaceFolderToken = '${workspaceFolder}';
         const defaultProgram = `${workspaceFolderToken}-manage.py`;
         pathSeparatorStub.value('-');
-        when(input.showInputBox(anything())).thenResolve();
+        when(input.showInputBox(anything())).thenResolve(defaultProgram);
         await djangoLaunch.buildDjangoLaunchDebugConfiguration(instance(input), state);
 
         const config = {
@@ -129,6 +130,7 @@ suite('Debugging - Configuration Provider Django', () => {
             program: defaultProgram,
             args: ['runserver'],
             django: true,
+            autoStartBrowser: false,
         };
 
         expect(state.config).to.be.deep.equal(config);
