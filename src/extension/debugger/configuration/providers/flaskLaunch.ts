@@ -32,6 +32,7 @@ export async function buildFlaskLaunchDebugConfiguration(
         },
         args: ['run', '--no-debugger', '--no-reload'],
         jinja: true,
+        autoStartBrowser: false,
     };
 
     if (!application) {
@@ -49,6 +50,8 @@ export async function buildFlaskLaunchDebugConfiguration(
         if (selectedApp) {
             manuallyEnteredAValue = true;
             config.env!.FLASK_APP = selectedApp;
+        } else {
+            return;
         }
     }
 
