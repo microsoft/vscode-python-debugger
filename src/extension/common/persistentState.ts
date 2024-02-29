@@ -41,7 +41,7 @@ export class PersistentState<T> implements IPersistentState<T> {
                 await this.storage.update(this.key, newValue);
             }
             if (retryOnce && JSON.stringify(this.value) !== JSON.stringify(newValue)) {
-                // Due to a VSCode bug sometimes the changes are not reflected in the storage, atleast not immediately.
+                // Due to a VSCode bug sometimes the changes are not reflected in the storage, at least not immediately.
                 // It is noticed however that if we reset the storage first and then update it, it works.
                 // https://github.com/microsoft/vscode/issues/171827
                 traceVerbose('Storage update failed for key', this.key, ' retrying by resetting first');

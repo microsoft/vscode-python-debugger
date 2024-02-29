@@ -390,7 +390,7 @@ suite('Debugging - launch.json Updater Service', () => {
         document.verifyAll();
         assert.strictEqual(debugConfigInserted, true);
     });
-    test('If cursor is at the begining of line 1 then there is no comma before cursor', async () => {
+    test('If cursor is at the beginning of line 1 then there is no comma before cursor', async () => {
         sandbox.restore();
         const document = typemoq.Mock.ofType<TextDocument>();
         const position = new Position(1, 0);

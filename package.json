@@ -253,7 +253,7 @@
                         "properties": {
                             "args": {
                                 "default": [],
-                                "description": "Command line arguments passed to the program. For string type arguments, it will pass through the shell as is, and therefore all shell variable expansions will apply. But for the array type, tha values will be shell-escaped.",
+                                "description": "Command line arguments passed to the program. For string type arguments, it will pass through the shell as is, and therefore all shell variable expansions will apply. But for the array type, the values will be shell-escaped.",
                                 "items": {
                                     "type": "string"
                                 },
@@ -496,7 +496,7 @@
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "format-fix": "prettier --write 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "test": "node ./out/test/runTest.js",
-        "vsce-package": "vsce package -o pyhton-debugger.vsix"
+        "vsce-package": "vsce package -o python-debugger.vsix"
     },
     "devDependencies": {
         "@types/chai": "^4.3.4",

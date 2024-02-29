@@ -82,7 +82,7 @@ export class LaunchJsonUpdaterServiceHelper {
     ): string {
         const json = JSON.stringify(config);
         if (cursorPosition === 'AfterItem') {
-            // If we already have a comma immediatley before the cursor, then no need of adding a comma.
+            // If we already have a comma immediately before the cursor, then no need of adding a comma.
             return commaPosition === 'BeforeCursor' ? json : `,${json}`;
         }
         if (cursorPosition === 'BeforeItem') {

@@ -82,9 +82,9 @@ export class ProtocolParser implements IProtocolParser {
                 break;
             }
             case 'response': {
-                const reponse = message as DebugProtocol.Response;
-                if (typeof reponse.command === 'string') {
-                    this.events.emit(`${message.type}_${reponse.command}`, reponse);
+                const response = message as DebugProtocol.Response;
+                if (typeof response.command === 'string') {
+                    this.events.emit(`${message.type}_${response.command}`, response);
                 }
                 break;
             }

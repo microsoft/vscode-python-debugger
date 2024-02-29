@@ -72,7 +72,7 @@ class DebugAdapterTracker {
     //  * onError(error: Error): void;
 
     private onDAPMessage(src: DAPSource, msg: DebugProtocol.ProtocolMessage) {
-        // Unomment this to see the DAP messages sent between VS Code and debugpy:
+        // Uncomment this to see the DAP messages sent between VS Code and debugpy:
         //console.log(`| DAP (${src === 'vscode' ? 'VS Code -> debugpy' : 'debugpy -> VS Code'})\n`, msg, '\n| DAP');
 
         // See: https://microsoft.github.io/debug-adapter-protocol/specification
@@ -194,7 +194,7 @@ class DebuggerSession {
         // Un-comment this to see the debug config used in this session:
         //console.log('|', session.config, '|');
         const started = await vscode.debug.startDebugging(this.wsRoot, this.config);
-        expect(started).to.be.equal(true, 'Debugger did not sart');
+        expect(started).to.be.equal(true, 'Debugger did not start');
         this.raw = debuggers.getSession(this.id);
         expect(this.raw).to.not.equal(undefined, 'session not set');
     }
