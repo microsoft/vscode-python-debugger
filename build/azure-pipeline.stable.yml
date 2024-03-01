@@ -99,5 +99,4 @@ extends:
           - 'brcan@microsoft.com'
           - 'kanadig@microsoft.com'
 
-    apiScanSoftwareName: 'ms-python.debugpy'
     apiScanSoftwareVersion: '2024'
