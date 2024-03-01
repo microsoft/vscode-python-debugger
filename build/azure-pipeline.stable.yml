@@ -101,4 +101,3 @@ extends:
 
     apiScanSoftwareName: 'ms-python.debugpy'
     apiScanSoftwareVersion: '2024'
-'
