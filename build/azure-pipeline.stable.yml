@@ -84,6 +84,7 @@ extends:
 
       - script: npm run package
         displayName: Build extension
+
     tsa:
       enabled: true
       options:
@@ -97,6 +98,7 @@ extends:
           - 'lszomoru@microsoft.com'
           - 'brcan@microsoft.com'
           - 'kanadig@microsoft.com'
+
     apiScanSoftwareName: 'ms-python.debugpy'
     apiScanSoftwareVersion: '2024'
 '
