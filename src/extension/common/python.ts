@@ -11,8 +11,8 @@ interface IExtensionApi {
     settings: {
         getExecutionDetails(resource?: Resource): { execCommand: string[] | undefined };
     };
-
-}export interface IInterpreterDetails {
+}
+export interface IInterpreterDetails {
     path?: string[];
     resource?: Uri;
 }
