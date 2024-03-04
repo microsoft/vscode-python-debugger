@@ -1,6 +1,8 @@
+import * as cp from 'child_process';
 import * as path from 'path';
 
-import { runTests } from '@vscode/test-electron';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import { PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
 
 async function main() {
     try {
@@ -12,8 +14,22 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
 
-        // Download VS Code, unzip it and run the integration test
-        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+        const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+
+        // Use cp.spawn / cp.exec for custom setup
+        cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+            encoding: 'utf-8',
+            stdio: 'inherit',
+        });
+
+        // Run the extension test
+        await runTests({
+            // Use the specified `code` executable
+            vscodeExecutablePath,
+            extensionDevelopmentPath,
+            extensionTestsPath,
+        });
     } catch (err) {
         console.error('Failed to run tests');
         process.exit(1);
