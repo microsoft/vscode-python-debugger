@@ -3,8 +3,9 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Environment, EnvironmentPath, PythonExtension, Resource } from '@vscode/python-extension';
-import { commands, extensions, Uri } from 'vscode';
+import { commands, EventEmitter, extensions, Uri, Event, Disposable } from 'vscode';
 import { createDeferred } from './utils/async';
+import { traceError, traceLog } from './log/logging';
 
 interface IExtensionApi {
     ready: Promise<void>;
@@ -12,10 +13,14 @@ interface IExtensionApi {
         getExecutionDetails(resource?: Resource): { execCommand: string[] | undefined };
     };
 }
+
 export interface IInterpreterDetails {
     path?: string[];
     resource?: Uri;
 }
+
+const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>();
+export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 async function activateExtension() {
     const extension = extensions.getExtension('ms-python.python');
     if (extension) {
@@ -33,7 +38,27 @@ async function getPythonExtensionAPI(): Promise<IExtensionApi | undefined> {
 
 async function getPythonExtensionEnviromentAPI(): Promise<PythonExtension> {
     // Load the Python extension API
+    await activateExtension();
     return await PythonExtension.api();
+}
+
+export async function initializePython(disposables: Disposable[]): Promise<void> {
+    try {
+        const api = await getPythonExtensionEnviromentAPI();
+
+        if (api) {
+            disposables.push(
+                api.environments.onDidChangeActiveEnvironmentPath((e) => {
+                    onDidChangePythonInterpreterEvent.fire({ path: [e.path], resource: e.resource?.uri });
+                }),
+            );
+
+            traceLog('Waiting for interpreter from python extension.');
+            onDidChangePythonInterpreterEvent.fire(await getInterpreterDetails());
+        }
+    } catch (error) {
+        traceError('Error initializing python: ', error);
+    }
 }
 
 export async function runPythonExtensionCommand(command: string, ...rest: any[]) {
