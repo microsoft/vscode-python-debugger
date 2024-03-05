@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 import { PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
-import { getOSType } from '../extension/common/platform';
+import { OSType, getOSType } from '../extension/common/platform';
 
 async function main() {
     try {
