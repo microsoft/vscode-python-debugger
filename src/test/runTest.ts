@@ -15,7 +15,11 @@ async function main() {
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
 
         const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        console.log("vscodeExecutablePath: ", vscodeExecutablePath);
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+        console.log("cliPath: ", cliPath);
+        console.log("args: ", args);
+
 
         // Use cp.spawn / cp.exec for custom setup
         cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
