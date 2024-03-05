@@ -19,10 +19,15 @@ async function main() {
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
         console.log("cliPath: ", cliPath);
         console.log("args: ", args);
+        const exec = path.basename(cliPath);
+        console.log("Base: ", exec);
+        
+        console.log("Base 2: ", path.dirname(cliPath));
 
 
         // Use cp.spawn / cp.exec for custom setup
-        cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+        cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+            cwd: path.dirname(cliPath),
             encoding: 'utf-8',
             stdio: 'inherit',
         });
