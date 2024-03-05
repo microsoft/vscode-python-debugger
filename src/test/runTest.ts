@@ -15,22 +15,16 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
         const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
-        console.log("vscodeExecutablePath: ", vscodeExecutablePath);
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
-        console.log("cliPath: ", cliPath);
-        console.log("args: ", args);
 
-        if (getOSType() == "Windows") {
+        // Use cp.spawn / cp.exec for custom setup
+        if (getOSType() == 'Windows') {
             const exec = path.basename(cliPath);
-            console.log("Base: ", exec);
-            console.log("Base 2: ", path.dirname(cliPath));
-
             cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
                 cwd: path.dirname(cliPath),
                 encoding: 'utf-8',
                 stdio: 'inherit',
             });
-    
         } else {
             cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
                 encoding: 'utf-8',
