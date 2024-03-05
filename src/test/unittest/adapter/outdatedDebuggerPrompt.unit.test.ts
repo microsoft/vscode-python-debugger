@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { anyString } from 'ts-mockito';
 import { DebugSession, WorkspaceFolder } from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { createDeferred } from '../../../extension/common/utils/async';
 import { Common } from '../../../extension/common/utils/localize';
 import { OutdatedDebuggerPromptFactory } from '../../../extension/debugger/adapter/outdatedDebuggerPrompt';
