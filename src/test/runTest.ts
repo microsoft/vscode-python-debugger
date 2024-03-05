@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 import { PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
+import { getOSType } from '../extension/common/platform';
 
 async function main() {
     try {
@@ -13,24 +14,29 @@ async function main() {
         // The path to test runner
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
-
         const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
         console.log("vscodeExecutablePath: ", vscodeExecutablePath);
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
         console.log("cliPath: ", cliPath);
         console.log("args: ", args);
-        const exec = path.basename(cliPath);
-        console.log("Base: ", exec);
-        
-        console.log("Base 2: ", path.dirname(cliPath));
 
+        if (getOSType() == "Windows") {
+            const exec = path.basename(cliPath);
+            console.log("Base: ", exec);
+            console.log("Base 2: ", path.dirname(cliPath));
 
-        // Use cp.spawn / cp.exec for custom setup
-        cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
-            cwd: path.dirname(cliPath),
-            encoding: 'utf-8',
-            stdio: 'inherit',
-        });
+            cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+                cwd: path.dirname(cliPath),
+                encoding: 'utf-8',
+                stdio: 'inherit',
+            });
+    
+        } else {
+            cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+                encoding: 'utf-8',
+                stdio: 'inherit',
+            });
+        }
 
         // Run the extension test
         await runTests({
