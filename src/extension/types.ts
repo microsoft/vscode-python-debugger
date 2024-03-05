@@ -5,7 +5,7 @@
 'use strict';
 
 import { DebugConfiguration } from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol/lib/debugProtocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { IDisposableRegistry, IExtensionContext } from './common/types';
 import { DebuggerTypeName } from './constants';
 
