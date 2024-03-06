@@ -20,11 +20,11 @@ import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getActiveEnvironmentPath, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
+import { getInterpreterDetails, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
-import { Environment } from '../../common/pythonTypes';
+import { ResolvedEnvironment } from '@vscode/python-extension';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -121,12 +121,12 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
 
         const resourceUri = workspaceFolder ? workspaceFolder.uri : undefined;
-        const interpreterPath = await getActiveEnvironmentPath(resourceUri);
-        const interpreter = await resolveEnvironment(interpreterPath);
+
+        const interpreter = await getInterpreterDetails(resourceUri);
 
         if (interpreter?.path) {
-            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreterPath}'`);
-            return this.getExecutableCommand(await resolveEnvironment(interpreterPath));
+            traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreter.path[0]}'`);
+            return this.getExecutableCommand(await resolveEnvironment(interpreter.path[0]));
         }
 
         const prompts = [Interpreters.changePythonInterpreter];
@@ -139,6 +139,11 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         );
         if (selection === Interpreters.changePythonInterpreter) {
             await executeCommand(Commands.Set_Interpreter);
+            const interpreter = await getInterpreterDetails(resourceUri);
+            if (interpreter?.path) {
+                traceVerbose(`Selecting active interpreter as Python Executable for DA '${interpreter.path[0]}'`);
+                return this.getExecutableCommand(await resolveEnvironment(interpreter.path[0]));
+            }
         }
         return [];
     }
@@ -171,7 +176,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
     }
 
-    private async getExecutableCommand(interpreter: Environment | undefined): Promise<string[]> {
+    private async getExecutableCommand(interpreter: ResolvedEnvironment | undefined): Promise<string[]> {
         if (interpreter) {
             if (
                 (interpreter.version?.major ?? 0) < 3 ||
