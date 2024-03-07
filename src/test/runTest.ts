@@ -1,6 +1,9 @@
+import * as cp from 'child_process';
 import * as path from 'path';
 
-import { runTests } from '@vscode/test-electron';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import { PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
+import { OSType, getOSType } from '../extension/common/platform';
 
 async function main() {
     try {
@@ -11,9 +14,31 @@ async function main() {
         // The path to test runner
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
+        const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
-        // Download VS Code, unzip it and run the integration test
-        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+        // Use cp.spawn / cp.exec for custom setup
+        if (getOSType() == OSType.Windows) {
+            const exec = path.basename(cliPath);
+            cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+                cwd: path.dirname(cliPath),
+                encoding: 'utf-8',
+                stdio: 'inherit',
+            });
+        } else {
+            cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
+                encoding: 'utf-8',
+                stdio: 'inherit',
+            });
+        }
+
+        // Run the extension test
+        await runTests({
+            // Use the specified `code` executable
+            vscodeExecutablePath,
+            extensionDevelopmentPath,
+            extensionTestsPath,
+        });
     } catch (err) {
         console.error('Failed to run tests');
         process.exit(1);

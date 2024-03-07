@@ -33,7 +33,7 @@ suite('Debugging - Adapter Factory', () => {
     let showErrorMessageStub: sinon.SinonStub;
     let resolveEnvironmentStub: sinon.SinonStub;
     let getInterpretersStub: sinon.SinonStub;
-    let getActiveEnvironmentPathStub: sinon.SinonStub;
+    let getInterpreterDetailsStub: sinon.SinonStub;
     let hasInterpretersStub: sinon.SinonStub;
 
     const nodeExecutable = undefined;
@@ -71,7 +71,7 @@ suite('Debugging - Adapter Factory', () => {
         showErrorMessageStub = sinon.stub(vscodeApi, 'showErrorMessage');
         resolveEnvironmentStub = sinon.stub(pythonApi, 'resolveEnvironment');
         getInterpretersStub = sinon.stub(pythonApi, 'getInterpreters');
-        getActiveEnvironmentPathStub = sinon.stub(pythonApi, 'getActiveEnvironmentPath');
+        getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
         hasInterpretersStub = sinon.stub(pythonApi, 'hasInterpreters');
 
         when(
@@ -119,7 +119,7 @@ suite('Debugging - Adapter Factory', () => {
     test('Return the path of the active interpreter as the current python path, it exists and configuration.pythonPath is not defined', async () => {
         const session = createSession({});
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -127,7 +127,7 @@ suite('Debugging - Adapter Factory', () => {
     });
 
     test('Display a message if no python interpreter is set', async () => {
-        getActiveEnvironmentPathStub.resolves(undefined);
+        getInterpreterDetailsStub.resolves(undefined);
         const session = createSession({});
         const promise = factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -149,7 +149,7 @@ suite('Debugging - Adapter Factory', () => {
             version: new SemVer('3.6.12-test'),
         };
         when(state.value).thenReturn(false);
-        getActiveEnvironmentPathStub.resolves(deprecatedInterpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [deprecatedInterpreter.path] });
         resolveEnvironmentStub.resolves(deprecatedInterpreter);
 
         await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -195,7 +195,7 @@ suite('Debugging - Adapter Factory', () => {
     test('Return Debug Adapter executable if request is "attach", and listen is specified', async () => {
         const session = createSession({ request: 'attach', listen: { port: 5678, host: 'localhost' } });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -226,7 +226,7 @@ suite('Debugging - Adapter Factory', () => {
             EXTENSION_ROOT_DIR,
         ]);
 
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -238,7 +238,7 @@ suite('Debugging - Adapter Factory', () => {
         const session = createSession({});
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
 
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -250,7 +250,7 @@ suite('Debugging - Adapter Factory', () => {
         const session = createSession({ logToFile: false });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
 
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -260,7 +260,7 @@ suite('Debugging - Adapter Factory', () => {
 
     test('Send attach to local process telemetry if attaching to a local process', async () => {
         const session = createSession({ request: 'attach', processId: 1234 });
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -270,7 +270,7 @@ suite('Debugging - Adapter Factory', () => {
 
     test("Don't send any telemetry if not attaching to a local process", async () => {
         const session = createSession({});
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         await factory.createDebugAdapterDescriptor(session, nodeExecutable);
@@ -282,7 +282,7 @@ suite('Debugging - Adapter Factory', () => {
         const customAdapterPath = 'custom/debug/adapter/path';
         const session = createSession({ debugAdapterPath: customAdapterPath });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [customAdapterPath]);
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
@@ -310,7 +310,7 @@ suite('Debugging - Adapter Factory', () => {
     test('Do not use "python" to spawn the debug adapter', async () => {
         const session = createSession({ python: '/bin/custompy' });
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
-        getActiveEnvironmentPathStub.resolves(interpreter.path);
+        getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
