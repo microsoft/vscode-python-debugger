@@ -472,6 +472,7 @@
                                 "type": "boolean"
                             },
                             "guiEventLoop": {
+                                "default": "matplotlib",
                                 "description": "The GUI event loop that's going to run. Possible values: \"matplotlib\", \"wx\", \"qt\", \"none\", or a custom function that'll be imported and run.",
                                 "type": "string"
                             }
