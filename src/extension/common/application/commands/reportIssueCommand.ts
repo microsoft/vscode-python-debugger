@@ -9,6 +9,8 @@ import { executeCommand } from '../../vscodeapi';
 import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 import { EXTENSION_ROOT_DIR } from '../../constants';
 import { getRawVersion } from '../../settings';
+import { sendTelemetryEvent } from '../../../telemetry';
+import { EventName } from '../../../telemetry/constants';
 
 /**
  * Allows the user to report an issue related to the Python Debugger extension using our template.
@@ -28,5 +30,5 @@ export async function openReportIssue(): Promise<void> {
         issueBody: template,
         data: userTemplate.replace('{0}', pythonVersion).replace('{1}', virtualEnvKind),
     });
-    // sendTelemetryEvent(EventName.USE_REPORT_ISSUE_COMMAND, undefined, {});
+    sendTelemetryEvent(EventName.USE_REPORT_ISSUE_COMMAND, undefined, {});
 }
