@@ -5,6 +5,7 @@ import { ConfigurationChangeEvent, ConfigurationTarget, Uri, WorkspaceConfigurat
 import { getInterpreterDetails } from './python';
 import { getConfiguration, getWorkspaceFolder, getWorkspaceFolders } from './vscodeapi';
 import { isUnitTestExecution } from './constants';
+import { VersionInfo } from '@vscode/python-extension';
 
 export interface ISettings {
     workspace: string;
@@ -15,7 +16,6 @@ export interface ISettings {
 export async function getExtensionSettings(namespace: string, includeInterpreter?: boolean): Promise<ISettings[]> {
     const settings: ISettings[] = [];
     const workspaces = getWorkspaceFolders();
-
     for (const workspace of workspaces) {
         const workspaceSetting = await getWorkspaceSettings(namespace, workspace, includeInterpreter);
         settings.push(workspaceSetting);
@@ -148,4 +148,11 @@ export async function verifySetting(
             retries += 1;
         } while (retries < 20);
     }
+}
+
+export function getRawVersion(version: VersionInfo | undefined) {
+    if (version) {
+        return `${version.major}.${version.minor}.${version.micro}`;
+    }
+    return ``;
 }

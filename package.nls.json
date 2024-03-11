@@ -1,7 +1,8 @@
 {
+    "debugpy.command.clearCacheAndReload.title": "Clear Cache and Reload Window",
     "debugpy.command.debugInTerminal.title": "Python Debugger: Debug Python File",
     "debugpy.command.debugUsingLaunchConfig.title": "Python Debugger: Debug using launch.json",
-    "debugpy.command.clearCacheAndReload.title": "Clear Cache and Reload Window",
+    "debugpy.command.reportIssue.title": "Report Issue...",
     "debugpy.command.viewOutput.title": "Show Output",
     "debugpy.debugJustMyCode": "When debugging only step through user-written code. Disable this to allow stepping into library code."
 }

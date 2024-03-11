@@ -34,6 +34,7 @@ import { pickArgsInput } from './common/utils/localize';
 import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 import { getConfigurationsByUri } from './debugger/configuration/launch.json/launchJsonReader';
 import { DebugpySocketsHandler } from './debugger/hooks/debugpySocketsHandler';
+import { openReportIssue } from './common/application/commands/reportIssueCommand';
 
 export async function registerDebugger(context: IExtensionContext): Promise<void> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -169,4 +170,6 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             debugPortAttributesProvider.resetPortAttribute();
         }),
     );
+
+    context.subscriptions.push(registerCommand(Commands.ReportIssue, () => openReportIssue()));
 }

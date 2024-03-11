@@ -39,6 +39,7 @@ export namespace Commands {
     export const Enable_SourceMap_Support = 'debugpy.enableSourceMapSupport';
     export const SelectDebugConfig = 'debugpy.SelectAndInsertDebugConfiguration';
     export const Set_Interpreter = 'python.setInterpreter';
+    export const ReportIssue = 'debugpy.reportIssue';
 }
 
 export type Channel = 'stable' | 'insiders';
