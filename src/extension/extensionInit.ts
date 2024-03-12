@@ -64,6 +64,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
         ),
     );
 
+    context.subscriptions.push(registerCommand(Commands.ReportIssue, () => openReportIssue()));
+
     context.subscriptions.push(
         registerCommand(Commands.Debug_In_Terminal, async (file?: Uri) => {
             sendTelemetryEvent(EventName.DEBUG_IN_TERMINAL_BUTTON);
@@ -170,6 +172,4 @@ export async function registerDebugger(context: IExtensionContext): Promise<void
             debugPortAttributesProvider.resetPortAttribute();
         }),
     );
-
-    context.subscriptions.push(registerCommand(Commands.ReportIssue, () => openReportIssue()));
 }
