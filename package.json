@@ -318,6 +318,10 @@
                                     "internalConsole"
                                 ]
                             },
+                            "consoleTitle": {
+                                "default": "Python Debug Console",
+                                "description": "Display name of the debug console or terminal"
+                            },
                             "cwd": {
                                 "default": "${workspaceFolder}",
                                 "description": "Absolute path to the working directory of the program being debugged. Default is the root directory of the file (leave empty).",
@@ -426,7 +430,7 @@
                             },
                             "pyramid": {
                                 "default": false,
-                                "description": "Whether debugging Pyramid applications",
+                                "description": "Whether debugging Pyramid applications.",
                                 "type": "boolean"
                             },
                             "python": {
@@ -459,13 +463,18 @@
                             },
                             "subProcess": {
                                 "default": false,
-                                "description": "Whether to enable Sub Process debugging",
+                                "description": "Whether to enable Sub Process debugging.",
                                 "type": "boolean"
                             },
                             "sudo": {
                                 "default": false,
                                 "description": "Running debug program under elevated permissions (on Unix).",
                                 "type": "boolean"
+                            },
+                            "guiEventLoop": {
+                                "default": "matplotlib",
+                                "description": "The GUI event loop that's going to run. Possible values: \"matplotlib\", \"wx\", \"qt\", \"none\", or a custom function that'll be imported and run.",
+                                "type": "string"
                             }
                         }
                     }
