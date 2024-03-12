@@ -73,7 +73,7 @@ suite('Report Issue Command', () => {
     test('Should send telemetry event when run Report Issue Command', async () => {
         const sendTelemetryStub = sinon.stub(Telemetry, 'sendTelemetryEvent');
         await openReportIssue();
-        
+
         sinon.assert.calledWith(sendTelemetryStub, EventName.USE_REPORT_ISSUE_COMMAND);
         sinon.restore();
     });
