@@ -1,0 +1,2 @@
+-   Python version (& distribution if applicable, e.g. Anaconda): {0}
+-   Type of virtual environment used (e.g. conda, venv, virtualenv, etc.): {1}

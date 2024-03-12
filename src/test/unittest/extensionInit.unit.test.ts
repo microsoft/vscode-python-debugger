@@ -60,6 +60,7 @@ suite('Debugging - register Debugging', () => {
     test('Ensure to register all the commands related to the debugger', () => {
         registerDebugger(context.object);
 
+        sinon.assert.calledWithExactly(registerCommandStub, Commands.ReportIssue, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_In_Terminal, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.Debug_Using_Launch_Config, sinon.match.any);
         sinon.assert.calledWithExactly(registerCommandStub, Commands.PickLocalProcess, sinon.match.any);
@@ -71,7 +72,7 @@ suite('Debugging - register Debugging', () => {
             sinon.match.any,
         );
         sinon.assert.calledWithExactly(registerCommandStub, Commands.ClearStorage, sinon.match.any);
-        expect(registerCommandStub.callCount).to.be.equal(6);
+        expect(registerCommandStub.callCount).to.be.equal(7);
     });
 
     test('Activation will register the Debug adapter factories', async () => {

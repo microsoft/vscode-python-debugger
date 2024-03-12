@@ -660,4 +660,11 @@ export interface IEventNamePropertyMapping {
        "envfile_variable_substitution" : { "owner": "karthiknadig" }
      */
     [EventName.ENVFILE_VARIABLE_SUBSTITUTION]: never | undefined;
+    /**
+     * Telemetry event sent when the user use the report issue command.
+     */
+    /* __GDPR__
+      "use_report_issue_command" : { "owner": "paulacamargo25" }
+     */
+    [EventName.USE_REPORT_ISSUE_COMMAND]: unknown;
 }

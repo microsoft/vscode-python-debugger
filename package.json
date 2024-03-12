@@ -5,7 +5,8 @@
     "version": "2024.3.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
-        "portsAttributes"
+        "portsAttributes",
+        "contribIssueReporter"
     ],
     "license": "MIT",
     "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -63,9 +64,19 @@
                     "light": "resources/light/repl.svg"
                 },
                 "title": "%debugpy.command.viewOutput.title%"
+            },
+            {
+                "category": "Python Debugger",
+                "command": "debugpy.reportIssue",
+                "title": "%debugpy.command.reportIssue.title%"
             }
         ],
         "menus": {
+            "issue/reporter": [
+				{
+					"command": "debugpy.reportIssue"
+				}
+			],
             "commandPalette": [
                 {
                     "category": "Python Debugger",
@@ -90,6 +101,12 @@
                     "category": "Python Debugger",
                     "command": "debugpy.viewOutput",
                     "title": "%debugpy.command.viewOutput.title%"
+                },
+                {
+                    "category": "Python Debugger",
+                    "command": "debugpy.reportIssue",
+                    "title": "%debugpy.command.reportIssue.title%",
+                    "when": "!virtualWorkspace && shellExecutionSupported"
                 }
             ],
             "editor/title/run": [
