@@ -14,7 +14,7 @@ import { EventName } from '../../../telemetry/constants';
 import { DebugConfigStrings } from '../../../common/utils/localize';
 import { AttachRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
-import { WorkspaceFolder } from 'vscode';
+import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { asyncFilter } from '../../../common/utilities';
 
 const defaultPort = 5678;
@@ -47,23 +47,42 @@ export async function configurePort(
     });
 }
 
+// async function getPossiblePaths(
+//     folder: WorkspaceFolder,
+//     globPatterns: string[],
+//     regex: RegExp,
+// ): Promise<string[]> {
+//     const foundPathsPromises = (await Promise.allSettled(
+//         globPatterns.map(
+//             async (pattern): Promise<string[]> =>
+//                 (await fs.pathExists(path.join(folder.uri.fsPath, pattern)))
+//                     ? [path.join(folder.uri.fsPath, pattern)]
+//                     : [],
+//         ),
+//     )) as { status: string; value: [] }[];
+//     const possiblePaths: string[] = [];
+//     foundPathsPromises.forEach((result) => possiblePaths.push(...result.value));
+//     const finalPaths = await asyncFilter(possiblePaths, async (possiblePath) =>
+//         regex.exec((await fs.readFile(possiblePath)).toString()),
+//     );
+
+//     return finalPaths;
+// }
+
 async function getPossiblePaths(
-    folder: WorkspaceFolder,
     globPatterns: string[],
     regex: RegExp,
-): Promise<string[]> {
+): Promise<Uri[]> {
     const foundPathsPromises = (await Promise.allSettled(
         globPatterns.map(
-            async (pattern): Promise<string[]> =>
-                (await fs.pathExists(path.join(folder.uri.fsPath, pattern)))
-                    ? [path.join(folder.uri.fsPath, pattern)]
-                    : [],
+            async (pattern): Promise<Uri[]> =>
+                (await workspace.findFiles(pattern))
         ),
     )) as { status: string; value: [] }[];
-    const possiblePaths: string[] = [];
+    const possiblePaths: Uri[] = [];
     foundPathsPromises.forEach((result) => possiblePaths.push(...result.value));
     const finalPaths = await asyncFilter(possiblePaths, async (possiblePath) =>
-        regex.exec((await fs.readFile(possiblePath)).toString()),
+        regex.exec((await fs.readFile(possiblePath.fsPath)).toString()),
     );
 
     return finalPaths;
@@ -74,12 +93,11 @@ export async function getDjangoPaths(folder: WorkspaceFolder | undefined) {
         return undefined;
     }
     const regExpression = /execute_from_command_line\(/;
-    const possiblePaths = await getPossiblePaths(
-        folder,
+    const djangoPaths = await getPossiblePaths(
         ['manage.py', '*/manage.py', 'app.py', '*/app.py'],
         regExpression,
     );
-    return possiblePaths;
+    return djangoPaths;
 }
 
 export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
@@ -88,12 +106,11 @@ export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
     }
     const regExpression = /app\s*=\s*FastAPI\(/;
     const fastApiPaths = await getPossiblePaths(
-        folder,
         ['main.py', 'app.py', '*/main.py', '*/app.py', '*/*/main.py', '*/*/app.py'],
         regExpression,
     );
 
-    return fastApiPaths.length ? fastApiPaths[0] : null;
+    return fastApiPaths;
 }
 
 export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {
@@ -102,10 +119,9 @@ export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {
     }
     const regExpression = /app(?:lication)?\s*=\s*(?:flask\.)?Flask\(|def\s+(?:create|make)_app\(/;
     const flaskPaths = await getPossiblePaths(
-        folder,
         ['__init__.py', 'app.py', 'wsgi.py', '*/__init__.py', '*/app.py', '*/wsgi.py'],
         regExpression,
     );
 
-    return flaskPaths.length ? flaskPaths[0] : null;
+    return flaskPaths;
 }
