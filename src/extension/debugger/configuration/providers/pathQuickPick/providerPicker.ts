@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { QuickInputButton, ThemeIcon, Uri, window } from 'vscode';
-import { browsePath } from '../../../../common/utils/localize';
 import { OSType, getOSType } from '../../../../common/platform';
+import { DebugConfigStrings } from '../../../../common/utils/localize';
 
 export const goToFileButton: QuickInputButton = {
     iconPath: new ThemeIcon('go-to-file'),
@@ -11,8 +11,8 @@ export const goToFileButton: QuickInputButton = {
 };
 
 export const browseFileOption = {
-    label: `$(folder) ${browsePath.label}`,
-    description: browsePath.detail,
+    label: `$(folder) ${DebugConfigStrings.browsePath.label}`,
+    description: DebugConfigStrings.browsePath.detail,
 };
 
 export async function openFileExplorer(folder: Uri | undefined) {
@@ -21,9 +21,9 @@ export async function openFileExplorer(folder: Uri | undefined) {
     filtersObject[filtersKey] = ['exe'];
     return await window.showOpenDialog({
         filters: getOSType() == OSType.Windows ? filtersObject : undefined,
-        openLabel: browsePath.openButtonLabel,
+        openLabel: DebugConfigStrings.browsePath.openButtonLabel,
         canSelectMany: false,
-        title: browsePath.title,
+        title: DebugConfigStrings.browsePath.title,
         defaultUri: folder ? folder : undefined,
     });
 }

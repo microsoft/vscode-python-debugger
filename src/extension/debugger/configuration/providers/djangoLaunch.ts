@@ -69,12 +69,12 @@ export async function pickDjangoPrompt(
     ];
 
     const selection = await input.showQuickPick<QuickPickType, IQuickPickParameters<QuickPickType>>({
-        placeholder: DebugConfigStrings.django.enterManagePyPath.prompt,
+        placeholder: DebugConfigStrings.django.djangoConfigPromp.prompt,
         items: options,
         acceptFilterBoxTextAsSelection: true,
         activeItem: options[0],
         matchOnDescription: true,
-        title: DebugConfigStrings.django.enterManagePyPath.title,
+        title: DebugConfigStrings.django.djangoConfigPromp.title,
         onDidTriggerItemButton: async (e: QuickPickItemButtonEvent<QuickPickType>) => {
             if (e.item && 'filePath' in e.item) {
                 await window.showTextDocument(e.item.filePath, { preview: true });
