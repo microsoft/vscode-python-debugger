@@ -320,3 +320,13 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
         }
     }
 }
+
+export const IMultiStepInputFactory = Symbol('IMultiStepInputFactory');
+export interface IMultiStepInputFactory {
+    create<S>(): IMultiStepInput<S>;
+}
+export class MultiStepInputFactory {
+    public create<S>(): IMultiStepInput<S> {
+        return new MultiStepInput<S>();
+    }
+}
