@@ -29,7 +29,9 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         });
 
         const djangoManagePaths = await getDjangoPaths(folder);
-        const djangoManagePath = djangoManagePaths?.length ? path.relative(folder.uri.fsPath, djangoManagePaths[0].fsPath) : null;
+        const djangoManagePath = djangoManagePaths?.length
+            ? path.relative(folder.uri.fsPath, djangoManagePaths[0].fsPath)
+            : null;
         if (djangoManagePath) {
             providers.push({
                 name: 'Python Debugger: Django',

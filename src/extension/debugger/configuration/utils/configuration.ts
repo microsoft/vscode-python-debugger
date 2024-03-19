@@ -6,7 +6,6 @@
 
 'use strict';
 
-import * as path from 'path';
 import * as fs from 'fs-extra';
 import { MultiStepInput } from '../../../common/multiStepInput';
 import { sendTelemetryEvent } from '../../../telemetry';
@@ -47,37 +46,9 @@ export async function configurePort(
     });
 }
 
-// async function getPossiblePaths(
-//     folder: WorkspaceFolder,
-//     globPatterns: string[],
-//     regex: RegExp,
-// ): Promise<string[]> {
-//     const foundPathsPromises = (await Promise.allSettled(
-//         globPatterns.map(
-//             async (pattern): Promise<string[]> =>
-//                 (await fs.pathExists(path.join(folder.uri.fsPath, pattern)))
-//                     ? [path.join(folder.uri.fsPath, pattern)]
-//                     : [],
-//         ),
-//     )) as { status: string; value: [] }[];
-//     const possiblePaths: string[] = [];
-//     foundPathsPromises.forEach((result) => possiblePaths.push(...result.value));
-//     const finalPaths = await asyncFilter(possiblePaths, async (possiblePath) =>
-//         regex.exec((await fs.readFile(possiblePath)).toString()),
-//     );
-
-//     return finalPaths;
-// }
-
-async function getPossiblePaths(
-    globPatterns: string[],
-    regex: RegExp,
-): Promise<Uri[]> {
+async function getPossiblePaths(globPatterns: string[], regex: RegExp): Promise<Uri[]> {
     const foundPathsPromises = (await Promise.allSettled(
-        globPatterns.map(
-            async (pattern): Promise<Uri[]> =>
-                (await workspace.findFiles(pattern))
-        ),
+        globPatterns.map(async (pattern): Promise<Uri[]> => await workspace.findFiles(pattern)),
     )) as { status: string; value: [] }[];
     const possiblePaths: Uri[] = [];
     foundPathsPromises.forEach((result) => possiblePaths.push(...result.value));
@@ -88,15 +59,12 @@ async function getPossiblePaths(
     return finalPaths;
 }
 
-export async function getDjangoPaths(folder: WorkspaceFolder | undefined) {
+export async function getDjangoPaths(folder: WorkspaceFolder | undefined): Promise<Uri[]> {
     if (!folder) {
-        return undefined;
+        return [];
     }
     const regExpression = /execute_from_command_line\(/;
-    const djangoPaths = await getPossiblePaths(
-        ['manage.py', '*/manage.py', 'app.py', '*/app.py'],
-        regExpression,
-    );
+    const djangoPaths = await getPossiblePaths(['manage.py', '*/manage.py', 'app.py', '*/app.py'], regExpression);
     return djangoPaths;
 }
 

@@ -603,7 +603,9 @@ export interface IEventNamePropertyMapping {
           "autodetectedpyramidinipath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
           "autodetectedfastapimainpypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
           "autodetectedflaskapppypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
+          "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+          "browsefilevalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
+
        }
      */
 
@@ -645,6 +647,12 @@ export interface IEventNamePropertyMapping {
          * @type {boolean}
          */
         manuallyEnteredAValue?: boolean;
+        /**
+         * Carries `true` if the user choose a file from the folder picker, `false` otherwise
+         *
+         * @type {boolean}
+         */
+        browsefilevalue?: boolean;
     };
     /**
      * Telemetry event sent when providing completion provider in launch.json. It is sent just *after* inserting the completion.

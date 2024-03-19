@@ -95,7 +95,7 @@ export namespace DebugConfigStrings {
         export const enterManagePyPath = {
             title: l10n.t('Debug Django'),
             prompt: l10n.t(
-                "Enter the path to manage.py ('${workspaceFolderToken}' points to the root of the current workspace folder)",
+                "Enter the path to manage.py or select one from the list ('${workspaceFolderToken}' points to the root of the current workspace folder)",
             ),
             invalid: l10n.t('Enter a valid Python file path'),
         };
@@ -170,3 +170,14 @@ export namespace pickArgsInput {
     export const title = l10n.t('Command Line Arguments');
     export const prompt = l10n.t('Enter the command line arguments you want to pass to the program');
 }
+
+// export const providerQuickPick = {
+//     refreshInterpreterList
+// }
+
+export const browsePath = {
+    label: l10n.t('Find...'),
+    detail: l10n.t('Browse your file system to find a Python file.'),
+    openButtonLabel: l10n.t('Select File'),
+    title: l10n.t('Select Python File'),
+};
