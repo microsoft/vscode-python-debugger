@@ -37,7 +37,7 @@ suite('Debugging - Configuration Provider Django', () => {
     test('Show picker and send parsed found managepy paths', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
-        const managePath = Uri.parse(path.join(folder.uri.fsPath, 'manage.py'));
+        const managePath = Uri.file(path.join(folder.uri.fsPath, 'manage.py'));
         console.log('Folder:', folder.uri.fsPath);
         console.log('managePath: ', managePath);
         getDjangoPathsStub.resolves([managePath]);
