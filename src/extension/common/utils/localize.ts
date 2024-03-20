@@ -27,7 +27,7 @@ export namespace DebugConfigStrings {
         detail: l10n.t('Browse your file system to find a Python file.'),
         openButtonLabel: l10n.t('Select File'),
         title: l10n.t('Select Python File'),
-    };    
+    };
     export namespace file {
         export const snippet = {
             name: l10n.t('Python Debugger: Current File'),
