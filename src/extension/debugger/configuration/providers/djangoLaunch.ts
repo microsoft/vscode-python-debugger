@@ -43,7 +43,7 @@ export async function buildDjangoLaunchDebugConfiguration(
     } else {
         const managePath = path.join(state?.folder?.uri.fsPath || '', 'manage.py');
         options.push({
-            label: 'manage.py',
+            label: 'Default',
             description: parseManagePyPath(state.folder, managePath),
             filePath: Uri.file(managePath),
         });

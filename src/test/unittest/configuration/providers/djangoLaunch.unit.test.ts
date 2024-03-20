@@ -34,10 +34,12 @@ suite('Debugging - Configuration Provider Django', () => {
     teardown(() => {
         sinon.restore();
     });
-    test('Show picker and send parsed managepy paths', async () => {
+    test('Show picker and send parsed found managepy paths', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         const managePath = Uri.parse(path.join(folder.uri.fsPath, 'manage.py'));
+        console.log('Folder:', folder.uri.fsPath);
+        console.log('managePath: ', managePath);
         getDjangoPathsStub.resolves([managePath]);
         pickDjangoPromptStub.resolves();
         await djangoLaunch.buildDjangoLaunchDebugConfiguration(multiStepInput.object, state);
@@ -53,6 +55,26 @@ suite('Debugging - Configuration Provider Django', () => {
                         tooltip: `Open in Preview`,
                     },
                 ],
+            },
+        ];
+
+        expect(options).to.be.deep.equal(expectedOptions);
+    });
+    test('Show picker and send defauge managepy path', async () => {
+        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
+        const state = { config: {}, folder };
+        const managePath = path.join(state?.folder?.uri.fsPath, 'manage.py');
+        console.log('Folder:', folder.uri.fsPath);
+        console.log('managePath: ', managePath);
+        getDjangoPathsStub.resolves([]);
+        pickDjangoPromptStub.resolves();
+        await djangoLaunch.buildDjangoLaunchDebugConfiguration(multiStepInput.object, state);
+        const options = pickDjangoPromptStub.getCall(0).args[3];
+        const expectedOptions = [
+            {
+                label: 'Default',
+                filePath: Uri.file(managePath),
+                description: `${djangoProviderQuickPick.workspaceFolderToken}-manage.py`,
             },
         ];
 
