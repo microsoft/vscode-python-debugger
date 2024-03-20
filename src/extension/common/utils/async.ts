@@ -11,7 +11,7 @@ export interface Deferred<T> {
     readonly rejected: boolean;
     readonly completed: boolean;
     resolve(value?: T | PromiseLike<T>): void;
-    reject(reason?: string | Error | Record<string, unknown>): void;
+    reject(reason?: string | Error | Record<string, unknown> | unknown): void;
 }
 
 class DeferredImpl<T> implements Deferred<T> {
