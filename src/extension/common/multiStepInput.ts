@@ -15,7 +15,9 @@ import {
     QuickPickItem,
     Event,
     window,
+    QuickPickItemButtonEvent,
 } from 'vscode';
+import { createDeferred } from './utils/async';
 
 // Borrowed from https://github.com/Microsoft/vscode-extension-samples/blob/master/quickinput-sample/src/multiStepInput.ts
 // Why re-invent the wheel :)
@@ -37,7 +39,7 @@ export type InputStep<T extends any> = (input: MultiStepInput<T>, state: T) => P
 
 type buttonCallbackType<T extends QuickPickItem> = (quickPick: QuickPick<T>) => void;
 
-type QuickInputButtonSetup = {
+export type QuickInputButtonSetup = {
     /**
      * Button for an action in a QuickPick.
      */
@@ -54,13 +56,12 @@ export interface IQuickPickParameters<T extends QuickPickItem, E = any> {
     totalSteps?: number;
     canGoBack?: boolean;
     items: T[];
-    activeItem?: T | Promise<T>;
+    activeItem?: T | ((quickPick: QuickPick<T>) => Promise<T>);
     placeholder: string | undefined;
     customButtonSetups?: QuickInputButtonSetup[];
     matchOnDescription?: boolean;
     matchOnDetail?: boolean;
     keepScrollPosition?: boolean;
-    sortByLabel?: boolean;
     acceptFilterBoxTextAsSelection?: boolean;
     /**
      * A method called only after quickpick has been created and all handlers are registered.
@@ -70,6 +71,7 @@ export interface IQuickPickParameters<T extends QuickPickItem, E = any> {
         callback: (event: E, quickPick: QuickPick<T>) => void;
         event: Event<E>;
     };
+    onDidTriggerItemButton?: (e: QuickPickItemButtonEvent<T>) => void;
 }
 
 interface InputBoxParameters {
@@ -83,7 +85,7 @@ interface InputBoxParameters {
     validate(value: string): Promise<string | undefined>;
 }
 
-type MultiStepInputQuickPicResponseType<T, P> = T | (P extends { buttons: (infer I)[] } ? I : never) | undefined;
+type MultiStepInputQuickPickResponseType<T, P> = T | (P extends { buttons: (infer I)[] } ? I : never) | undefined;
 type MultiStepInputInputBoxResponseType<P> = string | (P extends { buttons: (infer I)[] } ? I : never) | undefined;
 export interface IMultiStepInput<S> {
     run(start: InputStep<S>, state: S): Promise<void>;
@@ -95,7 +97,7 @@ export interface IMultiStepInput<S> {
         activeItem,
         placeholder,
         customButtonSetups,
-    }: P): Promise<MultiStepInputQuickPicResponseType<T, P>>;
+    }: P): Promise<MultiStepInputQuickPickResponseType<T, P>>;
     showInputBox<P extends InputBoxParameters>({
         title,
         step,
@@ -131,8 +133,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
         acceptFilterBoxTextAsSelection,
         onChangeItem,
         keepScrollPosition,
+        onDidTriggerItemButton,
         initialize,
-    }: P): Promise<MultiStepInputQuickPicResponseType<T, P>> {
+    }: P): Promise<MultiStepInputQuickPickResponseType<T, P>> {
         const disposables: Disposable[] = [];
         const input = window.createQuickPick<T>();
         input.title = title;
@@ -161,7 +164,13 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
             initialize(input);
         }
         if (activeItem) {
-            input.activeItems = [await activeItem];
+            if (typeof activeItem === 'function') {
+                activeItem(input).then((item) => {
+                    if (input.activeItems.length === 0) {
+                        input.activeItems = [item];
+                    }
+                });
+            }
         } else {
             input.activeItems = [];
         }
@@ -170,35 +179,46 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
         // so do it after initialization. This ensures quickpick starts with the active
         // item in focus when this is true, instead of having scroll position at top.
         input.keepScrollPosition = keepScrollPosition;
-        try {
-            return await new Promise<MultiStepInputQuickPicResponseType<T, P>>((resolve, reject) => {
-                disposables.push(
-                    input.onDidTriggerButton(async (item) => {
-                        if (item === QuickInputButtons.Back) {
-                            reject(InputFlowAction.back);
-                        }
-                        if (customButtonSetups) {
-                            for (const customButtonSetup of customButtonSetups) {
-                                if (JSON.stringify(item) === JSON.stringify(customButtonSetup?.button)) {
-                                    await customButtonSetup?.callback(input);
-                                }
-                            }
-                        }
-                    }),
-                    input.onDidChangeSelection((selectedItems) => resolve(selectedItems[0])),
-                    input.onDidHide(() => {
-                        resolve(undefined);
-                    }),
-                );
-                if (acceptFilterBoxTextAsSelection) {
-                    disposables.push(
-                        input.onDidAccept(() => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            resolve(input.value as any);
-                        }),
-                    );
+
+        const deferred = createDeferred<T>();
+
+        disposables.push(
+            input.onDidTriggerButton(async (item) => {
+                if (item === QuickInputButtons.Back) {
+                    deferred.reject(InputFlowAction.back);
+                    input.hide();
                 }
-            });
+                if (customButtonSetups) {
+                    for (const customButtonSetup of customButtonSetups) {
+                        if (JSON.stringify(item) === JSON.stringify(customButtonSetup?.button)) {
+                            await customButtonSetup?.callback(input);
+                        }
+                    }
+                }
+            }),
+            input.onDidChangeSelection((selectedItems) => deferred.resolve(selectedItems[0])),
+            input.onDidHide(() => {
+                if (!deferred.completed) {
+                    deferred.resolve(undefined);
+                }
+            }),
+            input.onDidTriggerItemButton(async (item) => {
+                if (onDidTriggerItemButton) {
+                    await onDidTriggerItemButton(item);
+                }
+            }),
+        );
+        if (acceptFilterBoxTextAsSelection) {
+            disposables.push(
+                input.onDidAccept(() => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    deferred.resolve(input.value as any);
+                }),
+            );
+        }
+
+        try {
+            return await deferred.promise;
         } finally {
             disposables.forEach((d) => d.dispose());
         }
@@ -283,6 +303,9 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
                 if (err === InputFlowAction.back) {
                     this.steps.pop();
                     step = this.steps.pop();
+                    if (step === undefined) {
+                        throw err;
+                    }
                 } else if (err === InputFlowAction.resume) {
                     step = this.steps.pop();
                 } else if (err === InputFlowAction.cancel) {
@@ -297,6 +320,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
         }
     }
 }
+
 export const IMultiStepInputFactory = Symbol('IMultiStepInputFactory');
 export interface IMultiStepInputFactory {
     create<S>(): IMultiStepInput<S>;

@@ -42,7 +42,6 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         const config: Partial<DebugConfigurationArguments> = {};
         const state = { config, folder, token };
 
-        // Disabled until configuration issues are addressed by VS Code. See #4007
         const multiStep = this.multiStepFactory.create<DebugConfigurationState>();
         await multiStep.run((input, s) => PythonDebugConfigurationService.pickDebugConfiguration(input, s), state);
 

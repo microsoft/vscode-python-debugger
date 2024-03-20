@@ -5,12 +5,11 @@
 'use strict';
 
 import * as path from 'path';
-import * as fs from 'fs-extra';
 import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { IDynamicDebugConfigurationService } from '../types';
-import { asyncFilter } from '../../common/utilities';
 import { DebuggerTypeName } from '../../constants';
 import { replaceAll } from '../../common/stringUtils';
+import { getDjangoPaths, getFastApiPaths, getFlaskPaths } from './utils/configuration';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -29,7 +28,10 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
             program: '${file}',
         });
 
-        const djangoManagePath = await DynamicPythonDebugConfigurationService.getDjangoPath(folder);
+        const djangoManagePaths = await getDjangoPaths(folder);
+        const djangoManagePath = djangoManagePaths?.length
+            ? path.relative(folder.uri.fsPath, djangoManagePaths[0].fsPath)
+            : null;
         if (djangoManagePath) {
             providers.push({
                 name: 'Python Debugger: Django',
@@ -41,7 +43,8 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
             });
         }
 
-        const flaskPath = await DynamicPythonDebugConfigurationService.getFlaskPath(folder);
+        const flaskPaths = await getFlaskPaths(folder);
+        const flaskPath = flaskPaths?.length ? flaskPaths[0].fsPath : null;
         if (flaskPath) {
             providers.push({
                 name: 'Python Debugger: Flask',
@@ -57,7 +60,8 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
             });
         }
 
-        let fastApiPath = await DynamicPythonDebugConfigurationService.getFastApiPath(folder);
+        const fastApiPaths = await getFastApiPaths(folder);
+        let fastApiPath = fastApiPaths?.length ? fastApiPaths[0].fsPath : null;
         if (fastApiPath) {
             fastApiPath = replaceAll(path.relative(folder.uri.fsPath, fastApiPath), path.sep, '.').replace('.py', '');
             providers.push({
@@ -71,59 +75,5 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         }
 
         return providers;
-    }
-
-    private static async getDjangoPath(folder: WorkspaceFolder) {
-        const regExpression = /execute_from_command_line\(/;
-        const possiblePaths = await DynamicPythonDebugConfigurationService.getPossiblePaths(
-            folder,
-            ['manage.py', '*/manage.py', 'app.py', '*/app.py'],
-            regExpression,
-        );
-        return possiblePaths.length ? path.relative(folder.uri.fsPath, possiblePaths[0]) : null;
-    }
-
-    private static async getFastApiPath(folder: WorkspaceFolder) {
-        const regExpression = /app\s*=\s*FastAPI\(/;
-        const fastApiPaths = await DynamicPythonDebugConfigurationService.getPossiblePaths(
-            folder,
-            ['main.py', 'app.py', '*/main.py', '*/app.py', '*/*/main.py', '*/*/app.py'],
-            regExpression,
-        );
-
-        return fastApiPaths.length ? fastApiPaths[0] : null;
-    }
-
-    private static async getFlaskPath(folder: WorkspaceFolder) {
-        const regExpression = /app(?:lication)?\s*=\s*(?:flask\.)?Flask\(|def\s+(?:create|make)_app\(/;
-        const flaskPaths = await DynamicPythonDebugConfigurationService.getPossiblePaths(
-            folder,
-            ['__init__.py', 'app.py', 'wsgi.py', '*/__init__.py', '*/app.py', '*/wsgi.py'],
-            regExpression,
-        );
-
-        return flaskPaths.length ? flaskPaths[0] : null;
-    }
-
-    private static async getPossiblePaths(
-        folder: WorkspaceFolder,
-        globPatterns: string[],
-        regex: RegExp,
-    ): Promise<string[]> {
-        const foundPathsPromises = (await Promise.allSettled(
-            globPatterns.map(
-                async (pattern): Promise<string[]> =>
-                    (await fs.pathExists(path.join(folder.uri.fsPath, pattern)))
-                        ? [path.join(folder.uri.fsPath, pattern)]
-                        : [],
-            ),
-        )) as { status: string; value: [] }[];
-        const possiblePaths: string[] = [];
-        foundPathsPromises.forEach((result) => possiblePaths.push(...result.value));
-        const finalPaths = await asyncFilter(possiblePaths, async (possiblePath) =>
-            regex.exec((await fs.readFile(possiblePath)).toString()),
-        );
-
-        return finalPaths;
     }
 }

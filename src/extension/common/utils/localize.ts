@@ -22,6 +22,12 @@ export namespace DebugConfigStrings {
         label: l10n.t('Python Debugger'),
         description: l10n.t('Select a Python Debugger debug configuration'),
     };
+    export const browsePath = {
+        label: l10n.t('Browse Files...'),
+        detail: l10n.t('Browse your file system to find a Python file.'),
+        openButtonLabel: l10n.t('Select File'),
+        title: l10n.t('Select Python File'),
+    };
     export namespace file {
         export const snippet = {
             name: l10n.t('Python Debugger: Current File'),
@@ -92,12 +98,11 @@ export namespace DebugConfigStrings {
             label: l10n.t('Django'),
             description: l10n.t('Launch and debug a Django web application'),
         };
-        export const enterManagePyPath = {
+        export const djangoConfigPromp = {
             title: l10n.t('Debug Django'),
             prompt: l10n.t(
-                "Enter the path to manage.py ('${workspaceFolderToken}' points to the root of the current workspace folder)",
+                "Enter the path to manage.py or select a file from the list ('${workspaceFolderToken}' points to the root of the current workspace folder)",
             ),
-            invalid: l10n.t('Enter a valid Python file path'),
         };
     }
     export namespace fastapi {

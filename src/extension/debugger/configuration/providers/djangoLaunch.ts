@@ -3,88 +3,50 @@
 
 'use strict';
 
-import * as vscode from 'vscode';
+import { Uri } from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs-extra';
 import { MultiStepInput } from '../../../common/multiStepInput';
-import { sendTelemetryEvent } from '../../../telemetry';
-import { EventName } from '../../../telemetry/constants';
 import { DebuggerTypeName } from '../../../constants';
 import { LaunchRequestArguments } from '../../../types';
-import { DebugConfigurationState, DebugConfigurationType } from '../../types';
-import { resolveVariables } from '../utils/common';
+import { DebugConfigurationState } from '../../types';
 import { DebugConfigStrings } from '../../../common/utils/localize';
-
-const workspaceFolderToken = '${workspaceFolder}';
+import { getDjangoPaths } from '../utils/configuration';
+import { goToFileButton } from './providerQuickPick/providerQuickPick';
+import { QuickPickType } from './providerQuickPick/types';
+import { parseManagePyPath, pickDjangoPrompt } from './providerQuickPick/djangoProviderQuickPick';
 
 export async function buildDjangoLaunchDebugConfiguration(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {
-    const program = await getManagePyPath(state.folder);
-    let manuallyEnteredAValue: boolean | undefined;
-    const defaultProgram = `${workspaceFolderToken}${path.sep}manage.py`;
     const config: Partial<LaunchRequestArguments> = {
         name: DebugConfigStrings.django.snippet.name,
         type: DebuggerTypeName,
         request: 'launch',
-        program: program || defaultProgram,
         args: ['runserver'],
         django: true,
         autoStartBrowser: false,
     };
-    if (!program) {
-        const selectedProgram = await input.showInputBox({
-            title: DebugConfigStrings.django.enterManagePyPath.title,
-            value: defaultProgram,
-            prompt: DebugConfigStrings.django.enterManagePyPath.prompt,
-            validate: (value) => validateManagePy(state.folder, defaultProgram, value),
+
+    let djangoPaths = await getDjangoPaths(state.folder);
+    let options: QuickPickType[] = [];
+    //add found paths to options
+    if (djangoPaths.length > 0) {
+        options.push(
+            ...djangoPaths.map((item) => ({
+                label: path.basename(item.fsPath),
+                filePath: item,
+                description: parseManagePyPath(state.folder, item.fsPath),
+                buttons: [goToFileButton],
+            })),
+        );
+    } else {
+        const managePath = path.join(state?.folder?.uri.fsPath || '', 'manage.py');
+        options.push({
+            label: 'Default',
+            description: parseManagePyPath(state.folder, managePath),
+            filePath: Uri.file(managePath),
         });
-        if (selectedProgram) {
-            manuallyEnteredAValue = true;
-            config.program = selectedProgram;
-        } else {
-            return;
-        }
     }
-
-    sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
-        configurationType: DebugConfigurationType.launchDjango,
-        autoDetectedDjangoManagePyPath: !!program,
-        manuallyEnteredAValue,
-    });
-
-    Object.assign(state.config, config);
-}
-
-export async function validateManagePy(
-    folder: vscode.WorkspaceFolder | undefined,
-    defaultValue: string,
-    selected?: string,
-): Promise<string | undefined> {
-    const error = DebugConfigStrings.django.enterManagePyPath.invalid;
-    if (!selected || selected.trim().length === 0) {
-        return error;
-    }
-    const resolvedPath = resolveVariables(selected, undefined, folder);
-    if (resolvedPath) {
-        if (selected !== defaultValue && !(await fs.pathExists(resolvedPath))) {
-            return error;
-        }
-        if (!resolvedPath.trim().toLowerCase().endsWith('.py')) {
-            return error;
-        }
-    }
-    return undefined;
-}
-
-export async function getManagePyPath(folder: vscode.WorkspaceFolder | undefined): Promise<string | undefined> {
-    if (!folder) {
-        return undefined;
-    }
-    const defaultLocationOfManagePy = path.join(folder.uri.fsPath, 'manage.py');
-    if (await fs.pathExists(defaultLocationOfManagePy)) {
-        return `${workspaceFolderToken}${path.sep}manage.py`;
-    }
-    return undefined;
+    await input.run((_input, state) => pickDjangoPrompt(input, state, config, options), state);
 }
