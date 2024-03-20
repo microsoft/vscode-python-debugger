@@ -10,7 +10,6 @@ import * as typemoq from 'typemoq';
 import * as sinon from 'sinon';
 import { MultiStepInput } from '../../../../extension/common/multiStepInput';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
-import * as vscodeapi from '../../../../extension/common/vscodeapi';
 import * as djangoLaunch from '../../../../extension/debugger/configuration/providers/djangoLaunch';
 import * as configuration from '../../../../extension/debugger/configuration/utils/configuration';
 import * as djangoProviderQuickPick from '../../../../extension/debugger/configuration/providers/providerQuickPick/djangoProviderQuickPick';
@@ -18,7 +17,6 @@ import * as djangoProviderQuickPick from '../../../../extension/debugger/configu
 suite('Debugging - Configuration Provider Django', () => {
     // let pathExistsStub: sinon.SinonStub;
     let pathSeparatorStub: sinon.SinonStub;
-    let workspaceStub: sinon.SinonStub;
     let getDjangoPathsStub: sinon.SinonStub;
     let pickDjangoPromptStub: sinon.SinonStub;
     let multiStepInput: typemoq.IMock<MultiStepInput<DebugConfigurationState>>;
@@ -29,7 +27,6 @@ suite('Debugging - Configuration Provider Django', () => {
             .setup((i) => i.run(typemoq.It.isAny(), typemoq.It.isAny()))
             .returns((callback, _state) => callback());
         pathSeparatorStub = sinon.stub(path, 'sep');
-        workspaceStub = sinon.stub(vscodeapi, 'getWorkspaceFolder');
         getDjangoPathsStub = sinon.stub(configuration, 'getDjangoPaths');
         pickDjangoPromptStub = sinon.stub(djangoProviderQuickPick, 'pickDjangoPrompt');
         pathSeparatorStub.value('-');
