@@ -15,7 +15,6 @@ import * as configuration from '../../../../extension/debugger/configuration/uti
 import * as djangoProviderQuickPick from '../../../../extension/debugger/configuration/providers/providerQuickPick/djangoProviderQuickPick';
 
 suite('Debugging - Configuration Provider Django', () => {
-    // let pathExistsStub: sinon.SinonStub;
     let pathSeparatorStub: sinon.SinonStub;
     let getDjangoPathsStub: sinon.SinonStub;
     let pickDjangoPromptStub: sinon.SinonStub;
@@ -38,8 +37,6 @@ suite('Debugging - Configuration Provider Django', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         const managePath = Uri.file(path.join(folder.uri.fsPath, 'manage.py'));
-        console.log('Folder:', folder.uri.fsPath);
-        console.log('managePath: ', managePath);
         getDjangoPathsStub.resolves([managePath]);
         pickDjangoPromptStub.resolves();
         await djangoLaunch.buildDjangoLaunchDebugConfiguration(multiStepInput.object, state);
@@ -64,8 +61,6 @@ suite('Debugging - Configuration Provider Django', () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         const managePath = path.join(state?.folder?.uri.fsPath, 'manage.py');
-        console.log('Folder:', folder.uri.fsPath);
-        console.log('managePath: ', managePath);
         getDjangoPathsStub.resolves([]);
         pickDjangoPromptStub.resolves();
         await djangoLaunch.buildDjangoLaunchDebugConfiguration(multiStepInput.object, state);

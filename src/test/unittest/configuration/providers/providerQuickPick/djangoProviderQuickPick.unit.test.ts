@@ -16,7 +16,6 @@ import {
 } from '../../../../../extension/debugger/configuration/providers/providerQuickPick/djangoProviderQuickPick';
 
 suite('Debugging - Configuration Provider Django QuickPick', () => {
-    // let pathExistsStub: sinon.SinonStub;
     let pathSeparatorStub: sinon.SinonStub;
     let multiStepInput: typemoq.IMock<MultiStepInput<DebugConfigurationState>>;
 
