@@ -10,9 +10,7 @@ import * as typemoq from 'typemoq';
 import * as sinon from 'sinon';
 import { MultiStepInput } from '../../../../../extension/common/multiStepInput';
 import { DebugConfigurationState } from '../../../../../extension/debugger/types';
-import {
-    parseFlaskPath
-} from '../../../../../extension/debugger/configuration/providers/providerQuickPick/flaskProviderQuickPick';
+import { parseFlaskPath } from '../../../../../extension/debugger/configuration/providers/providerQuickPick/flaskProviderQuickPick';
 
 suite('Debugging - Configuration Provider Flask QuickPick', () => {
     let pathSeparatorStub: sinon.SinonStub;

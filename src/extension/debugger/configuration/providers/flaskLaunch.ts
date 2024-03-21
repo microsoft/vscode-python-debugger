@@ -20,7 +20,6 @@ export async function buildFlaskLaunchDebugConfiguration(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {
-
     let flaskPaths = await getFlaskPaths(state.folder);
     let options: QuickPickType[] = [];
 
@@ -59,4 +58,4 @@ export async function buildFlaskLaunchDebugConfiguration(
         });
     }
     await input.run((_input, state) => pickFlaskPrompt(input, state, config, options), state);
-}  
+}

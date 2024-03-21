@@ -5,8 +5,7 @@
 
 import { expect } from 'chai';
 import * as path from 'path';
-import * as fs from 'fs-extra';
-import * as sinon from 'sinon';
+import * as sinon from 'sinon'
 import * as typemoq from 'typemoq';
 import { ThemeIcon, Uri } from 'vscode';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
@@ -15,15 +14,12 @@ import { MultiStepInput } from '../../../../extension/common/multiStepInput';
 import * as configuration from '../../../../extension/debugger/configuration/utils/configuration';
 import * as flaskProviderQuickPick from '../../../../extension/debugger/configuration/providers/providerQuickPick/flaskProviderQuickPick';
 
-
 suite('Debugging - Configuration Provider Flask', () => {
-    let pathExistsStub: sinon.SinonStub;
     let multiStepInput: typemoq.IMock<MultiStepInput<DebugConfigurationState>>;
     let getFlaskPathsStub: sinon.SinonStub;
     let pickFlaskPromptStub: sinon.SinonStub;
 
     setup(() => {
-        pathExistsStub = sinon.stub(fs, 'pathExists');
         multiStepInput = typemoq.Mock.ofType<MultiStepInput<DebugConfigurationState>>();
         multiStepInput
             .setup((i) => i.run(typemoq.It.isAny(), typemoq.It.isAny()))
@@ -46,7 +42,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             {
                 label: path.basename(appPath.fsPath),
                 filePath: appPath,
-                description: "app.py",
+                description: 'app.py',
                 buttons: [
                     {
                         iconPath: new ThemeIcon('go-to-file'),
@@ -70,7 +66,7 @@ suite('Debugging - Configuration Provider Flask', () => {
             {
                 label: 'Default',
                 filePath: Uri.file(appPath),
-                description: "app.py",
+                description: 'app.py',
             },
         ];
 
