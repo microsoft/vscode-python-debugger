@@ -101,7 +101,7 @@ export namespace DebugConfigStrings {
         export const djangoConfigPromp = {
             title: l10n.t('Debug Django'),
             prompt: l10n.t(
-                "Enter the path to manage.py or select a file from the list ('${workspaceFolderToken}' points to the root of the current workspace folder)",
+                "Enter the path to manage.py or select a file from the list.",
             ),
         };
     }
@@ -131,6 +131,12 @@ export namespace DebugConfigStrings {
             title: l10n.t('Debug Flask'),
             prompt: l10n.t('Python Debugger: Flask'),
             invalid: l10n.t('Enter a valid name'),
+        };
+        export const flaskConfigPromp = {
+            title: l10n.t('Debug Flask'),
+            prompt: l10n.t(
+                "Enter the path to app.py or select a file from the list",
+            ),
         };
     }
     export namespace pyramid {
