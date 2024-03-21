@@ -7,85 +7,73 @@ import { expect } from 'chai';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as sinon from 'sinon';
-import { anything, instance, mock, when } from 'ts-mockito';
-import { Uri } from 'vscode';
-import { DebugConfigStrings } from '../../../../extension/common/utils/localize';
-import { DebuggerTypeName } from '../../../../extension/constants';
+import * as typemoq from 'typemoq';
+import { ThemeIcon, Uri } from 'vscode';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
 import * as flaskLaunch from '../../../../extension/debugger/configuration/providers/flaskLaunch';
 import { MultiStepInput } from '../../../../extension/common/multiStepInput';
+import * as configuration from '../../../../extension/debugger/configuration/utils/configuration';
+import * as flaskProviderQuickPick from '../../../../extension/debugger/configuration/providers/providerQuickPick/flaskProviderQuickPick';
+
 
 suite('Debugging - Configuration Provider Flask', () => {
     let pathExistsStub: sinon.SinonStub;
-    let input: MultiStepInput<DebugConfigurationState>;
+    let multiStepInput: typemoq.IMock<MultiStepInput<DebugConfigurationState>>;
+    let getFlaskPathsStub: sinon.SinonStub;
+    let pickFlaskPromptStub: sinon.SinonStub;
+
     setup(() => {
-        input = mock<MultiStepInput<DebugConfigurationState>>(MultiStepInput);
         pathExistsStub = sinon.stub(fs, 'pathExists');
+        multiStepInput = typemoq.Mock.ofType<MultiStepInput<DebugConfigurationState>>();
+        multiStepInput
+            .setup((i) => i.run(typemoq.It.isAny(), typemoq.It.isAny()))
+            .returns((callback, _state) => callback());
+        getFlaskPathsStub = sinon.stub(configuration, 'getFlaskPaths');
+        pickFlaskPromptStub = sinon.stub(flaskProviderQuickPick, 'pickFlaskPrompt');
     });
     teardown(() => {
         sinon.restore();
     });
-    test("getApplicationPath should return undefined if file doesn't exist", async () => {
-        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
-        const appPyPath = path.join(folder.uri.fsPath, 'app.py');
-        pathExistsStub.withArgs(appPyPath).resolves(false);
-        const file = await flaskLaunch.getApplicationPath(folder);
-
-        expect(file).to.be.equal(undefined, 'Should return undefined');
-    });
-    test('getApplicationPath should file path', async () => {
-        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
-        const appPyPath = path.join(folder.uri.fsPath, 'app.py');
-        pathExistsStub.withArgs(appPyPath).resolves(true);
-        const file = await flaskLaunch.getApplicationPath(folder);
-
-        expect(file).to.be.equal('app.py');
-    });
-    test('Launch JSON with selected app path', async () => {
+    test('Show picker and send parsed found flask paths', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
-
-        when(input.showInputBox(anything())).thenResolve('hello');
-
-        await flaskLaunch.buildFlaskLaunchDebugConfiguration(instance(input), state);
-
-        const config = {
-            name: DebugConfigStrings.flask.snippet.name,
-            type: DebuggerTypeName,
-            request: 'launch',
-            module: 'flask',
-            env: {
-                FLASK_APP: 'hello',
-                FLASK_DEBUG: '1',
+        const appPath = Uri.file(path.join(folder.uri.fsPath, 'app.py'));
+        getFlaskPathsStub.resolves([appPath]);
+        pickFlaskPromptStub.resolves();
+        await flaskLaunch.buildFlaskLaunchDebugConfiguration(multiStepInput.object, state);
+        const options = pickFlaskPromptStub.getCall(0).args[3];
+        const expectedOptions = [
+            {
+                label: path.basename(appPath.fsPath),
+                filePath: appPath,
+                description: "app.py",
+                buttons: [
+                    {
+                        iconPath: new ThemeIcon('go-to-file'),
+                        tooltip: `Open in Preview`,
+                    },
+                ],
             },
-            args: ['run', '--no-debugger', '--no-reload'],
-            jinja: true,
-            autoStartBrowser: false,
-        };
+        ];
 
-        expect(state.config).to.be.deep.equal(config);
+        expect(options).to.be.deep.equal(expectedOptions);
     });
-    test('Launch JSON with default managepy path', async () => {
+    test('Show picker and send default app.py path', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
-        when(input.showInputBox(anything())).thenResolve('app.py');
-
-        await flaskLaunch.buildFlaskLaunchDebugConfiguration(instance(input), state);
-
-        const config = {
-            name: DebugConfigStrings.flask.snippet.name,
-            type: DebuggerTypeName,
-            request: 'launch',
-            module: 'flask',
-            env: {
-                FLASK_APP: 'app.py',
-                FLASK_DEBUG: '1',
+        const appPath = path.join(state?.folder?.uri.fsPath, 'app.py');
+        getFlaskPathsStub.resolves([]);
+        pickFlaskPromptStub.resolves();
+        await flaskLaunch.buildFlaskLaunchDebugConfiguration(multiStepInput.object, state);
+        const options = pickFlaskPromptStub.getCall(0).args[3];
+        const expectedOptions = [
+            {
+                label: 'Default',
+                filePath: Uri.file(appPath),
+                description: "app.py",
             },
-            args: ['run', '--no-debugger', '--no-reload'],
-            jinja: true,
-            autoStartBrowser: false,
-        };
+        ];
 
-        expect(state.config).to.be.deep.equal(config);
+        expect(options).to.be.deep.equal(expectedOptions);
     });
 });

@@ -12,8 +12,6 @@ import { DebugConfigStrings } from '../../../../common/utils/localize';
 import { sendTelemetryEvent } from '../../../../telemetry';
 import { EventName } from '../../../../telemetry/constants';
 
-export const workspaceFolderToken = '${workspaceFolder}';
-
 export async function pickFlaskPrompt(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
@@ -27,12 +25,12 @@ export async function pickFlaskPrompt(
     ];
 
     const selection = await input.showQuickPick<QuickPickType, IQuickPickParameters<QuickPickType>>({
-        placeholder: DebugConfigStrings.django.djangoConfigPromp.prompt,
+        placeholder: DebugConfigStrings.flask.flaskConfigPromp.prompt,
         items: options,
         acceptFilterBoxTextAsSelection: true,
         activeItem: options[0],
         matchOnDescription: true,
-        title: DebugConfigStrings.django.djangoConfigPromp.title,
+        title: DebugConfigStrings.flask.flaskConfigPromp.title,
         onDidTriggerItemButton: async (e: QuickPickItemButtonEvent<QuickPickType>) => {
             if (e.item && 'filePath' in e.item) {
                 await window.showTextDocument(e.item.filePath, { preview: true });
