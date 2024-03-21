@@ -5,7 +5,7 @@
 
 import { expect } from 'chai';
 import * as path from 'path';
-import * as sinon from 'sinon'
+import * as sinon from 'sinon';
 import * as typemoq from 'typemoq';
 import { ThemeIcon, Uri } from 'vscode';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
