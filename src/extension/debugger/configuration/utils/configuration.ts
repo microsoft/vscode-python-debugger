@@ -70,7 +70,7 @@ export async function getDjangoPaths(folder: WorkspaceFolder | undefined): Promi
 
 export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
     if (!folder) {
-        return undefined;
+        return [];
     }
     const regExpression = /app\s*=\s*FastAPI\(/;
     const fastApiPaths = await getPossiblePaths(
@@ -83,7 +83,7 @@ export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
 
 export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {
     if (!folder) {
-        return undefined;
+        return [];
     }
     const regExpression = /app(?:lication)?\s*=\s*(?:flask\.)?Flask\(|def\s+(?:create|make)_app\(/;
     const flaskPaths = await getPossiblePaths(
