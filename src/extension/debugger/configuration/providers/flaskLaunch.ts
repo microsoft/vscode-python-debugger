@@ -23,8 +23,6 @@ export async function buildFlaskLaunchDebugConfiguration(
     let flaskPaths = await getFlaskPaths(state.folder);
     let options: QuickPickType[] = [];
 
-    // const application = await getApplicationPath(state.folder);
-    // let manuallyEnteredAValue: boolean | undefined;
     const config: Partial<LaunchRequestArguments> = {
         name: DebugConfigStrings.flask.snippet.name,
         type: DebuggerTypeName,
