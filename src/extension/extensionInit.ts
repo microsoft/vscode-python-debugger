@@ -175,5 +175,5 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         }),
     );
 
-    return buildApi()
+    return buildApi();
 }
