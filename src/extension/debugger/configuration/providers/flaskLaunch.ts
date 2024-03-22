@@ -5,29 +5,31 @@
 'use strict';
 
 import * as path from 'path';
-import * as fs from 'fs-extra';
-import { WorkspaceFolder } from 'vscode';
+import { Uri } from 'vscode';
 import { DebugConfigStrings } from '../../../common/utils/localize';
 import { MultiStepInput } from '../../../common/multiStepInput';
-import { sendTelemetryEvent } from '../../../telemetry';
-import { EventName } from '../../../telemetry/constants';
 import { DebuggerTypeName } from '../../../constants';
 import { LaunchRequestArguments } from '../../../types';
-import { DebugConfigurationState, DebugConfigurationType } from '../../types';
+import { DebugConfigurationState } from '../../types';
+import { getFlaskPaths } from '../utils/configuration';
+import { QuickPickType } from './providerQuickPick/types';
+import { goToFileButton } from './providerQuickPick/providerQuickPick';
+import { parseFlaskPath, pickFlaskPrompt } from './providerQuickPick/flaskProviderQuickPick';
 
 export async function buildFlaskLaunchDebugConfiguration(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {
-    const application = await getApplicationPath(state.folder);
-    let manuallyEnteredAValue: boolean | undefined;
+    let flaskPaths = await getFlaskPaths(state.folder);
+    let options: QuickPickType[] = [];
+
     const config: Partial<LaunchRequestArguments> = {
         name: DebugConfigStrings.flask.snippet.name,
         type: DebuggerTypeName,
         request: 'launch',
         module: 'flask',
         env: {
-            FLASK_APP: application || 'app.py',
+            FLASK_APP: 'app.py',
             FLASK_DEBUG: '1',
         },
         args: ['run', '--no-debugger', '--no-reload'],
@@ -35,40 +37,23 @@ export async function buildFlaskLaunchDebugConfiguration(
         autoStartBrowser: false,
     };
 
-    if (!application) {
-        const selectedApp = await input.showInputBox({
-            title: DebugConfigStrings.flask.enterAppPathOrNamePath.title,
-            value: 'app.py',
-            prompt: DebugConfigStrings.flask.enterAppPathOrNamePath.prompt,
-            validate: (value) =>
-                Promise.resolve(
-                    value && value.trim().length > 0
-                        ? undefined
-                        : DebugConfigStrings.flask.enterAppPathOrNamePath.invalid,
-                ),
+    //add found paths to options
+    if (flaskPaths.length > 0) {
+        options.push(
+            ...flaskPaths.map((item) => ({
+                label: path.basename(item.fsPath),
+                filePath: item,
+                description: parseFlaskPath(state.folder, item.fsPath),
+                buttons: [goToFileButton],
+            })),
+        );
+    } else {
+        const managePath = path.join(state?.folder?.uri.fsPath || '', 'app.py');
+        options.push({
+            label: 'Default',
+            description: parseFlaskPath(state.folder, managePath),
+            filePath: Uri.file(managePath),
         });
-        if (selectedApp) {
-            manuallyEnteredAValue = true;
-            config.env!.FLASK_APP = selectedApp;
-        } else {
-            return;
-        }
     }
-
-    sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
-        configurationType: DebugConfigurationType.launchFlask,
-        autoDetectedFlaskAppPyPath: !!application,
-        manuallyEnteredAValue,
-    });
-    Object.assign(state.config, config);
-}
-export async function getApplicationPath(folder: WorkspaceFolder | undefined): Promise<string | undefined> {
-    if (!folder) {
-        return undefined;
-    }
-    const defaultLocationOfManagePy = path.join(folder.uri.fsPath, 'app.py');
-    if (await fs.pathExists(defaultLocationOfManagePy)) {
-        return 'app.py';
-    }
-    return undefined;
+    await input.run((_input, state) => pickFlaskPrompt(input, state, config, options), state);
 }
