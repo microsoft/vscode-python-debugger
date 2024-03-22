@@ -132,7 +132,7 @@ export namespace DebugConfigStrings {
         };
         export const flaskConfigPromp = {
             title: l10n.t('Debug Flask'),
-            prompt: l10n.t('Enter the path to app.py or select a file from the list'),
+            prompt: l10n.t('Enter the path to app.py or select a file from the list.'),
         };
     }
     export namespace pyramid {
