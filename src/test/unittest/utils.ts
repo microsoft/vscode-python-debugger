@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { EXTENSION_ROOT_DIR } from '../../extension/common/constants';
 import { getDebugpyLauncherArgs } from '../../extension/debugger/adapter/remoteLaunchers';
 import { sleep } from '../core';
