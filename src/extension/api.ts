@@ -20,7 +20,7 @@ export function buildApi(): IExtensionApi {
                     waitUntilDebuggerAttaches,
                 });
             },
-            async getDebuggerPackagePath(): Promise<string | undefined> {
+            async getDebuggerPackagePath(): Promise<string> {
                 return getDebugpyPackagePath();
             },
         },
