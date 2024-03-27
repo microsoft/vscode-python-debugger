@@ -218,7 +218,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
                     if (input.value) {
                         deferred.resolve(input.value as any);
                     } else {
-                    deferred.resolve(selectedItems[0]);
+                        deferred.resolve(selectedItems[0]);
                     }
                 }),
             );
@@ -227,7 +227,7 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
                 input.onDidChangeSelection((selectedItems) => {
                     deferred.resolve(selectedItems[0]);
                 }),
-            )
+            );
         }
 
         try {
