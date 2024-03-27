@@ -214,7 +214,20 @@ export class MultiStepInput<S> implements IMultiStepInput<S> {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     deferred.resolve(input.value as any);
                 }),
+                input.onDidChangeSelection((selectedItems) => {
+                    if (input.value) {
+                        deferred.resolve(input.value as any);
+                    } else {
+                    deferred.resolve(selectedItems[0]);
+                    }
+                }),
             );
+        } else {
+            disposables.push(
+                input.onDidChangeSelection((selectedItems) => {
+                    deferred.resolve(selectedItems[0]);
+                }),
+            )
         }
 
         try {
