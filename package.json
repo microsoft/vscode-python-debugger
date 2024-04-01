@@ -545,7 +545,7 @@
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
         "eslint": "^8.50.0",
-        "glob": "^8.0.3",
+        "glob": "^10.3.12",
         "mocha": "^10.0.0",
         "prettier": "^3.0.3",
         "rewiremock": "^3.13.0",
