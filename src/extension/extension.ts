@@ -15,10 +15,12 @@ import { Commands } from './common/constants';
 import { registerLogger, traceError, traceLog } from './common/log/logging';
 import { sendTelemetryEvent } from './telemetry';
 import { EventName } from './telemetry/constants';
+import { IExtensionApi } from './apiTypes';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export async function activate(context: IExtensionContext): Promise<void> {
+export async function activate(context: IExtensionContext): Promise<IExtensionApi> {
+    let api: IExtensionApi;
     // Setup logging
     const outputChannel = createOutputChannel('Python Debugger');
     context.subscriptions.push(outputChannel, registerLogger(outputChannel));
@@ -28,11 +30,14 @@ export async function activate(context: IExtensionContext): Promise<void> {
     traceLog(`Module: debugpy`);
 
     try {
-        await registerDebugger(context);
+        api = await registerDebugger(context);
         sendTelemetryEvent(EventName.DEBUG_SUCCESS_ACTIVATION);
     } catch (ex) {
         traceError('sendDebugpySuccessActivationTelemetry() failed.', ex);
+        throw ex; // re-raise
     }
+
+    return api;
 }
 
 // this method is called when your extension is deactivated
