@@ -57,7 +57,7 @@ suite('Debugger Integration', () => {
         'launch': ['launch a file', [...defaultScriptArgs, outFile]],
         // prettier-ignore
         'attach': ['attach to a local port', defaultScriptArgs],
-        'attach to PID': ['attach to a local PID', defaultScriptArgs],
+        'attach to PID': ['attach to a local PID', defaultScriptArgs], // eslint-disable-line no-use-before-define
         // For now we do not worry about "test" debugging.
     };
 
