@@ -16,11 +16,11 @@ export const browseFileOption = {
 };
 
 export async function openFileExplorer(folder: Uri | undefined) {
-    const filtersKey = 'Executables';
+    const filtersKey = 'Python Files';
     const filtersObject: { [name: string]: string[] } = {};
-    filtersObject[filtersKey] = ['exe'];
+    filtersObject[filtersKey] = ['py'];
     return await window.showOpenDialog({
-        filters: getOSType() == OSType.Windows ? filtersObject : undefined,
+        filters: getOSType() === OSType.Windows ? filtersObject : undefined,
         openLabel: DebugConfigStrings.browsePath.openButtonLabel,
         canSelectMany: false,
         title: DebugConfigStrings.browsePath.title,

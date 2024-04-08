@@ -28,7 +28,6 @@ export async function pickFlaskPrompt(
         placeholder: DebugConfigStrings.flask.flaskConfigPromp.prompt,
         items: options,
         acceptFilterBoxTextAsSelection: true,
-        activeItem: options[0],
         matchOnDescription: true,
         title: DebugConfigStrings.flask.flaskConfigPromp.title,
         onDidTriggerItemButton: async (e: QuickPickItemButtonEvent<QuickPickType>) => {

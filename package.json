@@ -2,7 +2,7 @@
     "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using debugpy.",
-    "version": "2024.3.0-dev",
+    "version": "2024.5.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
@@ -73,10 +73,10 @@
         ],
         "menus": {
             "issue/reporter": [
-				{
-					"command": "debugpy.reportIssue"
-				}
-			],
+                {
+                    "command": "debugpy.reportIssue"
+                }
+            ],
             "commandPalette": [
                 {
                     "category": "Python Debugger",
@@ -525,7 +525,7 @@
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "format-fix": "prettier --write 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "test": "node ./out/test/runTest.js",
-        "vsce-package": "vsce package -o python-debugger.vsix"
+        "vsce-package": "npx @vscode/vsce package -o python-debugger.vsix"
     },
     "devDependencies": {
         "@types/chai": "^4.3.4",
@@ -541,7 +541,7 @@
         "@typescript-eslint/eslint-plugin": "^5.31.0",
         "@typescript-eslint/parser": "^5.62.0",
         "@vscode/test-electron": "^2.3.9",
-        "@vscode/vsce": "^2.19.0",
+        "@vscode/vsce": "^2.24.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
         "eslint": "^8.50.0",

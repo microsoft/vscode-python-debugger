@@ -30,7 +30,6 @@ export async function pickDjangoPrompt(
         placeholder: DebugConfigStrings.django.djangoConfigPromp.prompt,
         items: options,
         acceptFilterBoxTextAsSelection: true,
-        activeItem: options[0],
         matchOnDescription: true,
         title: DebugConfigStrings.django.djangoConfigPromp.title,
         onDidTriggerItemButton: async (e: QuickPickItemButtonEvent<QuickPickType>) => {
