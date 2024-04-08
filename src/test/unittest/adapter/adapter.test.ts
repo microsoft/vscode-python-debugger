@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+/* eslint-disable @typescript-eslint/naming-convention */
 
 'use strict';
 
@@ -57,7 +58,7 @@ suite('Debugger Integration', () => {
         'launch': ['launch a file', [...defaultScriptArgs, outFile]],
         // prettier-ignore
         'attach': ['attach to a local port', defaultScriptArgs],
-        'attach to PID': ['attach to a local PID', defaultScriptArgs], // eslint-disable-line no-use-before-define
+        'attach to PID': ['attach to a local PID', defaultScriptArgs],
         // For now we do not worry about "test" debugging.
     };
 
