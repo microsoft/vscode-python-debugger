@@ -29,11 +29,11 @@ export class DebugpySocketsHandler implements IDebugSessionEventHandlers {
             return;
         }
 
-        if (event.event == DebuggerEvents.DebugpySockets) {
+        if (event.event === DebuggerEvents.DebugpySockets) {
             let portSocket = event.body.sockets.find((socket: { [x: string]: any }) => {
-                return socket['internal'] == false;
+                return socket['internal'] === false;
             });
-            if (portSocket != undefined) {
+            if (portSocket !== undefined) {
                 this.debugPortAttributesProvider.setPortAttribute(portSocket.port);
             }
         } else {
