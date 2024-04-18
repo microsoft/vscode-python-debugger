@@ -19,7 +19,6 @@ import {
     executeCommand,
     getConfiguration,
     registerCommand,
-    showInformationMessage,
     startDebugging,
 } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
