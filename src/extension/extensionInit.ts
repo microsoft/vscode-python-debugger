@@ -3,8 +3,25 @@
 
 'use strict';
 
-import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window, workspace } from 'vscode';
-import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
+import {
+    debug,
+    DebugConfigurationProviderTriggerKind,
+    DebugTreeItem,
+    DebugVisualization,
+    DebugVisualizationContext,
+    languages,
+    ThemeIcon,
+    Uri,
+    window,
+    workspace,
+} from 'vscode';
+import {
+    executeCommand,
+    getConfiguration,
+    registerCommand,
+    showInformationMessage,
+    startDebugging,
+} from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
 import { IExtensionContext } from './common/types';
@@ -174,6 +191,49 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     context.subscriptions.push(
         debug.onDidTerminateDebugSession(() => {
             debugPortAttributesProvider.resetPortAttribute();
+        }),
+    );
+
+    context.subscriptions.push(
+        debug.registerDebugVisualizationTreeProvider<
+            DebugTreeItem & { byte?: number; buffer: String; context: DebugVisualizationContext }
+        >('inlineHexDecoder', {
+            getTreeItem(context) {
+                const decoded = `0x${Number(context.variable.value).toString(16)}`;
+                return {
+                    label: context.variable.name.toString(),
+                    description: decoded.toString(),
+                    buffer: decoded,
+                    canEdit: true,
+                    context,
+                };
+            },
+            getChildren(_element) {
+                return undefined;
+            },
+            editItem(item, value) {
+                item.buffer = `0x${Number(value).toString(16)}`;
+                item.description = item.buffer.toString();
+
+                item.context.session.customRequest('setExpression', {
+                    expression: item.context.variable.evaluateName,
+                    frameId: item.context.frameId,
+                    value: JSON.stringify(item.buffer.toString()),
+                });
+
+                return item;
+            },
+        }),
+    );
+
+    context.subscriptions.push(
+        debug.registerDebugVisualizationProvider('inlineHexDecoder', {
+            provideDebugVisualization(_context, _token) {
+                const v = new DebugVisualization('Show as Hex');
+                v.iconPath = new ThemeIcon('rocket');
+                v.visualization = { treeId: 'inlineHexDecoder' };
+                return [v];
+            },
         }),
     );
 
