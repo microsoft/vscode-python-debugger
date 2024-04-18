@@ -6,7 +6,8 @@
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
-        "contribIssueReporter"
+        "contribIssueReporter",
+        "debugVisualization"
     ],
     "license": "MIT",
     "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -508,7 +509,13 @@
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }
-        ]
+        ],
+        "debugVisualizers": [
+			{
+				"id": "inlineHexDecoder",
+				"when": "debugConfigurationType == 'debugpy' && (variableType == 'float' || variableType == 'int')"
+			}
+		]
     },
     "extensionDependencies": [
         "ms-python.python"
