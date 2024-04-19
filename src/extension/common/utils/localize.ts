@@ -177,3 +177,7 @@ export namespace pickArgsInput {
     export const title = l10n.t('Command Line Arguments');
     export const prompt = l10n.t('Enter the command line arguments you want to pass to the program');
 }
+
+export namespace DebugVisualizers {
+    export const hexDecoder = l10n.t('Show as Hex');
+}
