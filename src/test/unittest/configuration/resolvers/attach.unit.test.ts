@@ -568,7 +568,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         test('Send consoleName value to debugpy as consoleTitle', async () => {
             const activeFile = 'xyz.py';
-            const consoleName = "My Console Name";
+            const consoleName = 'My Console Name';
             const workspaceFolder = createMoqWorkspaceFolder(__dirname);
             setupActiveEditor(activeFile, PYTHON_LANGUAGE);
             const defaultWorkspace = path.join('usr', 'desktop');

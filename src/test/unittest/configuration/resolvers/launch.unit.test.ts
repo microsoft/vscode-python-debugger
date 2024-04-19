@@ -954,7 +954,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         });
 
         test('Send consoleName value to debugpy as consoleTitle', async () => {
-            const consoleName = "My Console Name";
+            const consoleName = 'My Console Name';
             const pythonPath = `PythonPath_${new Date().toString()}`;
             const workspaceFolder = createMoqWorkspaceFolder(__dirname);
             const pythonFile = 'xyz.py';
@@ -963,7 +963,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
             const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                 ...launch,
-                ...{ consoleName }
+                ...{ consoleName },
             });
             expect(debugConfig).to.have.property('consoleTitle', consoleName);
         });
