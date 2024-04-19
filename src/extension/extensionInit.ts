@@ -15,12 +15,7 @@ import {
     window,
     workspace,
 } from 'vscode';
-import {
-    executeCommand,
-    getConfiguration,
-    registerCommand,
-    startDebugging,
-} from './common/vscodeapi';
+import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
 import { IExtensionContext } from './common/types';
