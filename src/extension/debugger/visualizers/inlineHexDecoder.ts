@@ -15,10 +15,10 @@ export function registerHexDebugVisualizationTreeProvider() {
                 context,
             };
         },
-        getChildren(_element) {
+        getChildren(_element: any) {
             return undefined;
         },
-        editItem(item, value) {
+        editItem(item: any, value: string) {
             item.buffer = `0x${Number(value).toString(16)}`;
             item.description = item.buffer.toString();
 
