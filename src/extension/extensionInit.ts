@@ -41,13 +41,14 @@ import { DebugSessionTelemetry } from './common/application/debugSessionTelemetr
 import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configuration/launch.json/completionProvider';
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
-import { pickArgsInput } from './common/utils/localize';
+import { DebugVisualizers, pickArgsInput } from './common/utils/localize';
 import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 import { getConfigurationsByUri } from './debugger/configuration/launch.json/launchJsonReader';
 import { DebugpySocketsHandler } from './debugger/hooks/debugpySocketsHandler';
 import { openReportIssue } from './common/application/commands/reportIssueCommand';
 import { buildApi } from './api';
 import { IExtensionApi } from './apiTypes';
+import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizers/inlineHexDecoder';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -191,40 +192,14 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     context.subscriptions.push(
         debug.registerDebugVisualizationTreeProvider<
             DebugTreeItem & { byte?: number; buffer: String; context: DebugVisualizationContext }
-        >('inlineHexDecoder', {
-            getTreeItem(context) {
-                const decoded = `0x${Number(context.variable.value).toString(16)}`;
-                return {
-                    label: context.variable.name.toString(),
-                    description: decoded.toString(),
-                    buffer: decoded,
-                    canEdit: true,
-                    context,
-                };
-            },
-            getChildren(_element) {
-                return undefined;
-            },
-            editItem(item, value) {
-                item.buffer = `0x${Number(value).toString(16)}`;
-                item.description = item.buffer.toString();
-
-                item.context.session.customRequest('setExpression', {
-                    expression: item.context.variable.evaluateName,
-                    frameId: item.context.frameId,
-                    value: JSON.stringify(item.buffer.toString()),
-                });
-
-                return item;
-            },
-        }),
+        >('inlineHexDecoder', registerHexDebugVisualizationTreeProvider()),
     );
 
     context.subscriptions.push(
         debug.registerDebugVisualizationProvider('inlineHexDecoder', {
             provideDebugVisualization(_context, _token) {
-                const v = new DebugVisualization('Show as Hex');
-                v.iconPath = new ThemeIcon('rocket');
+                const v = new DebugVisualization(DebugVisualizers.hexDecoder);
+                v.iconPath = new ThemeIcon('eye');
                 v.visualization = { treeId: 'inlineHexDecoder' };
                 return [v];
             },
