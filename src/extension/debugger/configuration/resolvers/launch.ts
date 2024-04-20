@@ -39,6 +39,10 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         if (debugConfiguration.clientOS === undefined) {
             debugConfiguration.clientOS = getOSType() === OSType.Windows ? 'windows' : 'unix';
         }
+        if (debugConfiguration.consoleName) {
+            debugConfiguration.consoleTitle = debugConfiguration.consoleName;
+            delete debugConfiguration.consoleName;
+        }
         return debugConfiguration;
     }
 
