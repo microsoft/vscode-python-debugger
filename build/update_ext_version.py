@@ -47,7 +47,7 @@ def micro_build_number() -> str:
     """Generates the micro build number.
     The format is `1<Julian day><hour><minute>`.
     """
-    return f"1{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%j%H%M')}"
+    return f"1{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%j%m%Y')}"
 
 
 def parse_version(version: str) -> Tuple[str, str, str, str]:
