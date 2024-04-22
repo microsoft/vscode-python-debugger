@@ -1,4 +1,5 @@
-/* eslint-disable class-methods-use-this */
+/* eslint-disable class-methods-use-this*/
+/* eslint-disable @typescript-eslint/naming-convention */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 

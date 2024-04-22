@@ -18,7 +18,7 @@ async function main() {
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
         // Use cp.spawn / cp.exec for custom setup
-        if (getOSType() == OSType.Windows) {
+        if (getOSType() === OSType.Windows) {
             const exec = path.basename(cliPath);
             cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
                 cwd: path.dirname(cliPath),

@@ -3,7 +3,18 @@
 
 'use strict';
 
-import { debug, DebugConfigurationProviderTriggerKind, languages, Uri, window, workspace } from 'vscode';
+import {
+    debug,
+    DebugConfigurationProviderTriggerKind,
+    DebugTreeItem,
+    DebugVisualization,
+    DebugVisualizationContext,
+    languages,
+    ThemeIcon,
+    Uri,
+    window,
+    workspace,
+} from 'vscode';
 import { executeCommand, getConfiguration, registerCommand, startDebugging } from './common/vscodeapi';
 import { DebuggerTypeName } from './constants';
 import { DynamicPythonDebugConfigurationService } from './debugger/configuration/dynamicdebugConfigurationService';
@@ -30,13 +41,14 @@ import { DebugSessionTelemetry } from './common/application/debugSessionTelemetr
 import { JsonLanguages, LaunchJsonCompletionProvider } from './debugger/configuration/launch.json/completionProvider';
 import { LaunchJsonUpdaterServiceHelper } from './debugger/configuration/launch.json/updaterServiceHelper';
 import { ignoreErrors } from './common/promiseUtils';
-import { pickArgsInput } from './common/utils/localize';
+import { DebugVisualizers, pickArgsInput } from './common/utils/localize';
 import { DebugPortAttributesProvider } from './debugger/debugPort/portAttributesProvider';
 import { getConfigurationsByUri } from './debugger/configuration/launch.json/launchJsonReader';
 import { DebugpySocketsHandler } from './debugger/hooks/debugpySocketsHandler';
 import { openReportIssue } from './common/application/commands/reportIssueCommand';
 import { buildApi } from './api';
 import { IExtensionApi } from './apiTypes';
+import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizers/inlineHexDecoder';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -95,7 +107,9 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
                 executeCommand('workbench.action.debug.selectandstart');
             } else {
                 await executeCommand('debug.addConfiguration');
-                if (file) await window.showTextDocument(file);
+                if (file) {
+                    await window.showTextDocument(file);
+                }
                 executeCommand('workbench.action.debug.start', file?.toString());
             }
         }),
@@ -172,6 +186,23 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     context.subscriptions.push(
         debug.onDidTerminateDebugSession(() => {
             debugPortAttributesProvider.resetPortAttribute();
+        }),
+    );
+
+    context.subscriptions.push(
+        debug.registerDebugVisualizationTreeProvider<
+            DebugTreeItem & { byte?: number; buffer: String; context: DebugVisualizationContext }
+        >('inlineHexDecoder', registerHexDebugVisualizationTreeProvider()),
+    );
+
+    context.subscriptions.push(
+        debug.registerDebugVisualizationProvider('inlineHexDecoder', {
+            provideDebugVisualization(_context, _token) {
+                const v = new DebugVisualization(DebugVisualizers.hexDecoder);
+                v.iconPath = new ThemeIcon('eye');
+                v.visualization = { treeId: 'inlineHexDecoder' };
+                return [v];
+            },
         }),
     );
 

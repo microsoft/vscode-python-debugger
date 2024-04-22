@@ -565,5 +565,25 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 expect(debugConfig).to.have.property('justMyCode', testParams.expectedResult);
             });
         });
+
+        test('Send consoleName value to debugpy as consoleTitle', async () => {
+            const activeFile = 'xyz.py';
+            const consoleName = 'My Console Name';
+            const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+            setupActiveEditor(activeFile, PYTHON_LANGUAGE);
+            const defaultWorkspace = path.join('usr', 'desktop');
+            setupWorkspaces([defaultWorkspace]);
+
+            const debugOptions = debugOptionsAvailable
+                .slice()
+                .concat(DebugOptions.Jinja, DebugOptions.Sudo) as DebugOptions[];
+
+            const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                ...attach,
+                debugOptions,
+                consoleName,
+            });
+            expect(debugConfig).to.have.property('consoleTitle', consoleName);
+        });
     });
 });

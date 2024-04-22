@@ -6,7 +6,8 @@
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
-        "contribIssueReporter"
+        "contribIssueReporter",
+        "debugVisualization"
     ],
     "license": "MIT",
     "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -263,6 +264,11 @@
                                 "default": false,
                                 "description": "Whether to enable Sub Process debugging",
                                 "type": "boolean"
+                            },
+                            "consoleName": {
+                                "default": "Python Debug Console",
+                                "description": "Display name of the debug console or terminal",
+                                "type": "string"
                             }
                         }
                     },
@@ -334,10 +340,6 @@
                                     "integratedTerminal",
                                     "internalConsole"
                                 ]
-                            },
-                            "consoleTitle": {
-                                "default": "Python Debug Console",
-                                "description": "Display name of the debug console or terminal"
                             },
                             "cwd": {
                                 "default": "${workspaceFolder}",
@@ -492,6 +494,11 @@
                                 "default": "matplotlib",
                                 "description": "The GUI event loop that's going to run. Possible values: \"matplotlib\", \"wx\", \"qt\", \"none\", or a custom function that'll be imported and run.",
                                 "type": "string"
+                            },
+                            "consoleName": {
+                                "default": "Python Debug Console",
+                                "description": "Display name of the debug console or terminal",
+                                "type": "string"
                             }
                         }
                     }
@@ -508,7 +515,13 @@
                 },
                 "when": "!virtualWorkspace && shellExecutionSupported"
             }
-        ]
+        ],
+        "debugVisualizers": [
+			{
+				"id": "inlineHexDecoder",
+				"when": "debugConfigurationType == 'debugpy' && (variableType == 'float' || variableType == 'int')"
+			}
+		]
     },
     "extensionDependencies": [
         "ms-python.python"
