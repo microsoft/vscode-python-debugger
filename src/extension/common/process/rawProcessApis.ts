@@ -11,6 +11,8 @@ import { ExecutionResult, ShellOptions, SpawnOptions, StdErrError } from './type
 import { noop } from '../utils/misc';
 import { decodeBuffer } from './decoder';
 
+const PS_ERROR_SCREEN_BOGUS = /your [0-9]+x[0-9]+ screen size is bogus\. expect trouble/;
+
 function getDefaultOptions<T extends ShellOptions | SpawnOptions>(options: T, defaultEnv?: EnvironmentVariables): T {
     const defaultOptions = { ...options };
     const execOptions = defaultOptions as SpawnOptions;
@@ -98,7 +100,13 @@ export function plainExec(
         }
         const stderr: string | undefined =
             stderrBuffers.length === 0 ? undefined : decodeBuffer(stderrBuffers, encoding);
-        if (stderr && stderr.length > 0 && options.throwOnStdErr) {
+        if (
+            stderr &&
+            stderr.length > 0 &&
+            options.throwOnStdErr &&
+            // ignore this specific error silently; see this issue for context: https://github.com/microsoft/vscode/issues/75932
+            !(PS_ERROR_SCREEN_BOGUS.test(stderr) && stderr.replace(PS_ERROR_SCREEN_BOGUS, '').trim().length === 0)
+        ) {
             deferred.reject(new StdErrError(stderr));
         } else {
             let stdout = decodeBuffer(stdoutBuffers, encoding);
