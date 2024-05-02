@@ -4,6 +4,7 @@
 import argparse
 import datetime
 import json
+import os
 import pathlib
 import sys
 from typing import Sequence, Tuple, Union
@@ -45,9 +46,9 @@ def is_even(v: Union[int, str]) -> bool:
 
 def micro_build_number() -> str:
     """Generates the micro build number.
-    The format is `1<Julian day><hour><minute>`.
+    The format is `<Year><Julian day><REV>`.
     """
-    return f"{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%y%m%d')}.$(Rev:r)"
+    return f"{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%y%j')}.${os.environ.get("REV", "")}"
 
 
 def parse_version(version: str) -> Tuple[str, str, str, str]:
