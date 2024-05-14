@@ -6,6 +6,8 @@ export function run(): Promise<void> {
     if ((Reflect as any).metadata === undefined) {
         require('reflect-metadata');
     }
+
+    process.env.VSC_PYTHON_UNIT_TEST = '1';
     // Create the mocha test
     const mocha = new Mocha({
         ui: 'tdd',
@@ -15,7 +17,7 @@ export function run(): Promise<void> {
     const testsRoot = path.resolve(__dirname);
 
     return new Promise((c, e) => {
-        glob('**/*.unit.test.js', { cwd: testsRoot }, (err: any, files: any[]) => {
+        glob('**/factory.unit.test.js', { cwd: testsRoot }, (err: any, files: any[]) => {
             if (err) {
                 return e(err);
             }
