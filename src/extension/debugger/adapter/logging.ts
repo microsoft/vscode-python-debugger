@@ -11,7 +11,7 @@ import {
     DebugSession,
     ProviderResult,
 } from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { EXTENSION_ROOT_DIR } from '../../common/constants';
 import { StopWatch } from '../../common/utils/stopWatch';
 

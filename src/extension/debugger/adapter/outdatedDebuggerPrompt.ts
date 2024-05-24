@@ -3,7 +3,7 @@
 
 'use strict';
 import { DebugAdapterTracker, DebugAdapterTrackerFactory, DebugSession, ProviderResult } from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { Common, OutdatedDebugger } from '../../common/utils/localize';
 import { launch, showInformationMessage } from '../../common/vscodeapi';
 import { IPromptShowState } from './types';

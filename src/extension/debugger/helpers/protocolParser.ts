@@ -3,7 +3,7 @@
 
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { IProtocolParser } from '../types';
 
 const PROTOCOL_START_INDENTIFIER = '\r\n\r\n';
