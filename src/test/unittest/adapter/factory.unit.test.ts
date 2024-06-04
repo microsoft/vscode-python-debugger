@@ -9,7 +9,6 @@ import { expect, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as path from 'path';
 import * as sinon from 'sinon';
-// import rewiremock from 'rewiremock';
 import { SemVer } from 'semver';
 import { instance, mock, when } from 'ts-mockito';
 import { DebugAdapterExecutable, DebugAdapterServer, DebugConfiguration, DebugSession, WorkspaceFolder } from 'vscode';
@@ -37,7 +36,6 @@ suite('Debugging - Adapter Factory', () => {
     let getInterpretersStub: sinon.SinonStub;
     let getInterpreterDetailsStub: sinon.SinonStub;
     let hasInterpretersStub: sinon.SinonStub;
-    // let sendTelemetryEventStub: sinon.SinonStub;
     let getTelemetryReporterStub: sinon.SinonStub;
     let reporter: any;
 
@@ -78,7 +76,6 @@ suite('Debugging - Adapter Factory', () => {
         getInterpretersStub = sinon.stub(pythonApi, 'getInterpreters');
         getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
         hasInterpretersStub = sinon.stub(pythonApi, 'hasInterpreters');
-        // sendTelemetryEventStub = sinon.stub(telemetry, 'sendTelemetryEvent');
         getTelemetryReporterStub = sinon.stub(telemetryReporter, 'getTelemetryReporter');
 
         when(
@@ -93,10 +90,9 @@ suite('Debugging - Adapter Factory', () => {
     teardown(() => {
         process.env.VSC_PYTHON_UNIT_TEST = oldValueOfVSC_PYTHON_UNIT_TEST;
         process.env.VSC_PYTHON_CI_TEST = oldValueOfVSC_PYTHON_CI_TEST;
-        reporter.properties = [];
-        reporter.eventNames = [];
-        reporter.measures = [];
-        // rewiremock.disable();
+        Reporter.properties = [];
+        Reporter.eventNames = [];
+        Reporter.measures = [];
         telemetry.clearTelemetryReporter();
         sinon.restore();
     });
@@ -265,14 +261,14 @@ suite('Debugging - Adapter Factory', () => {
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
 
-    test.only('Send attach to local process telemetry if attaching to a local process', async () => {
+    test('Send attach to local process telemetry if attaching to a local process', async () => {
         const session = createSession({ request: 'attach', processId: 1234 });
         getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
 
         await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
-        assert.ok(reporter.eventNames.includes(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS));
+        assert.ok(Reporter.eventNames.includes(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS));
     });
 
     test("Don't send any telemetry if not attaching to a local process", async () => {
