@@ -4,12 +4,13 @@
 
 import TelemetryReporter from '@vscode/extension-telemetry';
 
-import { AppinsightsKey, isTestExecution } from '../common/constants';
+import { isTestExecution } from '../common/constants';
 import { StopWatch } from '../common/utils/stopWatch';
 import { ConsoleType, TriggerType } from '../types';
 import { DebugConfigurationType } from '../debugger/types';
 import { EventName } from './constants';
 import { isPromise } from '../common/utils/async';
+import { getTelemetryReporter } from './reporter';
 
 /**
  * Checks whether telemetry is supported.
@@ -31,21 +32,6 @@ function isTelemetrySupported(): boolean {
 const sharedProperties: Record<string, unknown> = {};
 
 let telemetryReporter: TelemetryReporter | undefined;
-function getTelemetryReporter() {
-    if (!isTestExecution() && telemetryReporter) {
-        return telemetryReporter;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const Reporter = require('@vscode/extension-telemetry').default as typeof TelemetryReporter;
-    telemetryReporter = new Reporter(AppinsightsKey, [
-        {
-            lookup: /(errorName|errorMessage|errorStack)/g,
-        },
-    ]);
-
-    return telemetryReporter;
-}
 
 export function clearTelemetryReporter(): void {
     telemetryReporter = undefined;
@@ -60,7 +46,7 @@ export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extend
     if (isTestExecution() || !isTelemetrySupported()) {
         return;
     }
-    const reporter = getTelemetryReporter();
+    const reporter = getTelemetryReporter(telemetryReporter);
     const measures =
         typeof measuresOrDurationMs === 'number'
             ? { duration: measuresOrDurationMs }

@@ -6,6 +6,8 @@ export function run(): Promise<void> {
     if ((Reflect as any).metadata === undefined) {
         require('reflect-metadata');
     }
+
+    process.env.VSC_PYTHON_UNIT_TEST = '1';
     // Create the mocha test
     const mocha = new Mocha({
         ui: 'tdd',

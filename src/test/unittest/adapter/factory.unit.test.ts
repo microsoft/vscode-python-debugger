@@ -9,20 +9,20 @@ import { expect, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import rewiremock from 'rewiremock';
 import { SemVer } from 'semver';
 import { instance, mock, when } from 'ts-mockito';
 import { DebugAdapterExecutable, DebugAdapterServer, DebugConfiguration, DebugSession, WorkspaceFolder } from 'vscode';
 import { IPersistentStateFactory } from '../../../extension/common/types';
 import { DebugAdapterDescriptorFactory, debugStateKeys } from '../../../extension/debugger/adapter/factory';
 import { IDebugAdapterDescriptorFactory } from '../../../extension/debugger/types';
-import { clearTelemetryReporter } from '../../../extension/telemetry';
 import { EventName } from '../../../extension/telemetry/constants';
 import { PersistentState, PersistentStateFactory } from '../../../extension/common/persistentState';
-import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { Architecture } from '../../../extension/common/platform';
 import * as pythonApi from '../../../extension/common/python';
+import * as telemetry from '../../../extension/telemetry';
+import * as telemetryReporter from '../../../extension/telemetry/reporter';
+import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { DebugConfigStrings } from '../../../extension/common/utils/localize';
 
 use(chaiAsPromised);
@@ -36,6 +36,8 @@ suite('Debugging - Adapter Factory', () => {
     let getInterpretersStub: sinon.SinonStub;
     let getInterpreterDetailsStub: sinon.SinonStub;
     let hasInterpretersStub: sinon.SinonStub;
+    let getTelemetryReporterStub: sinon.SinonStub;
+    let reporter: any;
 
     const nodeExecutable = undefined;
     const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
@@ -65,8 +67,8 @@ suite('Debugging - Adapter Factory', () => {
     setup(() => {
         process.env.VSC_PYTHON_UNIT_TEST = undefined;
         process.env.VSC_PYTHON_CI_TEST = undefined;
-        rewiremock.enable();
-        rewiremock('@vscode/extension-telemetry').with({ default: Reporter });
+        reporter = new Reporter();
+
         stateFactory = mock(PersistentStateFactory);
         state = mock(PersistentState) as PersistentState<boolean | undefined>;
         showErrorMessageStub = sinon.stub(vscodeApi, 'showErrorMessage');
@@ -74,13 +76,14 @@ suite('Debugging - Adapter Factory', () => {
         getInterpretersStub = sinon.stub(pythonApi, 'getInterpreters');
         getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
         hasInterpretersStub = sinon.stub(pythonApi, 'hasInterpreters');
+        getTelemetryReporterStub = sinon.stub(telemetryReporter, 'getTelemetryReporter');
 
         when(
             stateFactory.createGlobalPersistentState<boolean | undefined>(debugStateKeys.doNotShowAgain, false),
         ).thenReturn(instance(state));
-
         getInterpretersStub.returns([interpreter]);
         hasInterpretersStub.returns(true);
+        getTelemetryReporterStub.returns(reporter);
         factory = new DebugAdapterDescriptorFactory(instance(stateFactory));
     });
 
@@ -90,8 +93,7 @@ suite('Debugging - Adapter Factory', () => {
         Reporter.properties = [];
         Reporter.eventNames = [];
         Reporter.measures = [];
-        rewiremock.disable();
-        clearTelemetryReporter();
+        telemetry.clearTelemetryReporter();
         sinon.restore();
     });
 

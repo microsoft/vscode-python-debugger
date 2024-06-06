@@ -517,11 +517,11 @@
             }
         ],
         "debugVisualizers": [
-			{
-				"id": "inlineHexDecoder",
-				"when": "debugConfigurationType == 'debugpy' && (variableType == 'float' || variableType == 'int')"
-			}
-		]
+            {
+                "id": "inlineHexDecoder",
+                "when": "debugConfigurationType == 'debugpy' && (variableType == 'float' || variableType == 'int')"
+            }
+        ]
     },
     "extensionDependencies": [
         "ms-python.python"
@@ -561,7 +561,6 @@
         "glob": "^8.0.3",
         "mocha": "^10.0.0",
         "prettier": "^3.0.3",
-        "rewiremock": "^3.13.0",
         "semver": "^7.5.4",
         "sinon": "^15.0.2",
         "ts-loader": "^9.3.1",
