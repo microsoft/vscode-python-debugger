@@ -43,7 +43,7 @@ runs:
       shell: bash
 
     - name: Install bundled python libraries
-      run:  nox --session install_bundled_libs
+      run: nox --session install_bundled_libs
       shell: bash
 
     # Use the GITHUB_RUN_ID environment variable to update the build number.
