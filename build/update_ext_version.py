@@ -46,9 +46,9 @@ def is_even(v: Union[int, str]) -> bool:
 
 def micro_build_number() -> str:
     """Generates the micro build number.
-    The format is `<Year><Julian day><REV>`.
+    The format is `<YY><Julian day><REV>`.
     """
-    return f"{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%j')}.{os.environ.get("REV", "")}"
+    return f"{datetime.datetime.now(tz=datetime.timezone.utc).strftime('%y%j')}{os.environ.get('REV', '')}"
 
 
 def parse_version(version: str) -> Tuple[str, str, str, str]:
