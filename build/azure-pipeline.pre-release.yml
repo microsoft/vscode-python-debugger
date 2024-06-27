@@ -28,6 +28,8 @@ extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
     l10nSourcePaths: ./src
+    standardizedVersioning: true
+    ghCreateTag: false
     buildPlatforms:
       - name: Linux
         vsceTarget: ''
@@ -61,7 +63,7 @@ extends:
 
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.7'
+          versionSpec: '3.8'
           addToPath: true
           architecture: 'x64'
         displayName: Select Python version
@@ -80,11 +82,6 @@ extends:
         displayName: Install Python dependencies
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}
-
-      - script: python ./build/update_ext_version.py --for-publishing
-        displayName: Update build number
-        env:
-          REV: $(Rev:r)
 
       - script: npm run package
         displayName: Build extension
