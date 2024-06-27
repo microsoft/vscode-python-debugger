@@ -31,7 +31,7 @@ runs:
 
     # For faster/better builds of sdists.
     - name: Update pip, install uv and install wheel
-      run: python -m pip install -U pip wheel
+      run: python -m pip install -U pip wheel uv
       shell: bash
 
     - name: Run npm ci
