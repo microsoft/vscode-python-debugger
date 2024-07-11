@@ -527,7 +527,7 @@
             {
                 "view": "debug",
                 "contents": "\n[Show all automatic configurations ](command:workbench.action.debug.selectandstart)\n",
-                "when": "true",
+                "when": "debuggersAvailables",
                 "order": 10,
                 "group": "4_debug"
             }
