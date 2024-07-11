@@ -7,7 +7,8 @@
     "enabledApiProposals": [
         "portsAttributes",
         "contribIssueReporter",
-        "debugVisualization"
+        "debugVisualization",
+        "contribViewsWelcome"
     ],
     "license": "MIT",
     "homepage": "https://github.com/Microsoft/vscode-python-debugger",
@@ -520,6 +521,15 @@
             {
                 "id": "inlineHexDecoder",
                 "when": "debugConfigurationType == 'debugpy' && (variableType == 'float' || variableType == 'int')"
+            }
+        ],
+        "viewsWelcome": [
+            {
+                "view": "debug",
+                "contents": "\n[Show all automatic configurations ](command:workbench.action.debug.selectandstart)\n",
+                "when": "true",
+                "order": 10,
+                "group": "4_debug"
             }
         ]
     },
