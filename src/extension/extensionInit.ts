@@ -49,6 +49,7 @@ import { openReportIssue } from './common/application/commands/reportIssueComman
 import { buildApi } from './api';
 import { IExtensionApi } from './apiTypes';
 import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizers/inlineHexDecoder';
+import { PythonInlineValueProvider } from './debugger/inlineValue/pythonInlineValueProvider';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -136,6 +137,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     context.subscriptions.push(
         debug.registerDebugAdapterDescriptorFactory(DebuggerTypeName, debugAdapterDescriptorFactory),
     );
+    
     context.subscriptions.push(
         debug.onDidStartDebugSession((debugSession) => {
             const shouldTerminalFocusOnStart = getConfiguration('python', debugSession.workspaceFolder?.uri)?.terminal
@@ -194,6 +196,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
             DebugTreeItem & { byte?: number; buffer: String; context: DebugVisualizationContext }
         >('inlineHexDecoder', registerHexDebugVisualizationTreeProvider()),
     );
+
+    context.subscriptions.push(languages.registerInlineValuesProvider({language: 'python'}, new PythonInlineValueProvider()));
 
     context.subscriptions.push(
         debug.registerDebugVisualizationProvider('inlineHexDecoder', {
