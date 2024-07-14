@@ -137,7 +137,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     context.subscriptions.push(
         debug.registerDebugAdapterDescriptorFactory(DebuggerTypeName, debugAdapterDescriptorFactory),
     );
-    
+
     context.subscriptions.push(
         debug.onDidStartDebugSession((debugSession) => {
             const shouldTerminalFocusOnStart = getConfiguration('python', debugSession.workspaceFolder?.uri)?.terminal
@@ -197,7 +197,13 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         >('inlineHexDecoder', registerHexDebugVisualizationTreeProvider()),
     );
 
-    context.subscriptions.push(languages.registerInlineValuesProvider({language: 'python'}, new PythonInlineValueProvider()));
+    context.subscriptions.push(
+        languages.registerInlineValuesProvider({ language: 'python' }, new PythonInlineValueProvider()),
+    );
+
+    context.subscriptions.push(
+        languages.registerInlineValuesProvider({ language: 'python' }, new PythonInlineValueProvider()),
+    );
 
     context.subscriptions.push(
         debug.registerDebugVisualizationProvider('inlineHexDecoder', {
