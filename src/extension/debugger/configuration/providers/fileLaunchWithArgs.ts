@@ -21,7 +21,7 @@ export async function buildFileWithArgsLaunchDebugConfiguration(
         request: 'launch',
         program: '${file}',
         console: 'integratedTerminal',
-        args: '${command:pickArgs}',
+        args: ['${command:pickArgs}'],
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFileWithArgs,
