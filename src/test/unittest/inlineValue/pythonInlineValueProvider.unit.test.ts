@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 import { use, expect } from 'chai';
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../constants';
 import { PythonInlineValueProvider } from '../../../extension/debugger/inlineValue/pythonInlineValueProvider';
-import { workspace, Range, InlineValueContext, debug, TextDocument } from 'vscode';
+import { workspace, Range, InlineValueContext } from 'vscode';
 import * as vscodeapi from '../../../extension/common/vscodeapi';
 
 use(chaiAsPromised);
