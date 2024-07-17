@@ -8,6 +8,7 @@ import {
     Range,
     TextDocument,
     InlineValueVariableLookup,
+    InlineValueEvaluatableExpression,
 } from 'vscode';
 import { customRequest } from '../../common/vscodeapi';
 
@@ -59,14 +60,19 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
             'if',
             'or',
             'yield',
+            'self',
         ];
 
         const pythonVariables: any[] = variablesRequest.variables
             .filter((variable: any) => variable.type)
             .map((variable: any) => variable.name);
 
-        //VariableRegex for matching variables names in a python file, excluding strings
-        let variableRegex = /(?<!['"\w])\b[a-zA-Z_][a-zA-Z0-9_]*\b(?![^"\n]*"(?:(?:[^"\n]*"){2})*[^"\n]*$)/g;
+        let variableRegex = new RegExp(
+            '(?:self.)?' + //match self. if present
+                '[a-zA-Z_][a-zA-Z0-9_]*', //math variable name
+            'g',
+        );
+
         const allValues: InlineValue[] = [];
         for (let l = viewPort.start.line; l <= viewPort.end.line; l++) {
             const line = document.lineAt(l);
@@ -75,18 +81,47 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
                 continue;
             }
 
-            for (let match = variableRegex.exec(line.text); match; match = variableRegex.exec(line.text)) {
+            let code = removeCharsOutsideBraces(line.text);
+
+            for (let match = variableRegex.exec(code); match; match = variableRegex.exec(code)) {
                 let varName = match[0];
                 // Skip python keywords
                 if (pythonKeywords.includes(varName)) {
                     continue;
                 }
-                if (pythonVariables.includes(varName)) {
-                    const rng = new Range(l, match.index, l, match.index + varName.length);
-                    allValues.push(new InlineValueVariableLookup(rng, varName, false));
+                if (pythonVariables.includes(varName.split('.')[0])) {
+                    if (varName.includes('self')) {
+                        const rng = new Range(l, match.index, l, match.index + varName.length);
+                        allValues.push(new InlineValueEvaluatableExpression(rng, varName));
+                    } else {
+                        const rng = new Range(l, match.index, l, match.index + varName.length);
+                        allValues.push(new InlineValueVariableLookup(rng, varName, false));
+                    }
                 }
             }
         }
         return allValues;
     }
+}
+
+function removeCharsOutsideBraces(code: string): string {
+    // Regular expression to find Python strings
+    const stringRegex = /(["'])(?:(?=(\\?))\2.)*?\1/g;
+
+    //Regular expression to match values inside {}
+    const insideBracesRegex = /{[^{}]*}/g;
+
+    return code.replace(stringRegex, (match) => {
+        const content = match.slice(1, -1);
+
+        let result = '';
+        let tempMatch;
+
+        while ((tempMatch = insideBracesRegex.exec(content)) !== null) {
+            result += tempMatch[0];
+        }
+        const processedContent = result || content;
+
+        return match[0] + processedContent + match[0];
+    });
 }
