@@ -22,6 +22,13 @@ suite('Debugging - pythonInlineProvider', () => {
     setup(() => {
         customRequestStub = sinon.stub(vscodeapi, 'customRequest');
         customRequestStub.withArgs('scopes', sinon.match.any).resolves({ scopes: [{ variablesReference: 0 }] });
+    });
+
+    teardown(async () => {
+        sinon.restore();
+    });
+
+    test('ProvideInlineValues function should return all the vars in the python file', async () => {
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
@@ -71,13 +78,6 @@ suite('Debugging - pythonInlineProvider', () => {
                 },
             ],
         });
-    });
-
-    teardown(async () => {
-        sinon.restore();
-    });
-
-    test('ProvideInlineValues function should return all the vars in the python file', async () => {
         const file = path.join(WS_ROOT, 'pythonFiles', 'testVarTypes.py');
         let document = await workspace.openTextDocument(file);
         const inlineValueProvider = new PythonInlineValueProvider();
@@ -184,6 +184,83 @@ suite('Debugging - pythonInlineProvider', () => {
                 },
                 variableName: 'var2',
                 caseSensitiveLookup: false,
+            },
+        ];
+        expect(result).to.deep.equal(expected);
+    });
+
+    test('ProvideInlineValues function should return all the vars in the python file with class variables', async () => {
+        customRequestStub.withArgs('variables', sinon.match.any).resolves({
+            variables: [
+                {
+                    name: 'self',
+                    value: '<__main__.Person object at 0x10b223310>',
+                    type: 'Person',
+                    evaluateName: 'self',
+                    variablesReference: 5,
+                },
+            ],
+        });
+        const file = path.join(WS_ROOT, 'pythonFiles', 'testClassVarType.py');
+        let document = await workspace.openTextDocument(file);
+        const inlineValueProvider = new PythonInlineValueProvider();
+
+        const viewPort = new Range(0, 0, 10, 0);
+        const context = { frameId: 0, stoppedLocation: new Range(6, 1, 6, 1) } as InlineValueContext;
+
+        const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
+        const expected = [
+            {
+                range: {
+                    c: {
+                        c: 2,
+                        e: 8,
+                    },
+                    e: {
+                        c: 2,
+                        e: 17,
+                    },
+                },
+                expression: 'self.name',
+            },
+            {
+                range: {
+                    c: {
+                        c: 3,
+                        e: 8,
+                    },
+                    e: {
+                        c: 3,
+                        e: 16,
+                    },
+                },
+                expression: 'self.age',
+            },
+            {
+                range: {
+                    c: {
+                        c: 6,
+                        e: 18,
+                    },
+                    e: {
+                        c: 6,
+                        e: 27,
+                    },
+                },
+                expression: 'self.name',
+            },
+            {
+                range: {
+                    c: {
+                        c: 6,
+                        e: 29,
+                    },
+                    e: {
+                        c: 6,
+                        e: 37,
+                    },
+                },
+                expression: 'self.age',
             },
         ];
         expect(result).to.deep.equal(expected);
