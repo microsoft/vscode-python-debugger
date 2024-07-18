@@ -202,10 +202,6 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     );
 
     context.subscriptions.push(
-        languages.registerInlineValuesProvider({ language: 'python' }, new PythonInlineValueProvider()),
-    );
-
-    context.subscriptions.push(
         debug.registerDebugVisualizationProvider('inlineHexDecoder', {
             provideDebugVisualization(_context, _token) {
                 const v = new DebugVisualization(DebugVisualizers.hexDecoder);
