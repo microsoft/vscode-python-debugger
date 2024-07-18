@@ -94,7 +94,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
     );
 
     context.subscriptions.push(
-        registerCommand(Commands.Debug_Using_Launch_Config, async (file?: Uri) => {        
+        registerCommand(Commands.Debug_Using_Launch_Config, async (file?: Uri) => {
             sendTelemetryEvent(EventName.DEBUG_USING_LAUNCH_CONFIG_BUTTON);
             const interpreter = await getInterpreterDetails(file);
 
@@ -206,7 +206,11 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         }),
     );
 
-    executeCommand('setContext', 'dynamicPythonConfigAvailable', window.activeTextEditor?.document.languageId === 'python');
+    executeCommand(
+        'setContext',
+        'dynamicPythonConfigAvailable',
+        window.activeTextEditor?.document.languageId === 'python',
+    );
 
     return buildApi();
 }
