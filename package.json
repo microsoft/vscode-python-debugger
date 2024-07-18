@@ -526,10 +526,8 @@
         "viewsWelcome": [
             {
                 "view": "debug",
-                "contents": "\n[Show all automatic configurations ](command:workbench.action.debug.selectandstart)\n",
-                "when": "debuggersAvailables",
-                "order": 10,
-                "group": "4_debug"
+                "contents": "\n[Show automatic Python configurations](command:workbench.action.debug.selectandstart?%5B%22debugpy%22%5D)\n",
+                "when": "dynamicPythonConfigAvailable"
             }
         ]
     },
