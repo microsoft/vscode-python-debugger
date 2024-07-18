@@ -206,5 +206,11 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         }),
     );
 
+    executeCommand(
+        'setContext',
+        'dynamicPythonConfigAvailable',
+        window.activeTextEditor?.document.languageId === 'python',
+    );
+
     return buildApi();
 }
