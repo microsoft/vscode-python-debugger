@@ -29,7 +29,7 @@ export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder):
     if (!parsed.version) {
         throw Error('Missing field in launch.json: version');
     }
-    traceLog("Using configuration in launch.json");
+    traceLog('Using configuration in launch.json');
     return parsed.configurations;
 }
 
