@@ -22,7 +22,7 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
         _token?: CancellationToken,
     ): Promise<DebugConfiguration[] | undefined> {
         const providers = [];
-        
+
         providers.push({
             name: 'Python Debugger: Python File',
             type: DebuggerTypeName,

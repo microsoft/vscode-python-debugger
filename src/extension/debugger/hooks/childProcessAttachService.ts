@@ -28,7 +28,7 @@ export class ChildProcessAttachService implements IChildProcessAttachService {
             lifecycleManagedByParent: true,
         };
         const folder = this.getRelatedWorkspaceFolder(debugConfig);
-        traceLog("Start debugger in the child proccess");
+        traceLog('Start debugger in the child proccess');
         const launched = await debug.startDebugging(folder, debugConfig, debugSessionOption);
         if (!launched) {
             showErrorMessage(l10n.t('Failed to launch debugger for child process {0}', debugConfig.subProcessId!)).then(

@@ -347,7 +347,7 @@ export interface IEventNamePropertyMapping {
          * @type {ConsoleType}
          */
         console?: ConsoleType;
-        error?: Error
+        error?: Error;
     };
     /**
      * Telemetry captured after stopping debug session.
@@ -662,7 +662,7 @@ export interface IEventNamePropertyMapping {
       "use_report_issue_command" : { "owner": "paulacamargo25" }
      */
     [EventName.USE_REPORT_ISSUE_COMMAND]: unknown;
-    /** 
+    /**
      * Telemetry event sent when providing dynamic configuration for debugger
      */
     /* __GDPR__
@@ -670,12 +670,12 @@ export interface IEventNamePropertyMapping {
      */
     [EventName.DEBUGGER_DYNAMIC_CONFIGURATION]: {
         /**
-        * Providers of dynamic configurations
-        * 
-        * @type {DebugConfiguration[]}
-        */
-        providers: DebugConfiguration[]
-    },
+         * Providers of dynamic configurations
+         *
+         * @type {DebugConfiguration[]}
+         */
+        providers: DebugConfiguration[];
+    };
     /**
      * Telemetry event sent when the debugger is running with a non supports python versions minor than 3.7.
      */
