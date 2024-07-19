@@ -84,6 +84,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         registerCommand(Commands.Debug_In_Terminal, async (file?: Uri) => {
+            traceLog("Debugging using the editor button 'Debug in terminal'");
             sendTelemetryEvent(EventName.DEBUG_IN_TERMINAL_BUTTON);
             const interpreter = await getInterpreterDetails(file);
             if (!interpreter.path) {
@@ -91,7 +92,6 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
                 return;
             }
             const config = await getDebugConfiguration(file);
-            traceLog("Debugging using the editor button 'Debug in terminal'");
             startDebugging(undefined, config);
         }),
     );
