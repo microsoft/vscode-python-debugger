@@ -683,4 +683,11 @@ export interface IEventNamePropertyMapping {
        "DEBUGGER_PYTHON_37_DEPRECATED" : { "owner": "paulacamargo25" }
      */
     [EventName.DEBUGGER_PYTHON_37_DEPRECATED]: never | undefined;
+    /**
+     * Telemetry event sent when displaying inline values in the debugger.
+     */
+    /* __GDPR__
+       "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "paulacamargo25" }
+     */
+    [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
 }
