@@ -16,6 +16,7 @@ import { resolveVariables } from '../utils/common';
 import { getProgram } from './helper';
 import { getSettingsPythonPath, getInterpreterDetails } from '../../../common/python';
 import { getOSType, OSType } from '../../../common/platform';
+import { traceLog } from '../../../common/log/logging';
 
 export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
     implements IDebugConfigurationResolver<T>
@@ -62,14 +63,17 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         const workspaceFolders = getWorkspaceFolders();
 
         if (!Array.isArray(workspaceFolders) || workspaceFolders.length === 0) {
+            traceLog('No workspace folder found');
             return program ? Uri.file(path.dirname(program)) : undefined;
         }
         if (workspaceFolders.length === 1) {
+            traceLog('Using the only workspaceFolder found: ', workspaceFolders[0].uri.fsPath);
             return workspaceFolders[0].uri;
         }
         if (program) {
             const workspaceFolder = getVSCodeWorkspaceFolder(Uri.file(program));
             if (workspaceFolder) {
+                traceLog('Using workspaceFolder found for the program: ', workspaceFolder.uri.fsPath);
                 return workspaceFolder.uri;
             }
         }

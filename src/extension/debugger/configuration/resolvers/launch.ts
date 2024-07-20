@@ -12,6 +12,7 @@ import { resolveVariables } from '../utils/common';
 import { BaseConfigurationResolver } from './base';
 import { getDebugEnvironmentVariables, getProgram } from './helper';
 import { getConfiguration } from '../../../common/vscodeapi';
+import { traceLog } from '../../../common/log/logging';
 
 export class LaunchConfigurationResolver extends BaseConfigurationResolver<LaunchRequestArguments> {
     public async resolveDebugConfiguration(
@@ -51,6 +52,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         debugConfiguration: LaunchRequestArguments,
         _token?: CancellationToken,
     ): Promise<LaunchRequestArguments | undefined> {
+        traceLog('Resolving launch configuration with substituted variables');
         const workspaceFolder = LaunchConfigurationResolver.getWorkspaceFolder(folder);
         await this.provideLaunchDefaults(workspaceFolder, debugConfiguration);
 

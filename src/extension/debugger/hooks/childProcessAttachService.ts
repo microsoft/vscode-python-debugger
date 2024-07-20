@@ -10,6 +10,7 @@ import { AttachRequestArguments } from '../../types';
 import { IChildProcessAttachService } from './types';
 import { getWorkspaceFolders, showErrorMessage } from '../../common/vscodeapi';
 import { noop } from '../../common/utils/misc';
+import { traceLog } from '../../common/log/logging';
 
 /**
  * This class is responsible for attaching the debugger to any
@@ -27,6 +28,7 @@ export class ChildProcessAttachService implements IChildProcessAttachService {
             lifecycleManagedByParent: true,
         };
         const folder = this.getRelatedWorkspaceFolder(debugConfig);
+        traceLog('Start debugger in the attach child proccess');
         const launched = await debug.startDebugging(folder, debugConfig, debugSessionOption);
         if (!launched) {
             showErrorMessage(l10n.t('Failed to launch debugger for child process {0}', debugConfig.subProcessId!)).then(

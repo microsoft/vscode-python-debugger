@@ -11,6 +11,8 @@ import {
     InlineValueEvaluatableExpression,
 } from 'vscode';
 import { customRequest } from '../../common/vscodeapi';
+import { sendTelemetryEvent } from '../../telemetry';
+import { EventName } from '../../telemetry/constants';
 
 export class PythonInlineValueProvider implements InlineValuesProvider {
     public async provideInlineValues(
@@ -100,6 +102,7 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
                 }
             }
         }
+        sendTelemetryEvent(EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES);
         return allValues;
     }
 }

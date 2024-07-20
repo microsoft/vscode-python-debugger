@@ -10,6 +10,8 @@ import { IDynamicDebugConfigurationService } from '../types';
 import { DebuggerTypeName } from '../../constants';
 import { replaceAll } from '../../common/stringUtils';
 import { getDjangoPaths, getFastApiPaths, getFlaskPaths } from './utils/configuration';
+import { sendTelemetryEvent } from '../../telemetry';
+import { EventName } from '../../telemetry/constants';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -73,6 +75,8 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
                 jinja: true,
             });
         }
+
+        sendTelemetryEvent(EventName.DEBUGGER_DYNAMIC_CONFIGURATION, undefined, { providers: providers });
 
         return providers;
     }

@@ -8,6 +8,7 @@ import { getOSType, OSType } from '../../../common/platform';
 import { AttachRequestArguments, DebugOptions, PathMapping } from '../../../types';
 import { BaseConfigurationResolver } from './base';
 import { getConfiguration } from '../../../common/vscodeapi';
+import { traceLog } from '../../../common/log/logging';
 
 export class AttachConfigurationResolver extends BaseConfigurationResolver<AttachRequestArguments> {
     public async resolveDebugConfigurationWithSubstitutedVariables(
@@ -15,6 +16,7 @@ export class AttachConfigurationResolver extends BaseConfigurationResolver<Attac
         debugConfiguration: AttachRequestArguments,
         _token?: CancellationToken,
     ): Promise<AttachRequestArguments | undefined> {
+        traceLog('Resolving attach configuration with substituted variables');
         const workspaceFolder = AttachConfigurationResolver.getWorkspaceFolder(folder);
 
         await this.provideAttachDefaults(workspaceFolder, debugConfiguration as AttachRequestArguments);

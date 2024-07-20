@@ -6,8 +6,10 @@ import * as fs from 'fs-extra';
 import { parse } from 'jsonc-parser';
 import { DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
 import { getConfiguration, getWorkspaceFolder } from '../../../common/vscodeapi';
+import { traceLog } from '../../../common/log/logging';
 
 export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder): Promise<DebugConfiguration[]> {
+    traceLog('Getting configurations for workspace');
     const filename = path.join(workspace.uri.fsPath, '.vscode', 'launch.json');
     if (!(await fs.pathExists(filename))) {
         // Check launch config in the workspace file
@@ -15,6 +17,7 @@ export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder):
         if (!codeWorkspaceConfig.configurations || !Array.isArray(codeWorkspaceConfig.configurations)) {
             return [];
         }
+        traceLog('Using configuration in workspace');
         return codeWorkspaceConfig.configurations;
     }
 
@@ -26,7 +29,7 @@ export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder):
     if (!parsed.version) {
         throw Error('Missing field in launch.json: version');
     }
-    // We do not bother ensuring each item is a DebugConfiguration...
+    traceLog('Using configuration in launch.json');
     return parsed.configurations;
 }
 

@@ -149,6 +149,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
     }
 
     private async showDeprecatedPythonMessage() {
+        sendTelemetryEvent(EventName.DEBUGGER_PYTHON_37_DEPRECATED);
         const notificationPromptEnabled = this.persistentState.createGlobalPersistentState(
             debugStateKeys.doNotShowAgain,
             false,

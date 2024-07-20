@@ -10,6 +10,7 @@ import { DebuggerEvents } from './constants';
 import { DebuggerTypeName } from '../../constants';
 import { DebugPortAttributesProvider } from '../debugPort/portAttributesProvider';
 import { IDebugSessionEventHandlers } from './types';
+import { traceLog } from '../../common/log/logging';
 
 /**
  * This class is responsible for register ports using by debugpy in the portProvider.
@@ -30,6 +31,7 @@ export class DebugpySocketsHandler implements IDebugSessionEventHandlers {
         }
 
         if (event.event === DebuggerEvents.DebugpySockets) {
+            traceLog("Received 'debugpySockets' event from debugpy.");
             let portSocket = event.body.sockets.find((socket: { [x: string]: any }) => {
                 return socket['internal'] === false;
             });

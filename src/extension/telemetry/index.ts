@@ -11,6 +11,7 @@ import { DebugConfigurationType } from '../debugger/types';
 import { EventName } from './constants';
 import { isPromise } from '../common/utils/async';
 import { getTelemetryReporter } from './reporter';
+import { DebugConfiguration } from 'vscode';
 
 /**
  * Checks whether telemetry is supported.
@@ -346,6 +347,7 @@ export interface IEventNamePropertyMapping {
          * @type {ConsoleType}
          */
         console?: ConsoleType;
+        error?: Error;
     };
     /**
      * Telemetry captured after stopping debug session.
@@ -660,4 +662,32 @@ export interface IEventNamePropertyMapping {
       "use_report_issue_command" : { "owner": "paulacamargo25" }
      */
     [EventName.USE_REPORT_ISSUE_COMMAND]: unknown;
+    /**
+     * Telemetry event sent when providing dynamic configuration for debugger
+     */
+    /* __GDPR__
+       "debugger_dynamic_config" : { "owner": "paulacamargo25" }
+     */
+    [EventName.DEBUGGER_DYNAMIC_CONFIGURATION]: {
+        /**
+         * Providers of dynamic configurations
+         *
+         * @type {DebugConfiguration[]}
+         */
+        providers: DebugConfiguration[];
+    };
+    /**
+     * Telemetry event sent when the debugger is running with a non supports python versions minor than 3.7.
+     */
+    /* __GDPR__
+       "DEBUGGER_PYTHON_37_DEPRECATED" : { "owner": "paulacamargo25" }
+     */
+    [EventName.DEBUGGER_PYTHON_37_DEPRECATED]: never | undefined;
+    /**
+     * Telemetry event sent when displaying inline values in the debugger.
+     */
+    /* __GDPR__
+       "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "paulacamargo25" }
+     */
+    [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
 }

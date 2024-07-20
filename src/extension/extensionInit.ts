@@ -50,6 +50,7 @@ import { buildApi } from './api';
 import { IExtensionApi } from './apiTypes';
 import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizers/inlineHexDecoder';
 import { PythonInlineValueProvider } from './debugger/inlineValue/pythonInlineValueProvider';
+import { traceLog } from './common/log/logging';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -83,6 +84,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         registerCommand(Commands.Debug_In_Terminal, async (file?: Uri) => {
+            traceLog("Debugging using the editor button 'Debug in terminal'");
             sendTelemetryEvent(EventName.DEBUG_IN_TERMINAL_BUTTON);
             const interpreter = await getInterpreterDetails(file);
             if (!interpreter.path) {
@@ -96,6 +98,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         registerCommand(Commands.Debug_Using_Launch_Config, async (file?: Uri) => {
+            traceLog("Debugging using the editor button 'Debug using the launch.json'");
             sendTelemetryEvent(EventName.DEBUG_USING_LAUNCH_CONFIG_BUTTON);
             const interpreter = await getInterpreterDetails(file);
 

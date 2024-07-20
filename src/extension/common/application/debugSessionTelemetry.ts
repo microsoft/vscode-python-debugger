@@ -41,17 +41,21 @@ class TelemetryTracker implements DebugAdapterTracker {
         this.sendTelemetry(EventName.DEBUG_SESSION_STOP);
     }
 
-    public onError?(_error: Error): void {
-        this.sendTelemetry(EventName.DEBUG_SESSION_ERROR);
+    public onError?(error: Error): void {
+        this.sendTelemetry(EventName.DEBUG_SESSION_ERROR, error);
     }
 
-    private sendTelemetry(eventName: EventName): void {
+    private sendTelemetry<P extends IEventNamePropertyMapping, E extends keyof P>(
+        eventName: EventName,
+        properties?: P[E],
+    ): void {
         if (eventName === EventName.DEBUG_SESSION_START) {
             this.timer.reset();
         }
         const telemetryProps = {
             trigger: this.trigger,
             console: this.console,
+            ...properties,
         };
         sendTelemetryEvent(eventName as keyof IEventNamePropertyMapping, this.timer.elapsedTime, telemetryProps);
     }
