@@ -36,18 +36,18 @@ suite('Debugging - pythonInlineProvider', () => {
                     value: '',
                     type: '',
                     evaluateName: 'special variables',
-                    variablesReference: 10,
+                    variablesReference: 5,
                 },
                 {
                     name: 'var1',
-                    value: '5',
+                    value: '7',
                     type: 'int',
                     evaluateName: 'var1',
                     variablesReference: 0,
                 },
                 {
                     name: 'var2',
-                    value: '7',
+                    value: '6',
                     type: 'int',
                     evaluateName: 'var2',
                     variablesReference: 0,
@@ -67,14 +67,14 @@ suite('Debugging - pythonInlineProvider', () => {
                     value: "{'a': 1, 'b': 2}",
                     type: 'dict',
                     evaluateName: 'var4',
-                    variablesReference: 8,
+                    variablesReference: 6,
                 },
                 {
                     name: 'var5',
                     value: '[1, 2, 3]',
                     type: 'list',
                     evaluateName: 'var5',
-                    variablesReference: 9,
+                    variablesReference: 7,
                 },
             ],
         });
@@ -82,8 +82,8 @@ suite('Debugging - pythonInlineProvider', () => {
         let document = await workspace.openTextDocument(file);
         const inlineValueProvider = new PythonInlineValueProvider();
 
-        const viewPort = new Range(0, 0, 5, 17);
-        const context = { frameId: 0, stoppedLocation: new Range(5, 1, 5, 1) } as InlineValueContext;
+        const viewPort = new Range(0, 0, 5, 0);
+        const context = { frameId: 0, stoppedLocation: new Range(4, 1, 4, 1) } as InlineValueContext;
 
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
@@ -104,12 +104,12 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 1,
-                        e: 0,
+                        c: 0,
+                        e: 6,
                     },
                     e: {
-                        c: 1,
-                        e: 4,
+                        c: 0,
+                        e: 10,
                     },
                 },
                 variableName: 'var2',
@@ -118,11 +118,11 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 2,
+                        c: 1,
                         e: 0,
                     },
                     e: {
-                        c: 2,
+                        c: 1,
                         e: 4,
                     },
                 },
@@ -132,11 +132,11 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 3,
+                        c: 2,
                         e: 0,
                     },
                     e: {
-                        c: 3,
+                        c: 2,
                         e: 4,
                     },
                 },
@@ -146,11 +146,11 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 4,
+                        c: 3,
                         e: 0,
                     },
                     e: {
-                        c: 4,
+                        c: 3,
                         e: 4,
                     },
                 },
@@ -160,12 +160,12 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 5,
-                        e: 6,
+                        c: 4,
+                        e: 7,
                     },
                     e: {
-                        c: 5,
-                        e: 10,
+                        c: 4,
+                        e: 11,
                     },
                 },
                 variableName: 'var1',
@@ -174,12 +174,12 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 5,
-                        e: 13,
+                        c: 4,
+                        e: 14,
                     },
                     e: {
-                        c: 5,
-                        e: 17,
+                        c: 4,
+                        e: 18,
                     },
                 },
                 variableName: 'var2',
@@ -189,7 +189,7 @@ suite('Debugging - pythonInlineProvider', () => {
         expect(result).to.deep.equal(expected);
     });
 
-    test('ProvideInlineValues function should return all the vars in the python file with class variables', async () => {
+    test('ProvideInlineValues function should return all the vars in the python file with self in class', async () => {
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
@@ -205,19 +205,19 @@ suite('Debugging - pythonInlineProvider', () => {
         let document = await workspace.openTextDocument(file);
         const inlineValueProvider = new PythonInlineValueProvider();
 
-        const viewPort = new Range(0, 0, 10, 0);
-        const context = { frameId: 0, stoppedLocation: new Range(6, 1, 6, 1) } as InlineValueContext;
+        const viewPort = new Range(0, 0, 12, 0);
+        const context = { frameId: 0, stoppedLocation: new Range(7, 1, 7, 1) } as InlineValueContext;
 
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
             {
                 range: {
                     c: {
-                        c: 2,
+                        c: 3,
                         e: 8,
                     },
                     e: {
-                        c: 2,
+                        c: 3,
                         e: 17,
                     },
                 },
@@ -226,11 +226,11 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 3,
+                        c: 4,
                         e: 8,
                     },
                     e: {
-                        c: 3,
+                        c: 4,
                         e: 16,
                     },
                 },
@@ -239,11 +239,11 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 6,
+                        c: 7,
                         e: 18,
                     },
                     e: {
-                        c: 6,
+                        c: 7,
                         e: 27,
                     },
                 },
@@ -252,17 +252,255 @@ suite('Debugging - pythonInlineProvider', () => {
             {
                 range: {
                     c: {
-                        c: 6,
+                        c: 7,
                         e: 29,
                     },
                     e: {
-                        c: 6,
+                        c: 7,
                         e: 37,
                     },
                 },
                 expression: 'self.age',
             },
         ];
+        expect(result).to.deep.equal(expected);
+    });
+
+    test('ProvideInlineValues function should return all the vars in the python file with class variables', async () => {
+        customRequestStub.withArgs('variables', sinon.match.any).resolves({
+            variables: [
+                {
+                    name: 'person1',
+                    value: '<__main__.Person object at 0x1085c92b0>',
+                    type: 'Person',
+                    evaluateName: 'person1',
+                    variablesReference: 7,
+                },
+            ],
+        });
+        const file = path.join(WS_ROOT, 'pythonFiles', 'testClassVarType.py');
+        let document = await workspace.openTextDocument(file);
+        const inlineValueProvider = new PythonInlineValueProvider();
+
+        const viewPort = new Range(0, 0, 12, 0);
+        const context = { frameId: 0, stoppedLocation: new Range(11, 1, 11, 1) } as InlineValueContext;
+
+        const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
+        const expected = [
+            {
+                range: {
+                    c: {
+                        c: 9,
+                        e: 0,
+                    },
+                    e: {
+                        c: 9,
+                        e: 7,
+                    },
+                },
+                variableName: 'person1',
+                caseSensitiveLookup: false,
+            },
+            {
+                range: {
+                    c: {
+                        c: 10,
+                        e: 0,
+                    },
+                    e: {
+                        c: 10,
+                        e: 13,
+                    },
+                },
+                expression: 'person1.greet',
+            },
+            {
+                range: {
+                    c: {
+                        c: 11,
+                        e: 0,
+                    },
+                    e: {
+                        c: 11,
+                        e: 10,
+                    },
+                },
+                expression: 'person1.id',
+            },
+        ];
+        expect(result).to.deep.equal(expected);
+
+    });
+
+    test.only('ProvideInlineValues function should return all the vars in the python file using Assignment Expressions', async () => {
+        customRequestStub.withArgs('variables', sinon.match.any).resolves({
+            variables: [
+                {
+                  name: "special variables",
+                  value: "",
+                  type: "",
+                  evaluateName: "special variables",
+                  variablesReference: 5,
+                },
+                {
+                  name: "n",
+                  value: "4",
+                  type: "int",
+                  evaluateName: "n",
+                  variablesReference: 0,
+                },
+                {
+                  name: "some_list",
+                  value: "[1, 2, 3, 7]",
+                  type: "list",
+                  evaluateName: "some_list",
+                  variablesReference: 6,
+                },
+                {
+                  name: "x",
+                  value: "3",
+                  type: "int",
+                  evaluateName: "x",
+                  variablesReference: 0,
+                },
+              ]
+        });
+        const file = path.join(WS_ROOT, 'pythonFiles', 'testAssignmentExp.py');
+        let document = await workspace.openTextDocument(file);
+        const inlineValueProvider = new PythonInlineValueProvider();
+
+        const viewPort = new Range(0, 0, 6, 0);
+        const context = { frameId: 0, stoppedLocation: new Range(3, 1, 3, 1) } as InlineValueContext;
+
+        const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
+        const expected = [
+            {
+              range: {
+                c: {
+                  c: 0,
+                  e: 0,
+                },
+                e: {
+                  c: 0,
+                  e: 9,
+                },
+              },
+              variableName: "some_list",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 1,
+                  e: 0,
+                },
+                e: {
+                  c: 1,
+                  e: 1,
+                },
+              },
+              variableName: "x",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 2,
+                  e: 4,
+                },
+                e: {
+                  c: 2,
+                  e: 5,
+                },
+              },
+              variableName: "n",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 2,
+                  e: 13,
+                },
+                e: {
+                  c: 2,
+                  e: 22,
+                },
+              },
+              variableName: "some_list",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 2,
+                  e: 27,
+                },
+                e: {
+                  c: 2,
+                  e: 28,
+                },
+              },
+              variableName: "x",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 3,
+                  e: 13,
+                },
+                e: {
+                  c: 3,
+                  e: 14,
+                },
+              },
+              variableName: "n",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 3,
+                  e: 16,
+                },
+                e: {
+                  c: 3,
+                  e: 17,
+                },
+              },
+              variableName: "x",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 5,
+                  e: 13,
+                },
+                e: {
+                  c: 5,
+                  e: 14,
+                },
+              },
+              variableName: "n",
+              caseSensitiveLookup: false,
+            },
+            {
+              range: {
+                c: {
+                  c: 5,
+                  e: 16,
+                },
+                e: {
+                  c: 5,
+                  e: 17,
+                },
+              },
+              variableName: "x",
+              caseSensitiveLookup: false,
+            },
+          ]
         expect(result).to.deep.equal(expected);
     });
 });

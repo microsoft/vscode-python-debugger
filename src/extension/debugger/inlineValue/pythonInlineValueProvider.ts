@@ -70,7 +70,7 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
             .map((variable: any) => variable.name);
 
         let variableRegex = new RegExp(
-            '(?:self.)?' + //match self. if present
+            '(?:[a-zA-Z_][a-zA-Z0-9_]*\\.)*' + //match any number of variable names separated by '.'
                 '[a-zA-Z_][a-zA-Z0-9_]*', //math variable name
             'g',
         );
@@ -92,7 +92,7 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
                     continue;
                 }
                 if (pythonVariables.includes(varName.split('.')[0])) {
-                    if (varName.includes('self')) {
+                    if (varName.includes('.')) {
                         const rng = new Range(l, match.index, l, match.index + varName.length);
                         allValues.push(new InlineValueEvaluatableExpression(rng, varName));
                     } else {
