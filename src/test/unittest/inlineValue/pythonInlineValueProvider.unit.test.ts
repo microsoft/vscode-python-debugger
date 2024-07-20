@@ -329,41 +329,40 @@ suite('Debugging - pythonInlineProvider', () => {
             },
         ];
         expect(result).to.deep.equal(expected);
-
     });
 
     test.only('ProvideInlineValues function should return all the vars in the python file using Assignment Expressions', async () => {
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
-                  name: "special variables",
-                  value: "",
-                  type: "",
-                  evaluateName: "special variables",
-                  variablesReference: 5,
+                    name: 'special variables',
+                    value: '',
+                    type: '',
+                    evaluateName: 'special variables',
+                    variablesReference: 5,
                 },
                 {
-                  name: "n",
-                  value: "4",
-                  type: "int",
-                  evaluateName: "n",
-                  variablesReference: 0,
+                    name: 'n',
+                    value: '4',
+                    type: 'int',
+                    evaluateName: 'n',
+                    variablesReference: 0,
                 },
                 {
-                  name: "some_list",
-                  value: "[1, 2, 3, 7]",
-                  type: "list",
-                  evaluateName: "some_list",
-                  variablesReference: 6,
+                    name: 'some_list',
+                    value: '[1, 2, 3, 7]',
+                    type: 'list',
+                    evaluateName: 'some_list',
+                    variablesReference: 6,
                 },
                 {
-                  name: "x",
-                  value: "3",
-                  type: "int",
-                  evaluateName: "x",
-                  variablesReference: 0,
+                    name: 'x',
+                    value: '3',
+                    type: 'int',
+                    evaluateName: 'x',
+                    variablesReference: 0,
                 },
-              ]
+            ],
         });
         const file = path.join(WS_ROOT, 'pythonFiles', 'testAssignmentExp.py');
         let document = await workspace.openTextDocument(file);
@@ -375,132 +374,132 @@ suite('Debugging - pythonInlineProvider', () => {
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
             {
-              range: {
-                c: {
-                  c: 0,
-                  e: 0,
+                range: {
+                    c: {
+                        c: 0,
+                        e: 0,
+                    },
+                    e: {
+                        c: 0,
+                        e: 9,
+                    },
                 },
-                e: {
-                  c: 0,
-                  e: 9,
-                },
-              },
-              variableName: "some_list",
-              caseSensitiveLookup: false,
+                variableName: 'some_list',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 1,
-                  e: 0,
+                range: {
+                    c: {
+                        c: 1,
+                        e: 0,
+                    },
+                    e: {
+                        c: 1,
+                        e: 1,
+                    },
                 },
-                e: {
-                  c: 1,
-                  e: 1,
-                },
-              },
-              variableName: "x",
-              caseSensitiveLookup: false,
+                variableName: 'x',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 2,
-                  e: 4,
+                range: {
+                    c: {
+                        c: 2,
+                        e: 4,
+                    },
+                    e: {
+                        c: 2,
+                        e: 5,
+                    },
                 },
-                e: {
-                  c: 2,
-                  e: 5,
-                },
-              },
-              variableName: "n",
-              caseSensitiveLookup: false,
+                variableName: 'n',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 2,
-                  e: 13,
+                range: {
+                    c: {
+                        c: 2,
+                        e: 13,
+                    },
+                    e: {
+                        c: 2,
+                        e: 22,
+                    },
                 },
-                e: {
-                  c: 2,
-                  e: 22,
-                },
-              },
-              variableName: "some_list",
-              caseSensitiveLookup: false,
+                variableName: 'some_list',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 2,
-                  e: 27,
+                range: {
+                    c: {
+                        c: 2,
+                        e: 27,
+                    },
+                    e: {
+                        c: 2,
+                        e: 28,
+                    },
                 },
-                e: {
-                  c: 2,
-                  e: 28,
-                },
-              },
-              variableName: "x",
-              caseSensitiveLookup: false,
+                variableName: 'x',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 3,
-                  e: 13,
+                range: {
+                    c: {
+                        c: 3,
+                        e: 13,
+                    },
+                    e: {
+                        c: 3,
+                        e: 14,
+                    },
                 },
-                e: {
-                  c: 3,
-                  e: 14,
-                },
-              },
-              variableName: "n",
-              caseSensitiveLookup: false,
+                variableName: 'n',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 3,
-                  e: 16,
+                range: {
+                    c: {
+                        c: 3,
+                        e: 16,
+                    },
+                    e: {
+                        c: 3,
+                        e: 17,
+                    },
                 },
-                e: {
-                  c: 3,
-                  e: 17,
-                },
-              },
-              variableName: "x",
-              caseSensitiveLookup: false,
+                variableName: 'x',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 5,
-                  e: 13,
+                range: {
+                    c: {
+                        c: 5,
+                        e: 13,
+                    },
+                    e: {
+                        c: 5,
+                        e: 14,
+                    },
                 },
-                e: {
-                  c: 5,
-                  e: 14,
-                },
-              },
-              variableName: "n",
-              caseSensitiveLookup: false,
+                variableName: 'n',
+                caseSensitiveLookup: false,
             },
             {
-              range: {
-                c: {
-                  c: 5,
-                  e: 16,
+                range: {
+                    c: {
+                        c: 5,
+                        e: 16,
+                    },
+                    e: {
+                        c: 5,
+                        e: 17,
+                    },
                 },
-                e: {
-                  c: 5,
-                  e: 17,
-                },
-              },
-              variableName: "x",
-              caseSensitiveLookup: false,
+                variableName: 'x',
+                caseSensitiveLookup: false,
             },
-          ]
+        ];
         expect(result).to.deep.equal(expected);
     });
 });
