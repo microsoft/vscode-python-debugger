@@ -81,9 +81,6 @@ extends:
         env:
           VSCETARGET: ${{ variables.VSCETARGET }}
 
-      - script: python ./build/update_ext_version.py --for-publishing
-        displayName: Update build number
-
       - script: npm run package
         displayName: Build extension
 
