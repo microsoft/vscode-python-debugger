@@ -10,7 +10,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { anything, instance, mock, verify, when } from 'ts-mockito';
 import { DebugSession, WorkspaceFolder } from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { DebugSessionLoggingFactory } from '../../../extension/debugger/adapter/logging';
 
