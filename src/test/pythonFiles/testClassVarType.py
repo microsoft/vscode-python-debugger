@@ -1,4 +1,5 @@
 class Person:
+    id = 1
     def __init__(self, name, age):
         self.name = name
         self.age = age
@@ -8,3 +9,4 @@ class Person:
     
 person1 = Person("John Doe", 30)
 person1.greet()
+person1.id = 3
