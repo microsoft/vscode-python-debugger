@@ -20,10 +20,7 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
         viewPort: Range,
         context: InlineValueContext,
     ): Promise<InlineValue[]> {
-        const showInlineValues = getConfiguration('debugpy').get<boolean>(
-            'showPythonInlineValues',
-            false,
-        );
+        const showInlineValues = getConfiguration('debugpy').get<boolean>('showPythonInlineValues', false);
         if (!showInlineValues) {
             return [];
         }
