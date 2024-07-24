@@ -136,7 +136,10 @@
                     "default": false,
                     "description": "%debugpy.showPythonInlineValues%",
                     "scope": "resource",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "tags": [
+                        "experimental"
+                    ]
                 }
             },
             "title": "Python Debugger",
