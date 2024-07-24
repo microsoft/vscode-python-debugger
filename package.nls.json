@@ -5,5 +5,5 @@
     "debugpy.command.reportIssue.title": "Report Issue...",
     "debugpy.command.viewOutput.title": "Show Output",
     "debugpy.debugJustMyCode": "When debugging only step through user-written code. Disable this to allow stepping into library code.",
-    "debugpy.showPythonInlineValues": "Enable this to see inline values in the editor while debugging."
+    "debugpy.showPythonInlineValues": "Whether to display inline values in the editor while debugging."
 }
