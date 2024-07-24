@@ -138,7 +138,6 @@
                     "scope": "resource",
                     "type": "boolean"
                 }
-                
             },
             "title": "Python Debugger",
             "type": "object"
