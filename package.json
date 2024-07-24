@@ -131,7 +131,14 @@
                     "description": "%debugpy.debugJustMyCode%",
                     "scope": "resource",
                     "type": "boolean"
+                },
+                "debugpy.showPythonInlineValues": {
+                    "default": false,
+                    "description": "%debugpy.showPythonInlineValues%",
+                    "scope": "resource",
+                    "type": "boolean"
                 }
+                
             },
             "title": "Python Debugger",
             "type": "object"
