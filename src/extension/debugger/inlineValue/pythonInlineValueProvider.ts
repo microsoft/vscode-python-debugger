@@ -123,7 +123,7 @@ function removeCharsOutsideBraces(code: string): string {
         while ((tempMatch = insideBracesRegex.exec(content)) !== null) {
             result += tempMatch[0];
         }
-        const processedContent = result || content;
+        const processedContent = result;
 
         return match[0] + processedContent + match[0];
     });
