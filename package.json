@@ -128,13 +128,13 @@
             "properties": {
                 "debugpy.debugJustMyCode": {
                     "default": true,
-                    "description": "%debugpy.debugJustMyCode%",
+                    "description": "%debugpy.debugJustMyCode.description%",
                     "scope": "resource",
                     "type": "boolean"
                 },
                 "debugpy.showPythonInlineValues": {
                     "default": false,
-                    "description": "%debugpy.showPythonInlineValues%",
+                    "description": "%debugpy.showPythonInlineValues.description%",
                     "scope": "resource",
                     "type": "boolean",
                     "tags": [
