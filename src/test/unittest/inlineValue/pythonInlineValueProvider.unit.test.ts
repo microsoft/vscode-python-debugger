@@ -300,17 +300,20 @@ suite('Debugging - pythonInlineProvider', () => {
     });
 
     test('ProvideInlineValues function should return the vars in the python file with readable class variables', async () => {
-        customRequestStub.withArgs('variables', sinon.match.any).onFirstCall().resolves({
-            variables: [
-                {
-                    name: 'person1',
-                    value: '<__main__.Person object at 0x1085c92b0>',
-                    type: 'Person',
-                    evaluateName: 'person1',
-                    variablesReference: 7,
-                },
-            ],
-        });
+        customRequestStub
+            .withArgs('variables', sinon.match.any)
+            .onFirstCall()
+            .resolves({
+                variables: [
+                    {
+                        name: 'person1',
+                        value: '<__main__.Person object at 0x1085c92b0>',
+                        type: 'Person',
+                        evaluateName: 'person1',
+                        variablesReference: 7,
+                    },
+                ],
+            });
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
