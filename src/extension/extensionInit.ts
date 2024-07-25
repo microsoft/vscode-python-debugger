@@ -4,11 +4,13 @@
 'use strict';
 
 import {
+    ConfigurationChangeEvent,
     debug,
     DebugConfigurationProviderTriggerKind,
     DebugTreeItem,
     DebugVisualization,
     DebugVisualizationContext,
+    Disposable,
     languages,
     ThemeIcon,
     Uri,
@@ -200,8 +202,32 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         >('inlineHexDecoder', registerHexDebugVisualizationTreeProvider()),
     );
 
+    let registerInlineValuesProviderDisposable: Disposable;
+
+    const showInlineValues = getConfiguration('debugpy').get<boolean>('showPythonInlineValues', false);
+    if (showInlineValues) {
+        registerInlineValuesProviderDisposable = languages.registerInlineValuesProvider(
+            { language: 'python' },
+            new PythonInlineValueProvider(),
+        );
+        context.subscriptions.push(registerInlineValuesProviderDisposable);
+    }
+
     context.subscriptions.push(
-        languages.registerInlineValuesProvider({ language: 'python' }, new PythonInlineValueProvider()),
+        workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
+            if (event.affectsConfiguration('debugpy')) {
+                const showInlineValues = getConfiguration('debugpy').get<boolean>('showPythonInlineValues', false);
+                if (!showInlineValues) {
+                    registerInlineValuesProviderDisposable.dispose();
+                } else {
+                    registerInlineValuesProviderDisposable = languages.registerInlineValuesProvider(
+                        { language: 'python' },
+                        new PythonInlineValueProvider(),
+                    );
+                    context.subscriptions.push(registerInlineValuesProviderDisposable);
+                }
+            }
+        }),
     );
 
     context.subscriptions.push(

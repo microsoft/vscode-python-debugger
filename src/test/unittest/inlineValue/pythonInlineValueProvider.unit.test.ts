@@ -5,11 +5,12 @@
 
 import * as chaiAsPromised from 'chai-as-promised';
 import * as path from 'path';
+import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
 import { use, expect } from 'chai';
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../constants';
 import { PythonInlineValueProvider } from '../../../extension/debugger/inlineValue/pythonInlineValueProvider';
-import { workspace, Range, InlineValueContext } from 'vscode';
+import { workspace, Range, InlineValueContext, WorkspaceConfiguration } from 'vscode';
 import * as vscodeapi from '../../../extension/common/vscodeapi';
 
 use(chaiAsPromised);
@@ -18,15 +19,26 @@ const WS_ROOT = path.join(EXTENSION_ROOT_DIR_FOR_TESTS, 'src', 'test');
 
 suite('Debugging - pythonInlineProvider', () => {
     let customRequestStub: sinon.SinonStub;
+    let getConfigurationStub: sinon.SinonStub;
 
     setup(() => {
         customRequestStub = sinon.stub(vscodeapi, 'customRequest');
         customRequestStub.withArgs('scopes', sinon.match.any).resolves({ scopes: [{ variablesReference: 0 }] });
+        getConfigurationStub = sinon.stub(vscodeapi, 'getConfiguration');
+        getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(true));
     });
 
     teardown(async () => {
         sinon.restore();
     });
+
+    function createMoqConfiguration(showPythonInlineValues: boolean) {
+        const debugpySettings = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+        debugpySettings
+            .setup((p) => p.get<boolean>('showPythonInlineValues', TypeMoq.It.isAny()))
+            .returns(() => showPythonInlineValues);
+        return debugpySettings.object;
+    }
 
     test('ProvideInlineValues function should return all the vars in the python file', async () => {
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
@@ -331,7 +343,7 @@ suite('Debugging - pythonInlineProvider', () => {
         expect(result).to.deep.equal(expected);
     });
 
-    test.only('ProvideInlineValues function should return all the vars in the python file using Assignment Expressions', async () => {
+    test('ProvideInlineValues function should return all the vars in the python file using Assignment Expressions', async () => {
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
