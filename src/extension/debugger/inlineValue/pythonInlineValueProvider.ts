@@ -10,7 +10,7 @@ import {
     InlineValueVariableLookup,
     InlineValueEvaluatableExpression,
 } from 'vscode';
-import { customRequest, getConfiguration } from '../../common/vscodeapi';
+import { customRequest } from '../../common/vscodeapi';
 import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 
@@ -20,10 +20,6 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
         viewPort: Range,
         context: InlineValueContext,
     ): Promise<InlineValue[]> {
-        const showInlineValues = getConfiguration('debugpy').get<boolean>('showPythonInlineValues', false);
-        if (!showInlineValues) {
-            return [];
-        }
         let scopesRequest = await customRequest('scopes', { frameId: context.frameId });
         let variablesRequest = await customRequest('variables', {
             variablesReference: scopesRequest.scopes[0].variablesReference,

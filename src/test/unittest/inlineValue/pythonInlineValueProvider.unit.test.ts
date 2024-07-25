@@ -514,16 +514,4 @@ suite('Debugging - pythonInlineProvider', () => {
         ];
         expect(result).to.deep.equal(expected);
     });
-
-    test("Provider should return empty array if 'showPythonInlineValues' is false", async () => {
-        getConfigurationStub.withArgs('debugpy').returns(createMoqConfiguration(false));
-        const file = path.join(WS_ROOT, 'pythonFiles', 'testAssignmentExp.py');
-        let document = await workspace.openTextDocument(file);
-        const viewPort = new Range(0, 0, 6, 0);
-        const context = { frameId: 0, stoppedLocation: new Range(3, 1, 3, 1) } as InlineValueContext;
-        const inlineValueProvider = new PythonInlineValueProvider();
-
-        const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
-        expect(result).to.deep.equal([]);
-    });
 });
