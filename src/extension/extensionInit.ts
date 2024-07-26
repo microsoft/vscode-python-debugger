@@ -215,7 +215,7 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration((event: ConfigurationChangeEvent) => {
-            if (event.affectsConfiguration('debugpy')) {
+            if (event.affectsConfiguration('debugpy.showPythonInlineValues')) {
                 const showInlineValues = getConfiguration('debugpy').get<boolean>('showPythonInlineValues', false);
                 if (!showInlineValues) {
                     registerInlineValuesProviderDisposable.dispose();

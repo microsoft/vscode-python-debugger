@@ -202,14 +202,35 @@ suite('Debugging - pythonInlineProvider', () => {
     });
 
     test('ProvideInlineValues function should return all the vars in the python file with self in class', async () => {
+        customRequestStub
+            .withArgs('variables', sinon.match.any)
+            .onFirstCall()
+            .resolves({
+                variables: [
+                    {
+                        name: 'self',
+                        value: '<__main__.Person object at 0x10b223310>',
+                        type: 'Person',
+                        evaluateName: 'self',
+                        variablesReference: 5,
+                    },
+                ],
+            });
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
-                    name: 'self',
-                    value: '<__main__.Person object at 0x10b223310>',
-                    type: 'Person',
-                    evaluateName: 'self',
-                    variablesReference: 5,
+                    name: 'name',
+                    value: "'John'",
+                    type: 'str',
+                    evaluateName: 'self.name',
+                    variablesReference: 0,
+                },
+                {
+                    name: 'age',
+                    value: '25',
+                    type: 'int',
+                    evaluateName: 'self.age',
+                    variablesReference: 0,
                 },
             ],
         });
@@ -278,15 +299,46 @@ suite('Debugging - pythonInlineProvider', () => {
         expect(result).to.deep.equal(expected);
     });
 
-    test('ProvideInlineValues function should return all the vars in the python file with class variables', async () => {
+    test('ProvideInlineValues function should return the vars in the python file with readable class variables', async () => {
+        customRequestStub
+            .withArgs('variables', sinon.match.any)
+            .onFirstCall()
+            .resolves({
+                variables: [
+                    {
+                        name: 'person1',
+                        value: '<__main__.Person object at 0x1085c92b0>',
+                        type: 'Person',
+                        evaluateName: 'person1',
+                        variablesReference: 7,
+                    },
+                ],
+            });
         customRequestStub.withArgs('variables', sinon.match.any).resolves({
             variables: [
                 {
-                    name: 'person1',
-                    value: '<__main__.Person object at 0x1085c92b0>',
-                    type: 'Person',
-                    evaluateName: 'person1',
-                    variablesReference: 7,
+                    name: 'age',
+                    value: '30',
+                    type: 'int',
+                    evaluateName: 'person1.age',
+                    variablesReference: 0,
+                },
+                {
+                    name: 'id',
+                    value: '1',
+                    type: 'int',
+                    evaluateName: 'person1.id',
+                    variablesReference: 0,
+                },
+                {
+                    name: 'name',
+                    value: "'John Doe'",
+                    type: 'str',
+                    evaluateName: 'person1.name',
+                    variablesReference: 0,
+                    presentationHint: {
+                        attributes: ['rawString'],
+                    },
                 },
             ],
         });
@@ -299,33 +351,6 @@ suite('Debugging - pythonInlineProvider', () => {
 
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
-            {
-                range: {
-                    c: {
-                        c: 9,
-                        e: 0,
-                    },
-                    e: {
-                        c: 9,
-                        e: 7,
-                    },
-                },
-                variableName: 'person1',
-                caseSensitiveLookup: false,
-            },
-            {
-                range: {
-                    c: {
-                        c: 10,
-                        e: 0,
-                    },
-                    e: {
-                        c: 10,
-                        e: 13,
-                    },
-                },
-                expression: 'person1.greet',
-            },
             {
                 range: {
                     c: {

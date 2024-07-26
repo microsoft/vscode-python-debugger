@@ -65,9 +65,17 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
             'self',
         ];
 
-        const pythonVariables: any[] = variablesRequest.variables
+        let includeTypes = ['int', 'float', 'str', 'list', 'dict', 'tuple', 'set', 'bool'];
+
+        const pythonVariables = variablesRequest.variables
             .filter((variable: any) => variable.type)
-            .map((variable: any) => variable.name);
+            .reduce((acc: { [key: string]: any }, variable: any) => {
+                acc[variable.name] = {
+                    type: variable.type,
+                    variablesReference: variable.variablesReference,
+                };
+                return acc;
+            }, {});
 
         let variableRegex = new RegExp(
             '(?:[a-zA-Z_][a-zA-Z0-9_]*\\.)*' + //match any number of variable names separated by '.'
@@ -91,13 +99,26 @@ export class PythonInlineValueProvider implements InlineValuesProvider {
                 if (pythonKeywords.includes(varName)) {
                     continue;
                 }
-                if (pythonVariables.includes(varName.split('.')[0])) {
+                let baseVarName = varName.split('.')[0];
+                if (pythonVariables.hasOwnProperty(baseVarName)) {
                     if (varName.includes('.')) {
-                        const rng = new Range(l, match.index, l, match.index + varName.length);
-                        allValues.push(new InlineValueEvaluatableExpression(rng, varName));
+                        //Find variable name in the variable children
+                        let foundVariable = (
+                            await customRequest('variables', {
+                                variablesReference: pythonVariables[baseVarName].variablesReference,
+                            })
+                        ).variables.find((variable: any) => variable.evaluateName === varName);
+                        //Check the type of the variable before adding to the inline values
+                        if (foundVariable && includeTypes.includes(foundVariable.type)) {
+                            const rng = new Range(l, match.index, l, match.index + varName.length);
+                            allValues.push(new InlineValueEvaluatableExpression(rng, varName));
+                        }
                     } else {
-                        const rng = new Range(l, match.index, l, match.index + varName.length);
-                        allValues.push(new InlineValueVariableLookup(rng, varName, false));
+                        //Check the type of the variable before adding to the inline values
+                        if (includeTypes.includes(pythonVariables[baseVarName].type)) {
+                            const rng = new Range(l, match.index, l, match.index + varName.length);
+                            allValues.push(new InlineValueVariableLookup(rng, varName, false));
+                        }
                     }
                 }
             }
