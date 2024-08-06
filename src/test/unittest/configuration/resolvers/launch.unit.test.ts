@@ -72,6 +72,14 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             return debugpySettings.object;
         }
 
+        function createVariablePresentationMoqConfiguration(variablePresentation: object) {
+            const debugpySettings = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+            debugpySettings
+                .setup((p) => p.get<object>('debugVariablePresentation', TypeMoq.It.isAny()))
+                .returns(() => variablePresentation);
+            return debugpySettings.object;
+        }
+
         function getClientOS() {
             return osType === platform.OSType.Windows ? 'windows' : 'unix';
         }
@@ -800,6 +808,54 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     justMyCode: testParams.justMyCode,
                 });
                 expect(debugConfig).to.have.property('justMyCode', testParams.expectedResult);
+            });
+        });
+
+        const testsForVariablePresentation = [
+            {
+                variablePresentation: {},
+                variablePresentationSetting: {
+                    "class": "inline"
+                },
+                expectedResult: {},
+            },
+            {
+                variablePresentation: {
+                    "class": "inline"
+                },
+                variablePresentationSetting: {
+                    "class": "hide"
+                },
+                expectedResult: {
+                    "class": "inline"
+                },
+            },
+            {
+                variablePresentation: undefined,
+                variablePresentationSetting: {
+                    "class": "inline"
+                },
+                expectedResult: {
+                    "class": "inline"
+                },
+            },
+        ];
+        testsForVariablePresentation.forEach(async (testParams) => {
+            test('Ensure variablePresentation property is correctly derived from global settings', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                getConfigurationStub
+                    .withArgs('debugpy', sinon.match.any)
+                    .returns(createVariablePresentationMoqConfiguration(testParams.variablePresentationSetting));
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    variablePresentation: testParams.variablePresentation,
+                });
+                expect(debugConfig).to.have.property('variablePresentation').that.deep.equals(testParams.expectedResult); // Corrected to use deep.equals
+
             });
         });
 
