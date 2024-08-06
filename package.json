@@ -140,6 +140,64 @@
                     "tags": [
                         "experimental"
                     ]
+                },
+                "debugpy.variablePresentation": {
+                    "default": {},
+                    "description": "Allow the user to specify the preferred presentation of variables.",
+                    "scope": "resource",
+                    "type": "object",
+                    "properties": {
+                        "all":{
+                            "type": "string",
+                            "default": "group",
+                            "description" : "Set preferred presentation of variables for all instances.",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "class":{
+                            "type": "string",
+                            "default": "group",
+                            "description" : "Set Class presentation of variables.",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "function":{
+                            "type": "string",
+                            "default": "group",
+                            "description" : "Set Function preferred presentation of variables.",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "protected":{
+                            "type": "string",
+                            "default": "group",
+                            "description" : "Set Protected preferred presentation of variables.",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "special":{
+                            "type": "string",
+                            "default": "group",
+                            "description" : "Set Special preferred presentation of variables.",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        }
+                    }
                 }
             },
             "title": "Python Debugger",

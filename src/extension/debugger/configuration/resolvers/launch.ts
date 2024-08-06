@@ -114,6 +114,12 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
                 true,
             );
         }
+        if (debugConfiguration.variablePresentation == undefined) {
+            debugConfiguration.variablePresentation = getConfiguration('debugpy', workspaceFolder).get<object>(
+                'variablePresentation',
+                {},
+            );
+        }
         // Pass workspace folder so we can get this when we get debug events firing.
         debugConfiguration.workspaceFolder = workspaceFolder ? workspaceFolder.fsPath : undefined;
         const debugOptions = debugConfiguration.debugOptions!;

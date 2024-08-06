@@ -50,6 +50,12 @@ export class AttachConfigurationResolver extends BaseConfigurationResolver<Attac
                 true,
             );
         }
+        if (debugConfiguration.variablePresentation == undefined) {
+            debugConfiguration.variablePresentation = getConfiguration('debugpy', workspaceFolder).get<object>(
+                'variablePresentation',
+                {},
+            );
+        }
         debugConfiguration.showReturnValue = debugConfiguration.showReturnValue !== false;
         // Pass workspace folder so we can get this when we get debug events firing.
         debugConfiguration.workspaceFolder = workspaceFolder ? workspaceFolder.fsPath : undefined;
