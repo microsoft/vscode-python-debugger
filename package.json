@@ -132,6 +132,64 @@
                     "scope": "resource",
                     "type": "boolean"
                 },
+                "debugpy.debugVariablePresentation": {
+                    "default": {},
+                    "description": "%debugpy.debugVariablePresentation.description%",
+                    "scope": "resource",
+                    "type": "object",
+                    "properties": {
+                        "all": {
+                            "type": "string",
+                            "default": "group",
+                            "description" : "%debugpy.debugVariablePresentation.all.description%",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "class": {
+                            "type": "string",
+                            "default": "group",
+                            "description" : "%debugpy.debugVariablePresentation.class.description%",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "function": {
+                            "type": "string",
+                            "default": "group",
+                            "description" : "%debugpy.debugVariablePresentation.function.description%",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "protected": {
+                            "type": "string",
+                            "default": "group",
+                            "description" : "%debugpy.debugVariablePresentation.protected.description%",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        },
+                        "special": {
+                            "type": "string",
+                            "default": "group",
+                            "description" : "%debugpy.debugVariablePresentation.special.description%",
+                            "enum": [
+                                "inline",
+                                "group",
+                                "hide"
+                            ]
+                        }
+                    }
+                },
                 "debugpy.showPythonInlineValues": {
                     "default": false,
                     "description": "%debugpy.showPythonInlineValues.description%",
@@ -140,64 +198,6 @@
                     "tags": [
                         "experimental"
                     ]
-                },
-                "debugpy.variablePresentation": {
-                    "default": {},
-                    "description": "Allow the user to specify the preferred presentation of variables.",
-                    "scope": "resource",
-                    "type": "object",
-                    "properties": {
-                        "all":{
-                            "type": "string",
-                            "default": "group",
-                            "description" : "Set preferred presentation of variables for all instances.",
-                            "enum": [
-                                "inline",
-                                "group",
-                                "hide"
-                            ]
-                        },
-                        "class":{
-                            "type": "string",
-                            "default": "group",
-                            "description" : "Set Class presentation of variables.",
-                            "enum": [
-                                "inline",
-                                "group",
-                                "hide"
-                            ]
-                        },
-                        "function":{
-                            "type": "string",
-                            "default": "group",
-                            "description" : "Set Function preferred presentation of variables.",
-                            "enum": [
-                                "inline",
-                                "group",
-                                "hide"
-                            ]
-                        },
-                        "protected":{
-                            "type": "string",
-                            "default": "group",
-                            "description" : "Set Protected preferred presentation of variables.",
-                            "enum": [
-                                "inline",
-                                "group",
-                                "hide"
-                            ]
-                        },
-                        "special":{
-                            "type": "string",
-                            "default": "group",
-                            "description" : "Set Special preferred presentation of variables.",
-                            "enum": [
-                                "inline",
-                                "group",
-                                "hide"
-                            ]
-                        }
-                    }
                 }
             },
             "title": "Python Debugger",
@@ -228,6 +228,11 @@
                                     "port"
                                 ],
                                 "type": "object"
+                            },
+                            "consoleName": {
+                                "default": "Python Debug Console",
+                                "description": "Display name of the debug console or terminal",
+                                "type": "string"
                             },
                             "debugAdapterPath": {
                                 "description": "Path (fully qualified) to the python debug adapter executable.",
@@ -333,10 +338,61 @@
                                 "description": "Whether to enable Sub Process debugging",
                                 "type": "boolean"
                             },
-                            "consoleName": {
-                                "default": "Python Debug Console",
-                                "description": "Display name of the debug console or terminal",
-                                "type": "string"
+                            "variablePresentation": {
+                                "default": {},
+                                "description": "%debugpy.debugVariablePresentation.description%",
+                                "properties": {
+                                    "all": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.all.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "class": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.class.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "function": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.function.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "protected": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.protected.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "special": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.special.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    }
+                                }
                             }
                         }
                     },
@@ -400,6 +456,11 @@
                                 },
                                 "type": "object"
                             },
+                            "autoStartBrowser": {
+                                "default": false,
+                                "description": "Open external browser to launch the application",
+                                "type": "boolean"
+                            },
                             "console": {
                                 "default": "integratedTerminal",
                                 "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
@@ -409,6 +470,11 @@
                                     "internalConsole"
                                 ]
                             },
+                            "consoleName": {
+                                "default": "Python Debug Console",
+                                "description": "Display name of the debug console or terminal",
+                                "type": "string"
+                            },
                             "cwd": {
                                 "default": "${workspaceFolder}",
                                 "description": "Absolute path to the working directory of the program being debugged. Default is the root directory of the file (leave empty).",
@@ -417,11 +483,6 @@
                             "debugAdapterPath": {
                                 "description": "Path (fully qualified) to the Python debug adapter executable.",
                                 "type": "string"
-                            },
-                            "autoStartBrowser": {
-                                "default": false,
-                                "description": "Open external browser to launch the application",
-                                "type": "boolean"
                             },
                             "django": {
                                 "default": false,
@@ -445,6 +506,11 @@
                                 "default": false,
                                 "description": "Enable debugging of gevent monkey-patched code.",
                                 "type": "boolean"
+                            },
+                            "guiEventLoop": {
+                                "default": "matplotlib",
+                                "description": "The GUI event loop that's going to run. Possible values: \"matplotlib\", \"wx\", \"qt\", \"none\", or a custom function that'll be imported and run.",
+                                "type": "string"
                             },
                             "jinja": {
                                 "default": null,
@@ -558,15 +624,61 @@
                                 "description": "Running debug program under elevated permissions (on Unix).",
                                 "type": "boolean"
                             },
-                            "guiEventLoop": {
-                                "default": "matplotlib",
-                                "description": "The GUI event loop that's going to run. Possible values: \"matplotlib\", \"wx\", \"qt\", \"none\", or a custom function that'll be imported and run.",
-                                "type": "string"
-                            },
-                            "consoleName": {
-                                "default": "Python Debug Console",
-                                "description": "Display name of the debug console or terminal",
-                                "type": "string"
+                            "variablePresentation": {
+                                "default": {},
+                                "description": "%debugpy.debugVariablePresentation.description%",
+                                "properties": {
+                                    "all": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.all.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "class": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.class.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "function": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.function.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "protected": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.protected.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    },
+                                    "special": {
+                                        "type": "string",
+                                        "default": "group",
+                                        "description" : "%debugpy.debugVariablePresentation.special.description%",
+                                        "enum": [
+                                            "inline",
+                                            "group",
+                                            "hide"
+                                        ]
+                                    }
+                                }
                             }
                         }
                     }
