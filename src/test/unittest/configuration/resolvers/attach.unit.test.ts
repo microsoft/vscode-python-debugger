@@ -578,28 +578,28 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             {
                 variablePresentation: {},
                 variablePresentationSetting: {
-                    "class": "inline"
+                    class: 'inline',
                 },
                 expectedResult: {},
             },
             {
                 variablePresentation: {
-                    "class": "inline"
+                    class: 'inline',
                 },
                 variablePresentationSetting: {
-                    "class": "hide"
+                    class: 'hide',
                 },
                 expectedResult: {
-                    "class": "inline"
+                    class: 'inline',
                 },
             },
             {
                 variablePresentation: undefined,
                 variablePresentationSetting: {
-                    "class": "inline"
+                    class: 'inline',
                 },
                 expectedResult: {
-                    "class": "inline"
+                    class: 'inline',
                 },
             },
         ];
@@ -623,8 +623,9 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     debugOptions,
                     variablePresentation: testParams.variablePresentation,
                 });
-                expect(debugConfig).to.have.property('variablePresentation').that.deep.equals(testParams.expectedResult); // Corrected to use deep.equals
-
+                expect(debugConfig)
+                    .to.have.property('variablePresentation')
+                    .that.deep.equals(testParams.expectedResult); // Corrected to use deep.equals
             });
         });
 
