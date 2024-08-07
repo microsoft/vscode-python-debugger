@@ -50,7 +50,7 @@ export class AttachConfigurationResolver extends BaseConfigurationResolver<Attac
                 true,
             );
         }
-        if (debugConfiguration.variablePresentation == undefined) {
+        if (debugConfiguration.variablePresentation === undefined) {
             debugConfiguration.variablePresentation = getConfiguration('debugpy', workspaceFolder).get<object>(
                 'debugVariablePresentation',
                 {},

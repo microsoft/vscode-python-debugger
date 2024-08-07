@@ -114,7 +114,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
                 true,
             );
         }
-        if (debugConfiguration.variablePresentation == undefined) {
+        if (debugConfiguration.variablePresentation === undefined) {
             debugConfiguration.variablePresentation = getConfiguration('debugpy', workspaceFolder).get<object>(
                 'debugVariablePresentation',
                 {},
