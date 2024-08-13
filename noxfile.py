@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 """All the action we need during build"""
+
 import hashlib
 import io
 import json
@@ -75,21 +76,24 @@ def install_bundled_libs(session):
         download_url(debugpy_info["any"])
 
 
-def download_url(value):
-    with url_lib.urlopen(value["url"]) as response:
-        data = response.read()
-        hash_algorithm, hash_value = [
-            (key, value) for key, value in value["hash"].items()
-        ][0]
-        if hashlib.new(hash_algorithm, data).hexdigest() != hash_value:
-            raise ValueError("Failed hash verification for {}.".format(value["url"]))
+def download_url(values):
+    for value in values:
+        with url_lib.urlopen(value["url"]) as response:
+            data = response.read()
+            hash_algorithm, hash_value = [
+                (key, value) for key, value in value["hash"].items()
+            ][0]
+            if hashlib.new(hash_algorithm, data).hexdigest() != hash_value:
+                raise ValueError(
+                    "Failed hash verification for {}.".format(value["url"])
+                )
 
-        print("Download: ", value["url"])
-        with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
-            libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
-            for zip_info in wheel.infolist():
-                print("\t" + zip_info.filename)
-                wheel.extract(zip_info.filename, libs_dir)
+            print("Download: ", value["url"])
+            with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
+                libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
+                for zip_info in wheel.infolist():
+                    print("\t" + zip_info.filename)
+                    wheel.extract(zip_info.filename, libs_dir)
 
 
 @nox.session()
@@ -141,18 +145,24 @@ def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
 
 
 @nox.session
-@nox.parametrize("version", ["1.5.1", "1.7.0", "latest"])
-@nox.parametrize("cp", ["cp39", "cp311"])
-def create_debugpy_json(session: nox.Session, version, cp):
+def create_debugpy_json(session: nox.Session):
     platforms = [
         ("macOS", "macosx"),
-        ("win32", "win32"),
+        # ("win32", "win32"), # VS Code does not support 32-bit Windows anymore
         ("win64", "win_amd64"),
         ("linux", "manylinux"),
         ("any", "none-any"),
     ]
     debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
-    debugpy_info = {p: _get_debugpy_info(version, id, cp) for p, id in platforms}
+    debugpy_info = {}
+    for p, id in platforms:
+        # we typically have the latest 3 versions of debugpy compiled bits
+        downloads = []
+        for cp in ["cp310", "cp311", "cp312"]:
+            data = _get_debugpy_info("latest", id, cp)
+            if not any(d["url"] == data["url"] for d in downloads):
+                downloads.append(data)
+        debugpy_info[p] = downloads
     debugpy_info_json_path.write_text(
         json.dumps(debugpy_info, indent=4), encoding="utf-8"
     )
