@@ -80,13 +80,9 @@ def download_url(values):
     for value in values:
         with url_lib.urlopen(value["url"]) as response:
             data = response.read()
-            hash_algorithm, hash_value = [
-                (key, value) for key, value in value["hash"].items()
-            ][0]
-            if hashlib.new(hash_algorithm, data).hexdigest() != hash_value:
-                raise ValueError(
-                    "Failed hash verification for {}.".format(value["url"])
-                )
+            name, digest = next(iter(value["hash"].items()))
+            if hashlib.new(name, data).hexdigest() != digest:
+                raise ValueError(f"Failed hash verification for {value['url']}.")
 
             print("Download: ", value["url"])
             with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
