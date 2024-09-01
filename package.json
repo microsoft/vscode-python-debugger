@@ -590,7 +590,7 @@
     "dependencies": {
         "@vscode/debugadapter": "^1.65.0",
         "@vscode/debugprotocol": "^1.65.0",
-        "@vscode/extension-telemetry": "^0.8.5",
+        "@vscode/extension-telemetry": "^0.9.7",
         "@vscode/python-extension": "^1.0.5",
         "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
