@@ -29,6 +29,7 @@ extends:
   parameters:
     l10nSourcePaths: ./src
     standardizedVersioning: true
+    ghCreateTag: false
     buildPlatforms:
       - name: Linux
         vsceTarget: ''

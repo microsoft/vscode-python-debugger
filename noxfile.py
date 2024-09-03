@@ -80,8 +80,8 @@ def download_url(values):
     for value in values:
         with url_lib.urlopen(value["url"]) as response:
             data = response.read()
-            name, digest = next(iter(value["hash"].items()))
-            if hashlib.new(name, data).hexdigest() != digest:
+            digest = value["hash"]["sha256"]
+            if hashlib.new("sha256", data).hexdigest() != digest:
                 raise ValueError(f"Failed hash verification for {value['url']}.")
 
             print("Download: ", value["url"])
