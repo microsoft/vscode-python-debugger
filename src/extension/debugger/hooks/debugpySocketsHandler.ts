@@ -3,7 +3,6 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
 import { DebugSessionCustomEvent } from 'vscode';
 import { swallowExceptions } from '../../common/utils/decorators';
 import { DebuggerEvents } from './constants';
@@ -18,11 +17,8 @@ import { traceLog } from '../../common/log/logging';
  * @class ChildProcessAttachEventHandler
  * @implements {IDebugSessionEventHandlers}
  */
-@injectable()
 export class DebugpySocketsHandler implements IDebugSessionEventHandlers {
-    constructor(
-        @inject(DebugPortAttributesProvider) private readonly debugPortAttributesProvider: DebugPortAttributesProvider,
-    ) {}
+    constructor(private readonly debugPortAttributesProvider: DebugPortAttributesProvider) {}
 
     @swallowExceptions('Handle child process launch')
     public async handleCustomEvent(event: DebugSessionCustomEvent): Promise<void> {
