@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-'use strict';
-
-import { inject, injectable, named } from 'inversify';
 import { cloneDeep } from 'lodash';
 import { CancellationToken, DebugConfiguration, QuickPickItem, WorkspaceFolder } from 'vscode';
 import { DebugConfigStrings } from '../../common/utils/localize';
@@ -21,18 +18,13 @@ import { buildRemoteAttachConfiguration } from './providers/remoteAttach';
 import { IDebugConfigurationResolver } from './types';
 import { buildFileWithArgsLaunchDebugConfiguration } from './providers/fileLaunchWithArgs';
 
-@injectable()
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
     private cacheDebugConfig: DebugConfiguration | undefined = undefined;
 
     constructor(
-        @inject(IDebugConfigurationResolver)
-        @named('attach')
         private readonly attachResolver: IDebugConfigurationResolver<AttachRequestArguments>,
-        @inject(IDebugConfigurationResolver)
-        @named('launch')
         private readonly launchResolver: IDebugConfigurationResolver<LaunchRequestArguments>,
-        @inject(IMultiStepInputFactory) private readonly multiStepFactory: IMultiStepInputFactory,
+        private readonly multiStepFactory: IMultiStepInputFactory,
     ) {}
 
     public async provideDebugConfigurations(
