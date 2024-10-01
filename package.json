@@ -574,7 +574,7 @@
         "@vscode/vsce": "^2.24.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
-        "eslint": "^8.50.0",
+        "eslint": "^9.11.1",
         "glob": "^8.0.3",
         "mocha": "^10.7.0",
         "prettier": "^3.0.3",
