@@ -5,5 +5,11 @@
     "debugpy.command.reportIssue.title": "Report Issue...",
     "debugpy.command.viewOutput.title": "Show Output",
     "debugpy.debugJustMyCode.description": "When debugging only step through user-written code. Disable this to allow stepping into library code.",
+    "debugpy.debugVariablePresentation.description": "Allow the user to specify the preferred presentation of variables.",
+    "debugpy.debugVariablePresentation.all.description": "Set preferred presentation of variables for all instances.",
+    "debugpy.debugVariablePresentation.class.description": "Set Class presentation of variables.",
+    "debugpy.debugVariablePresentation.function.description": "Set Function preferred presentation of variables.",
+    "debugpy.debugVariablePresentation.protected.description": "Set Protected preferred presentation of variables.",
+    "debugpy.debugVariablePresentation.special.description": "Set Special preferred presentation of variables.",
     "debugpy.showPythonInlineValues.description": "Whether to display inline values in the editor while debugging."
 }
