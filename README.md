@@ -4,7 +4,7 @@ A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marke
 
 Note: 
 - The Python extension offers the python debugger extension as an optional installation, including it during the setup process.
-- This extension is supported for all [actively supported versions](https://devguide.python.org/#status-of-python-branches) of the Python language (i.e., Python >= 3.7).
+- This extension is supported for all [actively supported versions](https://devguide.python.org/#status-of-python-branches) of the Python language. See below for support on deprecated Python versions.
 
 
 ## Purpose
