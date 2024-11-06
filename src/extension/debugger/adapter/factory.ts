@@ -76,7 +76,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
                 sendTelemetryEvent(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS);
             }
 
-            const executable = command.shift() ?? 'python';
+            let executable = command.shift() ?? 'python';
 
             // "logToFile" is not handled directly by the adapter - instead, we need to pass
             // the corresponding CLI switch when spawning it.
@@ -85,6 +85,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (configuration.debugAdapterPath !== undefined) {
                 const args = command.concat([configuration.debugAdapterPath, ...logArgs]);
                 traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
+                executable = `"${executable}"`; // surround executable with quotes to handle spaces
                 return new DebugAdapterExecutable(executable, args);
             }
 
