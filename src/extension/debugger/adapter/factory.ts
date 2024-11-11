@@ -25,6 +25,7 @@ import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { ResolvedEnvironment } from '@vscode/python-extension';
+import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -85,7 +86,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (configuration.debugAdapterPath !== undefined) {
                 const args = command.concat([configuration.debugAdapterPath, ...logArgs]);
                 traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
-                executable = `"${executable}"`; // surround executable with quotes to handle spaces
+                executable = fileToCommandArgumentForPythonExt(executable);
                 return new DebugAdapterExecutable(executable, args);
             }
 

@@ -41,7 +41,7 @@ suite('Debugging - Adapter Factory', () => {
 
     const nodeExecutable = undefined;
     const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
-    const pythonPath = path.join('path', 'to', 'python', 'interpreter');
+    const pythonPath = path.join('path', 'to', 'pythonA', 'interpreter');
     const interpreter = {
         architecture: Architecture.Unknown,
         path: pythonPath,
@@ -287,6 +287,27 @@ suite('Debugging - Adapter Factory', () => {
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [customAdapterPath]);
         getInterpreterDetailsStub.resolves({ path: [interpreter.path] });
         resolveEnvironmentStub.withArgs(interpreter.path).resolves(interpreter);
+        const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+
+        assert.deepStrictEqual(descriptor, debugExecutable);
+    });
+    test('Add quotes to interpreter path with spaces', async () => {
+        const customAdapterPath = 'custom/debug/adapter/customAdapterPath';
+        const session = createSession({ debugAdapterPath: customAdapterPath });
+        const interpreterPathSpaces = '/path/to/python interpreter with spaces';
+        const interpreterPathSpacesQuoted = `"${interpreterPathSpaces}"`;
+        const debugExecutable = new DebugAdapterExecutable(interpreterPathSpacesQuoted, [customAdapterPath]);
+
+        getInterpreterDetailsStub.resolves({ path: [interpreterPathSpaces] });
+        const interpreterSpacePath = {
+            architecture: Architecture.Unknown,
+            path: interpreterPathSpaces,
+            sysPrefix: '',
+            sysVersion: '',
+            envType: 'Unknow',
+            version: new SemVer('3.7.4-test'),
+        };
+        resolveEnvironmentStub.withArgs(interpreterPathSpaces).resolves(interpreterSpacePath);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         assert.deepStrictEqual(descriptor, debugExecutable);
