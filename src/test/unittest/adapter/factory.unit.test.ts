@@ -41,7 +41,7 @@ suite('Debugging - Adapter Factory', () => {
 
     const nodeExecutable = undefined;
     const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
-    const pythonPath = path.join('path', 'to', 'pythonA', 'interpreter');
+    const pythonPath = path.join('path', 'to', 'python', 'interpreter');
     const interpreter = {
         architecture: Architecture.Unknown,
         path: pythonPath,
