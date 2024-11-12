@@ -41,7 +41,7 @@ suite('Debugging - Adapter Factory', () => {
 
     const nodeExecutable = undefined;
     const debugAdapterPath = path.join(EXTENSION_ROOT_DIR, 'bundled', 'libs', 'debugpy', 'adapter');
-    const pythonPath = path.join('path', 'to', 'python', 'interpreter');
+    const pythonPath = 'path/to/python/interpreter';
     const interpreter = {
         architecture: Architecture.Unknown,
         path: pythonPath,
@@ -292,9 +292,9 @@ suite('Debugging - Adapter Factory', () => {
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
     test('Add quotes to interpreter path with spaces', async () => {
-        const customAdapterPath = path.join('custom', 'debug', 'adapter', 'customAdapterPath');
+        const customAdapterPath = 'custom/debug/adapter/customAdapterPath';
         const session = createSession({ debugAdapterPath: customAdapterPath });
-        const interpreterPathSpaces = path.join('path', 'to', 'python interpreter with spaces');
+        const interpreterPathSpaces = 'path/to/python interpreter with spaces';
         const interpreterPathSpacesQuoted = `"${interpreterPathSpaces}"`;
         const debugExecutable = new DebugAdapterExecutable(interpreterPathSpacesQuoted, [customAdapterPath]);
 
