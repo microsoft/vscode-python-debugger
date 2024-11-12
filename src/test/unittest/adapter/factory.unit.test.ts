@@ -294,7 +294,7 @@ suite('Debugging - Adapter Factory', () => {
     test('Add quotes to interpreter path with spaces', async () => {
         const customAdapterPath = path.join('custom', 'debug', 'adapter', 'customAdapterPath');
         const session = createSession({ debugAdapterPath: customAdapterPath });
-        const interpreterPathSpaces = path.join('/path', 'to', 'python interpreter with spaces');
+        const interpreterPathSpaces = path.join('path', 'to', 'python interpreter with spaces');
         const interpreterPathSpacesQuoted = `"${interpreterPathSpaces}"`;
         const debugExecutable = new DebugAdapterExecutable(interpreterPathSpacesQuoted, [customAdapterPath]);
 
