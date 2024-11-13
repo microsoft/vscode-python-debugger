@@ -6,7 +6,6 @@
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
-        "contribIssueReporter",
         "debugVisualization",
         "contribViewsWelcome"
     ],
@@ -594,10 +593,8 @@
         "@vscode/python-extension": "^1.0.5",
         "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
-        "inversify": "^6.0.1",
         "jsonc-parser": "^3.2.0",
         "lodash": "^4.17.21",
-        "reflect-metadata": "^0.1.13",
         "vscode-languageclient": "^8.0.2"
     }
 }

@@ -4,7 +4,6 @@
 
 'use strict';
 
-import { inject, injectable } from 'inversify';
 import * as path from 'path';
 import {
     DebugAdapterDescriptor,
@@ -31,9 +30,8 @@ export enum debugStateKeys {
     doNotShowAgain = 'doNotShowPython36DebugDeprecatedAgain',
 }
 
-@injectable()
 export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFactory {
-    constructor(@inject(IPersistentStateFactory) private persistentState: IPersistentStateFactory) {}
+    constructor(private persistentState: IPersistentStateFactory) {}
 
     public async createDebugAdapterDescriptor(
         session: DebugSession,
