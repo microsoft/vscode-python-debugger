@@ -24,6 +24,7 @@ import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { ResolvedEnvironment } from '@vscode/python-extension';
+import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -74,7 +75,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
                 sendTelemetryEvent(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS);
             }
 
-            const executable = command.shift() ?? 'python';
+            let executable = command.shift() ?? 'python';
 
             // "logToFile" is not handled directly by the adapter - instead, we need to pass
             // the corresponding CLI switch when spawning it.
@@ -83,6 +84,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (configuration.debugAdapterPath !== undefined) {
                 const args = command.concat([configuration.debugAdapterPath, ...logArgs]);
                 traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
+                executable = fileToCommandArgumentForPythonExt(executable);
                 return new DebugAdapterExecutable(executable, args);
             }
 
