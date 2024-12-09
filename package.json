@@ -535,7 +535,7 @@
             {
                 "view": "debug",
                 "contents": "\n[Show automatic Python configurations](command:workbench.action.debug.selectandstart?%5B%22debugpy%22%5D)\n",
-                "when": "dynamicPythonConfigAvailable"
+                "when": "dynamicPythonConfigAvailable && !virtualWorkspace"
             }
         ]
     },
