@@ -28,7 +28,7 @@ suite('Debugging - Configuration Provider File with Arguments', () => {
             request: 'launch',
             program: '${file}',
             console: 'integratedTerminal',
-            args: ['${command:pickArgs}'],
+            args: '${command:pickArgs}',
         };
 
         expect(state.config).to.be.deep.equal(config);
