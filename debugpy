@@ -1,0 +1,2 @@
+#! /bin/bash
+python /Users/eleanorboyd/vscode-python-debugger/bundled/libs/debugpy --listen 0 --wait-for-client $@

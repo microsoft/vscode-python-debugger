@@ -53,6 +53,7 @@ import { IExtensionApi } from './apiTypes';
 import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizers/inlineHexDecoder';
 import { PythonInlineValueProvider } from './debugger/inlineValue/pythonInlineValueProvider';
 import { traceLog } from './common/log/logging';
+import { registerConfiglessDebug } from './configlessDebugInit';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -246,6 +247,8 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         'dynamicPythonConfigAvailable',
         window.activeTextEditor?.document.languageId === 'python',
     );
+
+    registerConfiglessDebug(context);
 
     return buildApi();
 }
