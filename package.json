@@ -278,6 +278,15 @@
                                 "default": "Python Debug Console",
                                 "description": "Display name of the debug console or terminal",
                                 "type": "string"
+                            },
+                            "clientOS": {
+                                "default": null,
+                                "description": "OS that VS code is using.",
+                                "enum": [
+                                    "windows",
+                                    null,
+                                    "unix"
+                                ]
                             }
                         }
                     },
@@ -508,6 +517,15 @@
                                 "default": "Python Debug Console",
                                 "description": "Display name of the debug console or terminal",
                                 "type": "string"
+                            },
+                            "clientOS": {
+                                "default": null,
+                                "description": "OS that VS code is using.",
+                                "enum": [
+                                    "windows",
+                                    null,
+                                    "unix"
+                                ]
                             }
                         }
                     }
