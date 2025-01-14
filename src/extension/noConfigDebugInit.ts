@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { IExtensionContext } from './common/types';
-import { DebugSessionOptions, debug, RelativePattern, workspace } from 'vscode';
+import { DebugSessionOptions, debug, RelativePattern } from 'vscode';
+import { createFileSystemWatcher } from './utils';
 
 /**
  * Registers the configuration-less debugging setup for the extension.
@@ -32,19 +33,19 @@ export async function registerConfiglessDebug(context: IExtensionContext): Promi
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
     context.subscriptions.push(
-        workspace.createFileSystemWatcher(new RelativePattern(debugAdapterEndpointDir, '**/*')).onDidCreate((uri) => {
-            console.log(`File created: ${uri.fsPath}`);
+        createFileSystemWatcher(new RelativePattern(debugAdapterEndpointDir, '**/*')).onDidCreate((uri) => {
+            // console.log(`File created: ${uri.fsPath}`);
             const filePath = uri.fsPath;
             fs.readFile(filePath, 'utf8', (err, data) => {
                 if (err) {
-                    console.error(`Error reading file: ${err}`);
+                    // console.error(`Error reading file: ${err}`);
                     return;
                 }
                 try {
                     // parse the client port
                     const jsonData = JSON.parse(data);
                     const clientPort = jsonData.client?.port;
-                    console.log(`Client port: ${clientPort}`);
+                    //console.log(`Client port: ${clientPort}`);
 
                     const options: DebugSessionOptions = {
                         noDebug: false,
@@ -66,17 +67,18 @@ export async function registerConfiglessDebug(context: IExtensionContext): Promi
                         .then(
                             (started) => {
                                 if (started) {
-                                    console.log('Debug session started successfully');
+                                    //console.log('Debug session started successfully');
                                 } else {
-                                    console.error('Failed to start debug session');
+                                    //console.error('Failed to start debug session');
                                 }
                             },
                             (error) => {
-                                console.error(`Error starting debug session: ${error}`);
+                                //console.error(`Error starting debug session: ${error}`);
+                                error;
                             },
                         );
                 } catch (parseErr) {
-                    console.error(`Error parsing JSON: ${parseErr}`);
+                    //console.error(`Error parsing JSON: ${parseErr}`);
                 }
             });
             JSON.parse;
