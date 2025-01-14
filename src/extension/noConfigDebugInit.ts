@@ -26,10 +26,11 @@ export async function registerNoConfigDebug(context: IExtensionContext): Promise
     const debuggerAdapterEndpointPath = path.join(debugAdapterEndpointDir, 'debuggerAdapterEndpoint.txt');
     collection.replace('DEBUGPY_ADAPTER_ENDPOINTS', debuggerAdapterEndpointPath);
 
-    const noConfigScriptsDir = path.join(context.extensionPath, 'bundled/scripts/noConfigScripts');
-    collection.append('PATH', `:${noConfigScriptsDir}`);
+    const noConfigScriptsDir = path.join(context.extensionPath, 'bundled', 'scripts', 'noConfigScripts');
+    const pathSeparator = process.platform === 'win32' ? ';' : ':';
+    collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`);
 
-    const bundledDebugPath = path.join(context.extensionPath, 'bundled/libs/debugpy');
+    const bundledDebugPath = path.join(context.extensionPath, 'bundled', 'libs', 'debugpy');
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
