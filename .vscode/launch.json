@@ -32,14 +32,12 @@
 				"./out/test/**/*.unit.test.js",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/unittest/index",
-				//"--grep",
-				//"this test suite"
+				//"--grep", "<suite name>",
+				"--timeout=300000"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js",
 			],
-			"preLaunchTask": "tasks: watch-tests",
-			"timeout": 600000 // Increase timeout to 10 minutes (600000 ms)
-		},
+			"preLaunchTask": "tasks: watch-tests"		},
 	]
 }
