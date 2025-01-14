@@ -1,0 +1,5 @@
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+
+This folder is necessary as it is the location where the debug adapter 
+will create the debuggerAdapterEndpoint.txt to communicate the endpoint.
