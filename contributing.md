@@ -1,15 +1,23 @@
 ## Getting Started
 
+Follow the steps below for setup:
 ```
 git clone https://github.com/microsoft/vscode-python-debugger
 cd vscode-python-debugger
 npm ci
-# Create virtual environment as appropriate for your shell or use the command "Python: Create Environment" in VS Code
+```
+
+Create virtual environment as appropriate for your shell or use the command `Python: Create Environment` in VS Code. Then activate it appropriate for your shell.
+```
 python3 -m venv .venv
-# Activate the virtual environment as appropriate for your shell like:
+# Activate the virtual environment
 # ".venv/Scripts/activate.bat"
 # On bash/zsh it's ...
 source .venv/bin/activate
+```
+
+Install then setup with nox.
+```
 python3 -m pip install nox
 nox --session setup_repo
 ```
