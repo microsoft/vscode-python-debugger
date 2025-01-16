@@ -1,69 +1,69 @@
 {
     "macOS": [
         {
-            "url": "https://files.pythonhosted.org/packages/f4/ce/5e093945df2da28dbd1bc14c631d71431d1aa08adc629e221c9658841f82/debugpy-1.8.6-cp310-cp310-macosx_14_0_x86_64.whl",
+            "url": "https://files.pythonhosted.org/packages/26/e6/4cf7422eaa591b4c7d6a9fde224095dac25283fdd99d90164f28714242b0/debugpy-1.8.11-cp310-cp310-macosx_14_0_x86_64.whl",
             "hash": {
-                "sha256": "30f467c5345d9dfdcc0afdb10e018e47f092e383447500f125b4e013236bf14b"
+                "sha256": "2b26fefc4e31ff85593d68b9022e35e8925714a10ab4858fb1b577a8a48cb8cd"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/9f/cc/3158aa2c96c677e324981230dfd33087ef4bfb5afb1d9cd40b7a1b35edb2/debugpy-1.8.6-cp311-cp311-macosx_14_0_universal2.whl",
+            "url": "https://files.pythonhosted.org/packages/7c/58/8e3f7ec86c1b7985a232667b5df8f3b1b1c8401028d8f4d75e025c9556cd/debugpy-1.8.11-cp311-cp311-macosx_14_0_universal2.whl",
             "hash": {
-                "sha256": "67479a94cf5fd2c2d88f9615e087fcb4fec169ec780464a3f2ba4a9a2bb79955"
+                "sha256": "85de8474ad53ad546ff1c7c7c89230db215b9b8a02754d41cb5a76f70d0be296"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/b8/9e/882dae43f281fc4742fd9e5d2e0f5dae77f38d4f345e78bf1ed5e1f6202e/debugpy-1.8.6-cp312-cp312-macosx_14_0_universal2.whl",
+            "url": "https://files.pythonhosted.org/packages/c6/ae/2cf26f3111e9d94384d9c01e9d6170188b0aeda15b60a4ac6457f7c8a26f/debugpy-1.8.11-cp312-cp312-macosx_14_0_universal2.whl",
             "hash": {
-                "sha256": "db891b141fc6ee4b5fc6d1cc8035ec329cabc64bdd2ae672b4550c87d4ecb128"
+                "sha256": "84e511a7545d11683d32cdb8f809ef63fc17ea2a00455cc62d0a4dbb4ed1c308"
             }
         }
     ],
     "win64": [
         {
-            "url": "https://files.pythonhosted.org/packages/ce/68/127cfc6012fbeef126eab1e168ad788ee9832b8b0d572743e5c6fa03ea83/debugpy-1.8.6-cp310-cp310-win_amd64.whl",
+            "url": "https://files.pythonhosted.org/packages/49/80/359ff8aa388f0bd4a48f0fa9ce3606396d576657ac149c6fba3cc7de8adb/debugpy-1.8.11-cp310-cp310-win_amd64.whl",
             "hash": {
-                "sha256": "e3a82da039cfe717b6fb1886cbbe5c4a3f15d7df4765af857f4307585121c2dd"
+                "sha256": "8da1db4ca4f22583e834dcabdc7832e56fe16275253ee53ba66627b86e304da1"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/9d/de/ddad801b7fdbe2f97c744b44bb61169c4e0ab48a90f881c8f43b463f206b/debugpy-1.8.6-cp311-cp311-win_amd64.whl",
+            "url": "https://files.pythonhosted.org/packages/3b/90/3775e301cfa573b51eb8a108285681f43f5441dc4c3916feed9f386ef861/debugpy-1.8.11-cp311-cp311-win_amd64.whl",
             "hash": {
-                "sha256": "43996632bee7435583952155c06881074b9a742a86cee74e701d87ca532fe833"
+                "sha256": "987bce16e86efa86f747d5151c54e91b3c1e36acc03ce1ddb50f9d09d16ded0e"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/c2/97/2196c4132c29f7cd8e574bb05a4b03ed35f94e3fcd1f56e72ea9f10732f4/debugpy-1.8.6-cp312-cp312-win_amd64.whl",
+            "url": "https://files.pythonhosted.org/packages/77/09/b1f05be802c1caef5b3efc042fc6a7cadd13d8118b072afd04a9b9e91e06/debugpy-1.8.11-cp312-cp312-win_amd64.whl",
             "hash": {
-                "sha256": "e4ce0570aa4aca87137890d23b86faeadf184924ad892d20c54237bcaab75d8f"
+                "sha256": "44b1b8e6253bceada11f714acf4309ffb98bfa9ac55e4fce14f9e5d4484287a1"
             }
         }
     ],
     "linux": [
         {
-            "url": "https://files.pythonhosted.org/packages/d4/7a/a5fe4eaf648016a27a875403735a089ba7cc9a4cc906d37c8fdb2997b50d/debugpy-1.8.6-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+            "url": "https://files.pythonhosted.org/packages/83/3a/e163de1df5995d95760a4d748b02fbefb1c1bf19e915b664017c40435dbf/debugpy-1.8.11-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
             "hash": {
-                "sha256": "5d73d8c52614432f4215d0fe79a7e595d0dd162b5c15233762565be2f014803b"
+                "sha256": "61bc8b3b265e6949855300e84dc93d02d7a3a637f2aec6d382afd4ceb9120c9f"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/d5/9f/5691af62c556392ee45ed9b5c3fde4aaa7cb3b519cc8bea92fc27eab31fc/debugpy-1.8.6-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+            "url": "https://files.pythonhosted.org/packages/d2/03/95738a68ade2358e5a4d63a2fd8e7ed9ad911001cfabbbb33a7f81343945/debugpy-1.8.11-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
             "hash": {
-                "sha256": "9fb8653f6cbf1dd0a305ac1aa66ec246002145074ea57933978346ea5afdf70b"
+                "sha256": "8ffc382e4afa4aee367bf413f55ed17bd91b191dcaf979890af239dda435f2a1"
             }
         },
         {
-            "url": "https://files.pythonhosted.org/packages/77/cf/6c0497f4b092cb4a408dda5ab84750032e5535f994d21eb812086d62094d/debugpy-1.8.6-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+            "url": "https://files.pythonhosted.org/packages/b0/16/ec551789d547541a46831a19aa15c147741133da188e7e6acf77510545a7/debugpy-1.8.11-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
             "hash": {
-                "sha256": "567419081ff67da766c898ccf21e79f1adad0e321381b0dfc7a9c8f7a9347972"
+                "sha256": "ce291a5aca4985d82875d6779f61375e959208cdf09fcec40001e65fb0a54768"
             }
         }
     ],
     "any": [
         {
-            "url": "https://files.pythonhosted.org/packages/05/ce/785925e87ce735cc3da7fb2bd66d8ca83173d8a0b60ce35a59a60b8d636f/debugpy-1.8.6-py2.py3-none-any.whl",
+            "url": "https://files.pythonhosted.org/packages/77/0a/d29a5aacf47b4383ed569b8478c02d59ee3a01ad91224d2cff8562410e43/debugpy-1.8.11-py2.py3-none-any.whl",
             "hash": {
-                "sha256": "b48892df4d810eff21d3ef37274f4c60d32cdcafc462ad5647239036b0f0649f"
+                "sha256": "0e22f846f4211383e6a416d04b4c13ed174d24cc5d43f5fd52e7821d0ebc8920"
             }
         }
     ]

@@ -2,11 +2,10 @@
     "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using debugpy.",
-    "version": "2024.11.0-dev",
+    "version": "2024.15.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
-        "contribIssueReporter",
         "debugVisualization",
         "contribViewsWelcome"
     ],
@@ -279,6 +278,15 @@
                                 "default": "Python Debug Console",
                                 "description": "Display name of the debug console or terminal",
                                 "type": "string"
+                            },
+                            "clientOS": {
+                                "default": null,
+                                "description": "OS that VS code is using.",
+                                "enum": [
+                                    "windows",
+                                    null,
+                                    "unix"
+                                ]
                             }
                         }
                     },
@@ -509,6 +517,15 @@
                                 "default": "Python Debug Console",
                                 "description": "Display name of the debug console or terminal",
                                 "type": "string"
+                            },
+                            "clientOS": {
+                                "default": null,
+                                "description": "OS that VS code is using.",
+                                "enum": [
+                                    "windows",
+                                    null,
+                                    "unix"
+                                ]
                             }
                         }
                     }
@@ -536,7 +553,7 @@
             {
                 "view": "debug",
                 "contents": "\n[Show automatic Python configurations](command:workbench.action.debug.selectandstart?%5B%22debugpy%22%5D)\n",
-                "when": "dynamicPythonConfigAvailable"
+                "when": "dynamicPythonConfigAvailable && !virtualWorkspace"
             }
         ]
     },
@@ -594,10 +611,8 @@
         "@vscode/python-extension": "^1.0.5",
         "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
-        "inversify": "^6.0.1",
         "jsonc-parser": "^3.2.0",
         "lodash": "^4.17.21",
-        "reflect-metadata": "^0.1.13",
         "vscode-languageclient": "^8.0.2"
     }
 }
