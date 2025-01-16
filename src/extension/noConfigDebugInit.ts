@@ -37,55 +37,56 @@ export async function registerNoConfigDebug(context: IExtensionContext): Promise
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    context.subscriptions.push(
-        createFileSystemWatcher(new RelativePattern(debugAdapterEndpointDir, '**/*')).onDidCreate((uri) => {
-            const filePath = uri.fsPath;
-            fs.readFile(filePath, (err, data) => {
-                const dataParse = data.toString();
-                if (err) {
-                    traceError(`Error reading debuggerAdapterEndpoint.txt file: ${err}`);
-                    return;
-                }
-                try {
-                    // parse the client port
-                    const jsonData = JSON.parse(dataParse);
-                    const clientPort = jsonData.client?.port;
-                    traceVerbose(`Parsed client port: ${clientPort}`);
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(debugAdapterEndpointDir, '**/*'));
+    const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
+        const filePath = uri.fsPath;
+        fs.readFile(filePath, (err, data) => {
+            const dataParse = data.toString();
+            if (err) {
+                traceError(`Error reading debuggerAdapterEndpoint.txt file: ${err}`);
+                return;
+            }
+            try {
+                // parse the client port
+                const jsonData = JSON.parse(dataParse);
+                const clientPort = jsonData.client?.port;
+                traceVerbose(`Parsed client port: ${clientPort}`);
 
-                    const options: DebugSessionOptions = {
-                        noDebug: false,
-                    };
+                const options: DebugSessionOptions = {
+                    noDebug: false,
+                };
 
-                    // start debug session with the client port
-                    debugStartDebugging(
-                        undefined,
-                        {
-                            type: 'python',
-                            request: 'attach',
-                            name: 'Attach to Python',
-                            connect: {
-                                port: clientPort,
-                                host: 'localhost',
-                            },
+                // start debug session with the client port
+                debugStartDebugging(
+                    undefined,
+                    {
+                        type: 'python',
+                        request: 'attach',
+                        name: 'Attach to Python',
+                        connect: {
+                            port: clientPort,
+                            host: 'localhost',
                         },
-                        options,
-                    ).then(
-                        (started) => {
-                            if (started) {
-                                traceVerbose('Successfully started debug session');
-                            } else {
-                                traceError('Error starting debug session, session not started.');
-                            }
-                        },
-                        (error) => {
-                            traceError(`Error starting debug session: ${error}`);
-                        },
-                    );
-                } catch (parseErr) {
-                    traceError(`Error parsing JSON: ${parseErr}`);
-                }
-            });
-            JSON.parse;
-        }),
-    );
+                    },
+                    options,
+                ).then(
+                    (started) => {
+                        if (started) {
+                            traceVerbose('Successfully started debug session');
+                        } else {
+                            traceError('Error starting debug session, session not started.');
+                        }
+                    },
+                    (error) => {
+                        traceError(`Error starting debug session: ${error}`);
+                    },
+                );
+            } catch (parseErr) {
+                traceError(`Error parsing JSON: ${parseErr}`);
+            }
+        });
+        JSON.parse;
+    });
+    context.subscriptions.push(fileCreationEvent);
+    context.subscriptions.push(fileSystemWatcher);
 }
