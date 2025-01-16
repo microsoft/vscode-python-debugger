@@ -23,7 +23,7 @@ If you encounter any issues, please report them using the [GitHub Issues](https:
 1. Fork the repository and create your branch from `main`.
 2. If you've added code that should be tested, add tests.
 3. Ensure the test suite passes.
-4. Make sure your code passes lints and formatting requirements
+4. Make sure your code passes linting and formatting requirements
 5. Submit a pull request.
 
 ## Running Tests
