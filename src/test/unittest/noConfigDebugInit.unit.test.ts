@@ -135,8 +135,10 @@ suite('setup for no-config debug scenario', function () {
             type: 'python',
             request: 'attach',
             name: 'Attach to Python',
-            port: 5678,
-            host: 'localhost',
+            connect: {
+                port: 5678,
+                host: 'localhost',
+            },
         };
         const optionsExpected: DebugSessionOptions = {
             noDebug: false,

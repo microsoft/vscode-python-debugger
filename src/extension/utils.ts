@@ -12,10 +12,10 @@ export function createFileSystemWatcher(args: any): FileSystemWatcher {
     return workspace.createFileSystemWatcher(args);
 }
 
-export function debugStartDebugging(
+export async function debugStartDebugging(
     folder: WorkspaceFolder | undefined,
     nameOrConfiguration: string | DebugConfiguration,
     parentSessionOrOptions?: DebugSession | DebugSessionOptions,
-): Thenable<boolean> {
+): Promise<boolean> {
     return debug.startDebugging(folder, nameOrConfiguration, parentSessionOrOptions);
 }

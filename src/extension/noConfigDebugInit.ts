@@ -63,8 +63,10 @@ export async function registerNoConfigDebug(context: IExtensionContext): Promise
                             type: 'python',
                             request: 'attach',
                             name: 'Attach to Python',
-                            port: clientPort,
-                            host: 'localhost',
+                            connect: {
+                                port: clientPort,
+                                host: 'localhost',
+                            },
                         },
                         options,
                     ).then(
