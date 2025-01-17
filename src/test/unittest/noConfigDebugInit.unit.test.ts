@@ -10,44 +10,43 @@ import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri } from 'v
 import * as utils from '../../extension/utils';
 import { assert } from 'console';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as crypto from 'crypto';
 
 suite('setup for no-config debug scenario', function () {
     let envVarCollectionReplaceStub: sinon.SinonStub;
     let envVarCollectionAppendStub: sinon.SinonStub;
     let context: TypeMoq.IMock<IExtensionContext>;
-    let debugAdapterEndpointDir: string;
-    let debuggerAdapterEndpointPath: string;
     let noConfigScriptsDir: string;
     let bundledDebugPath: string;
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
+    let tempDirPath: string;
 
     const testDataDir = path.join(__dirname, 'testData');
     const testFilePath = path.join(testDataDir, 'debuggerAdapterEndpoint.txt');
-    suiteSetup(() => {
-        // create file called testData/debuggerAdapterEndpoint.txt
-        if (!fs.existsSync(testDataDir)) {
-            fs.mkdirSync(testDataDir);
-        }
-        fs.writeFileSync(testFilePath, JSON.stringify({ client: { port: 5678 } }));
-    });
     setup(() => {
-        context = TypeMoq.Mock.ofType<IExtensionContext>();
+        try {
+            context = TypeMoq.Mock.ofType<IExtensionContext>();
 
-        context.setup((c) => (c as any).extensionPath).returns(() => 'fake/extension/path');
-        context.setup((c) => c.subscriptions).returns(() => []);
-        debugAdapterEndpointDir = path.join(context.object.extensionPath, 'noConfigDebugAdapterEndpoints');
-        debuggerAdapterEndpointPath = path.join(debugAdapterEndpointDir, 'debuggerAdapterEndpoint.txt');
-        noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
-        bundledDebugPath = path.join(context.object.extensionPath, 'bundled/libs/debugpy');
+            const randomSuffix = '1234567899';
+            const tempDirName = `noConfigDebugAdapterEndpoints-${randomSuffix}`;
+            tempDirPath = path.join(os.tmpdir(), tempDirName);
+            context.setup((c) => (c as any).extensionPath).returns(() => 'fake/extension/path');
+            context.setup((c) => c.subscriptions).returns(() => []);
+            noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
+            bundledDebugPath = path.join(context.object.extensionPath, 'bundled/libs/debugpy');
+
+            // Stub crypto.randomBytes with proper typing
+            let randomBytesStub = sinon.stub(crypto, 'randomBytes');
+            // Provide a valid Buffer object
+            randomBytesStub.callsFake((_size: number) => Buffer.from('1234567899', 'hex'));
+        } catch (error) {
+            console.error('Error in setup:', error);
+        }
     });
     teardown(() => {
         sinon.restore();
-    });
-    suiteTeardown(() => {
-        if (fs.existsSync(testDataDir)) {
-            fs.rmSync(testDataDir, { recursive: true, force: true });
-        }
     });
 
     test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
@@ -60,7 +59,7 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === DEBUGPY_ADAPTER_ENDPOINTS) {
-                    assert(value === debuggerAdapterEndpointPath);
+                    assert(value.includes('noConfigDebugAdapterEndpoints-1234567899'));
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
                     assert(value === bundledDebugPath);
                 }
@@ -80,7 +79,7 @@ suite('setup for no-config debug scenario', function () {
         setupFileSystemWatchers();
 
         // run init for no config debug
-        await registerNoConfigDebug(context.object);
+        await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
         // assert that functions called right number of times
         sinon.assert.calledTwice(envVarCollectionReplaceStub);
@@ -94,11 +93,11 @@ suite('setup for no-config debug scenario', function () {
         let createFileSystemWatcherFunct = setupFileSystemWatchers();
 
         // Act
-        await registerNoConfigDebug(context.object);
+        await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
-        const expectedPattern = new RelativePattern(debugAdapterEndpointDir, '**/*');
+        const expectedPattern = new RelativePattern(tempDirPath, '**/*');
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
 
@@ -127,7 +126,7 @@ suite('setup for no-config debug scenario', function () {
         const debugStub = sinon.stub(utils, 'debugStartDebugging').resolves(true);
 
         // Act
-        await registerNoConfigDebug(context.object);
+        await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
         // Assert
         sinon.assert.calledOnce(debugStub);

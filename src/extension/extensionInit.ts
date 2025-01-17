@@ -248,7 +248,9 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         window.activeTextEditor?.document.languageId === 'python',
     );
 
-    registerNoConfigDebug(context);
+    context.subscriptions.push(
+        await registerNoConfigDebug(context.environmentVariableCollection, context.extensionPath),
+    );
 
     return buildApi();
 }

@@ -3,10 +3,11 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { IExtensionContext } from './common/types';
-import { DebugSessionOptions, RelativePattern } from 'vscode';
+import * as crypto from 'crypto';
+import * as os from 'os';
+import { DebugSessionOptions, Disposable, GlobalEnvironmentVariableCollection, RelativePattern } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
-import { traceError, traceVerbose } from './common/log/logging';
+import { traceError, traceLog, traceVerbose } from './common/log/logging';
 
 /**
  * Registers the configuration-less debugging setup for the extension.
@@ -14,30 +15,49 @@ import { traceError, traceVerbose } from './common/log/logging';
  * This function sets up environment variables and a file system watcher to
  * facilitate debugging without requiring a pre-configured launch.json file.
  *
- * @param context - The extension context which provides access to the environment variable collection and subscriptions.
+ * @param envVarCollection - The collection of environment variables to be modified.
+ * @param extPath - The path to the extension directory.
  *
  * Environment Variables:
  * - `DEBUGPY_ADAPTER_ENDPOINTS`: Path to the file containing the debugger adapter endpoint.
  * - `BUNDLED_DEBUGPY_PATH`: Path to the bundled debugpy library.
  * - `PATH`: Appends the path to the noConfigScripts directory.
  */
-export async function registerNoConfigDebug(context: IExtensionContext): Promise<void> {
-    const collection = context.environmentVariableCollection;
+export async function registerNoConfigDebug(
+    envVarCollection: GlobalEnvironmentVariableCollection,
+    extPath: string,
+): Promise<Disposable> {
+    const collection = envVarCollection;
+
+    // create a temp directory for the noConfigDebugAdapterEndpoints
+    // file path format: tempDir/noConfigDebugAdapterEndpoints-<randomString>/debuggerAdapterEndpoint.txt
+    const randomSuffix = crypto.randomBytes(10).toString('hex');
+    const tempDirName = `noConfigDebugAdapterEndpoints-${randomSuffix}`;
+    let tempDirPath = path.join(os.tmpdir(), tempDirName);
+    try {
+        traceLog('Attempting to use temp directory for noConfigDebugAdapterEndpoints, dir name:', tempDirName);
+        await fs.promises.mkdir(tempDirPath, { recursive: true });
+    } catch (error) {
+        // Handle the error when accessing the temp directory
+        traceError('Error accessing temp directory:', error, ' Attempt to use extension root dir instead');
+        // Make new temp directory in extension root dird
+        tempDirPath = path.join(extPath, '.temp');
+        await fs.promises.mkdir(tempDirPath, { recursive: true });
+    }
+    const tempFilePath = path.join(tempDirPath, 'debuggerAdapterEndpoint.txt');
 
     // Add env vars for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
-    const debugAdapterEndpointDir = path.join(context.extensionPath, 'noConfigDebugAdapterEndpoints');
-    const debuggerAdapterEndpointPath = path.join(debugAdapterEndpointDir, 'debuggerAdapterEndpoint.txt');
-    collection.replace('DEBUGPY_ADAPTER_ENDPOINTS', debuggerAdapterEndpointPath);
+    collection.replace('DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
 
-    const noConfigScriptsDir = path.join(context.extensionPath, 'bundled', 'scripts', 'noConfigScripts');
+    const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
     collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`);
 
-    const bundledDebugPath = path.join(context.extensionPath, 'bundled', 'libs', 'debugpy');
+    const bundledDebugPath = path.join(extPath, 'bundled', 'libs', 'debugpy');
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(debugAdapterEndpointDir, '**/*'));
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*'));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
         const filePath = uri.fsPath;
         fs.readFile(filePath, (err, data) => {
@@ -87,6 +107,10 @@ export async function registerNoConfigDebug(context: IExtensionContext): Promise
         });
         JSON.parse;
     });
-    context.subscriptions.push(fileCreationEvent);
-    context.subscriptions.push(fileSystemWatcher);
+    return Promise.resolve(
+        new Disposable(() => {
+            fileSystemWatcher.dispose();
+            fileCreationEvent.dispose();
+        }),
+    );
 }
