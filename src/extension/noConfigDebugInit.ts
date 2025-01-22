@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as os from 'os';
-import { DebugSessionOptions, Disposable, GlobalEnvironmentVariableCollection, RelativePattern } from 'vscode';
+import { DebugSessionOptions, Disposable, GlobalEnvironmentVariableCollection, l10n, RelativePattern } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
 import { traceError, traceLog, traceVerbose } from './common/log/logging';
 
@@ -55,6 +55,8 @@ export async function registerNoConfigDebug(
 
     const bundledDebugPath = path.join(extPath, 'bundled', 'libs', 'debugpy');
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
+
+    envVarCollection.description = l10n.t('Enables use of no-config debugging command in the terminal.');
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
     const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*'));
