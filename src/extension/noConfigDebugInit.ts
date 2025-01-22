@@ -46,6 +46,9 @@ export async function registerNoConfigDebug(
     }
     const tempFilePath = path.join(tempDirPath, 'debuggerAdapterEndpoint.txt');
 
+    // Add env var for PYDEVD_DISABLE_FILE_VALIDATION to disable extra output in terminal when starting the debug session.
+    collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
+
     // Add env vars for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
     collection.replace('DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
 
