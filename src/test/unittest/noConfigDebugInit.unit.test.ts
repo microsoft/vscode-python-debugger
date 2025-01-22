@@ -62,6 +62,8 @@ suite('setup for no-config debug scenario', function () {
                     assert(value.includes('noConfigDebugAdapterEndpoints-1234567899'));
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
                     assert(value === bundledDebugPath);
+                } else if (key === 'PYDEVD_DISABLE_FILE_VALIDATION') {
+                    assert(value === '1');
                 }
             })
             .returns(envVarCollectionReplaceStub);
@@ -82,7 +84,7 @@ suite('setup for no-config debug scenario', function () {
         await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
         // assert that functions called right number of times
-        sinon.assert.calledTwice(envVarCollectionReplaceStub);
+        sinon.assert.calledThrice(envVarCollectionReplaceStub);
         sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
