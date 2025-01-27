@@ -1,2 +1,2 @@
 # Fish script
-python $BUNDLED_DEBUGPY_PATH --listen 0 --wait-for-client $argv
+python3 $BUNDLED_DEBUGPY_PATH --listen 0 --wait-for-client $argv
