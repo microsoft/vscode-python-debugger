@@ -1,3 +1,3 @@
 @echo off
 :: Bat script
-python3 %BUNDLED_DEBUGPY_PATH% --listen 0 --wait-for-client %*
+python %BUNDLED_DEBUGPY_PATH% --listen 0 --wait-for-client %*
