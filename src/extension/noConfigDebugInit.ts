@@ -60,7 +60,7 @@ export async function registerNoConfigDebug(
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
 
     envVarCollection.description = l10n.t(
-        'Enables use of no-config debugging command, `debugpy <script.py>`, in the terminal.',
+        'Enables use of [no-config debugging](https://github.com/microsoft/vscode-python-debugger/wiki/No%E2%80%90Config-Debugging), `debugpy <script.py>`, in the terminal.',
     );
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
