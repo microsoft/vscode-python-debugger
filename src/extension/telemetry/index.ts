@@ -564,6 +564,12 @@ export interface IEventNamePropertyMapping {
          * @type {boolean}
          */
         autoStartBrowser: boolean;
+        /**
+         * A custom URL to start in the browser when autoStartBrowser is true.
+         *
+         * @type {string}
+         */
+        autoStartBrowserURL: string;
     };
     /**
      * Telemetry event sent when attaching to child process

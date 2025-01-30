@@ -373,6 +373,10 @@
                                 "description": "Open external browser to launch the application",
                                 "type": "boolean"
                             },
+                            "autoStartBrowserURL": {
+                                "description": "The URL to open in the external browser if autoStartBrowser is true. The URL can be a regular expression that matches the URL to open in the stdout.",
+                                "type": "string"
+                            },
                             "django": {
                                 "default": false,
                                 "description": "Django debugging.",
