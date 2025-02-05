@@ -20,11 +20,7 @@ export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder):
     // no launch.json or no configurations found in launch.json, look in settings.json
     if (!parsed || !parsed.configurations) {
         traceLog('No configurations found in launch.json, looking in settings.json.');
-        const settingConfigs = getConfigurationsFromSettings(workspace);
-        if (settingConfigs.length === 0) {
-            throw Error('No configurations found in launch.json or settings.json');
-        }
-        return Promise.resolve(settingConfigs);
+        return getConfigurationsFromSettings(workspace);
     }
     // configurations found in launch.json, verify them then return
     if (!Array.isArray(parsed.configurations) || parsed.configurations.length === 0) {
@@ -51,8 +47,12 @@ export function getConfigurationsFromSettings(workspace: WorkspaceFolder): Debug
     // look in settings.json
     const codeWorkspaceConfig = getConfiguration('launch', workspace);
     // if this includes user configs, how do I make sure it selects the workspace ones first
-    if (!codeWorkspaceConfig.configurations || !Array.isArray(codeWorkspaceConfig.configurations)) {
-        return [];
+    if (
+        !codeWorkspaceConfig.configurations ||
+        !Array.isArray(codeWorkspaceConfig.configurations) ||
+        codeWorkspaceConfig.configurations.length === 0
+    ) {
+        throw Error('No configurations found in launch.json or settings.json');
     }
     traceLog('Using configuration in workspace settings.json.');
     return codeWorkspaceConfig.configurations;

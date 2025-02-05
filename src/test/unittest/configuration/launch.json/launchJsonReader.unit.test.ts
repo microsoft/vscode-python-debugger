@@ -96,7 +96,7 @@ suite('Debugging - launchJsonReader', () => {
             assert.strictEqual(configurations[0].name, 'Launch Program 3');
         });
 
-        test('Should return empty array if no configurations in settings.json', () => {
+        test('Should error if no configurations in settings.json', () => {
             const workspace = typemoq.Mock.ofType<WorkspaceFolder>();
             workspace.setup((w) => w.uri).returns(() => Uri.file('/path/to/workspace'));
 
@@ -106,8 +106,11 @@ suite('Debugging - launchJsonReader', () => {
 
             sandbox.stub(utils, 'getConfiguration').returns(mockConfig.object);
 
-            const configurations = getConfigurationsFromSettings(workspace.object);
-            assert.strictEqual(configurations.length, 0);
+            assert.throws(
+                () => getConfigurationsFromSettings(workspace.object),
+                Error,
+                'No configurations found in launch.json or settings.json',
+            );
         });
     });
 });
