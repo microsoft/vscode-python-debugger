@@ -54,7 +54,7 @@ runs:
       shell: bash
 
     - name: Upload VSIX
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linter-package
         path: |
