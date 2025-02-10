@@ -9,7 +9,7 @@ import {
     getConfigurationsForWorkspace,
     getConfigurationsFromSettings,
 } from '../../../../extension/debugger/configuration/launch.json/launchJsonReader';
-import * as utils from '../../../../extension/debugger/configuration/launch.json/utils';
+import * as vscodeapi from '../../../../extension/common/vscodeapi';
 
 suite('Debugging - launchJsonReader', () => {
     let sandbox: sinon.SinonSandbox;
@@ -64,7 +64,7 @@ suite('Debugging - launchJsonReader', () => {
                 ]);
 
             sandbox.stub(fs, 'pathExists').resolves(false);
-            sandbox.stub(utils, 'getConfiguration').returns(mockConfig.object);
+            sandbox.stub(vscodeapi, 'getConfiguration').returns(mockConfig.object);
 
             const configurations = await getConfigurationsForWorkspace(workspace.object);
             assert.strictEqual(configurations.length, 1);
@@ -89,7 +89,7 @@ suite('Debugging - launchJsonReader', () => {
                     },
                 ]);
 
-            sandbox.stub(utils, 'getConfiguration').returns(mockConfig.object);
+            sandbox.stub(vscodeapi, 'getConfiguration').returns(mockConfig.object);
 
             const configurations = getConfigurationsFromSettings(workspace.object);
             assert.strictEqual(configurations.length, 1);
@@ -104,7 +104,7 @@ suite('Debugging - launchJsonReader', () => {
             mockConfig.setup((c) => c.get('configurations')).returns(() => []);
             mockConfig.setup((c) => c.configurations).returns(() => []);
 
-            sandbox.stub(utils, 'getConfiguration').returns(mockConfig.object);
+            sandbox.stub(vscodeapi, 'getConfiguration').returns(mockConfig.object);
 
             assert.throws(
                 () => getConfigurationsFromSettings(workspace.object),
