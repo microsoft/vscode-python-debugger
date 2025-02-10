@@ -4,10 +4,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import * as os from 'os';
-import { DebugSessionOptions, Disposable, GlobalEnvironmentVariableCollection, l10n, RelativePattern } from 'vscode';
+import {
+    DebugSessionOptions,
+    Disposable,
+    GlobalEnvironmentVariableCollection,
+    l10n,
+    RelativePattern,
+    workspace,
+} from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
-import { traceError, traceLog, traceVerbose } from './common/log/logging';
+import { traceError, traceVerbose } from './common/log/logging';
 
 /**
  * Registers the configuration-less debugging setup for the extension.
@@ -30,21 +36,30 @@ export async function registerNoConfigDebug(
     const collection = envVarCollection;
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
-    // file path format: tempDir/noConfigDebugAdapterEndpoints-<randomString>/debuggerAdapterEndpoint.txt
-    const randomSuffix = crypto.randomBytes(10).toString('hex');
-    const tempDirName = `noConfigDebugAdapterEndpoints-${randomSuffix}`;
-    let tempDirPath = path.join(os.tmpdir(), tempDirName);
-    try {
-        traceLog('Attempting to use temp directory for noConfigDebugAdapterEndpoints, dir name:', tempDirName);
-        await fs.promises.mkdir(tempDirPath, { recursive: true });
-    } catch (error) {
-        // Handle the error when accessing the temp directory
-        traceError('Error accessing temp directory:', error, ' Attempt to use extension root dir instead');
-        // Make new temp directory in extension root dird
-        tempDirPath = path.join(extPath, '.temp');
-        await fs.promises.mkdir(tempDirPath, { recursive: true });
+    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
+    const workspaceUri = workspace.workspaceFolders?.[0]?.uri;
+    if (!workspaceUri) {
+        traceError('No workspace folder found');
+        return Promise.resolve(new Disposable(() => {}));
     }
-    const tempFilePath = path.join(tempDirPath, 'debuggerAdapterEndpoint.txt');
+
+    // create a stable hash for the workspace folder, reduce terminal variable churn
+    const hash = crypto.createHash('sha256');
+    hash.update(workspaceUri.toString());
+    const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
+
+    const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
+    const tempFilePath = path.join(tempDirPath, `endpoint-${stableWorkspaceHash}.txt`);
+
+    // create the temp directory if it doesn't exist
+    if (!fs.existsSync(tempDirPath)) {
+        fs.mkdirSync(tempDirPath, { recursive: true });
+    } else {
+        // remove endpoint file in the temp directory if it exists
+        if (fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+        }
+    }
 
     // Add env var for PYDEVD_DISABLE_FILE_VALIDATION to disable extra output in terminal when starting the debug session.
     collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
