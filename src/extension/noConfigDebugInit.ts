@@ -4,7 +4,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import * as os from 'os';
 import {
     DebugSessionOptions,
     Disposable,
@@ -14,7 +13,7 @@ import {
     workspace,
 } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
-import { traceError, traceLog, traceVerbose } from './common/log/logging';
+import { traceError, traceVerbose } from './common/log/logging';
 
 /**
  * Registers the configuration-less debugging setup for the extension.
