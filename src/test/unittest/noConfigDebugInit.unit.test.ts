@@ -21,7 +21,6 @@ suite('setup for no-config debug scenario', function () {
     let bundledDebugPath: string;
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
-    let tempDirPath: string;
     let workspaceUriStub: sinon.SinonStub;
 
     const testDataDir = path.join(__dirname, 'testData');
@@ -30,9 +29,6 @@ suite('setup for no-config debug scenario', function () {
         try {
             context = TypeMoq.Mock.ofType<IExtensionContext>();
 
-            const randomSuffix = '1234567899';
-            const tempDirName = `noConfigDebugAdapterEndpoints-${randomSuffix}`;
-            tempDirPath = path.join(os.tmpdir(), tempDirName);
             context.setup((c) => (c as any).extensionPath).returns(() => os.tmpdir());
             context.setup((c) => c.subscriptions).returns(() => []);
             noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
