@@ -46,7 +46,7 @@ export async function registerNoConfigDebug(
     // create a stable hash for the workspace folder, reduce terminal variable churn
     const hash = crypto.createHash('sha256');
     hash.update(workspaceUri.toString());
-    const stableWorkspaceHash = hash.digest('hex');
+    const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
 
     const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
     const tempFilePath = path.join(tempDirPath, `endpoint-${stableWorkspaceHash}.txt`);
