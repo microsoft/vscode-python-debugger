@@ -6,7 +6,7 @@ import { IExtensionContext } from '../../extension/common/types';
 import { registerNoConfigDebug as registerNoConfigDebug } from '../../extension/noConfigDebugInit';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri } from 'vscode';
+import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri, workspace } from 'vscode';
 import * as utils from '../../extension/utils';
 import { assert } from 'console';
 import * as fs from 'fs';
@@ -22,6 +22,7 @@ suite('setup for no-config debug scenario', function () {
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
     let tempDirPath: string;
+    let workspaceUriStub: sinon.SinonStub;
 
     const testDataDir = path.join(__dirname, 'testData');
     const testFilePath = path.join(testDataDir, 'debuggerAdapterEndpoint.txt');
@@ -32,7 +33,7 @@ suite('setup for no-config debug scenario', function () {
             const randomSuffix = '1234567899';
             const tempDirName = `noConfigDebugAdapterEndpoints-${randomSuffix}`;
             tempDirPath = path.join(os.tmpdir(), tempDirName);
-            context.setup((c) => (c as any).extensionPath).returns(() => 'fake/extension/path');
+            context.setup((c) => (c as any).extensionPath).returns(() => os.tmpdir());
             context.setup((c) => c.subscriptions).returns(() => []);
             noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
             bundledDebugPath = path.join(context.object.extensionPath, 'bundled/libs/debugpy');
@@ -41,12 +42,15 @@ suite('setup for no-config debug scenario', function () {
             let randomBytesStub = sinon.stub(crypto, 'randomBytes');
             // Provide a valid Buffer object
             randomBytesStub.callsFake((_size: number) => Buffer.from('1234567899', 'hex'));
+
+            workspaceUriStub = sinon.stub(workspace, 'workspaceFolders').value([{ uri: Uri.parse(os.tmpdir()) }]);
         } catch (error) {
             console.error('Error in setup:', error);
         }
     });
     teardown(() => {
         sinon.restore();
+        workspaceUriStub.restore();
     });
 
     test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
@@ -59,7 +63,7 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === DEBUGPY_ADAPTER_ENDPOINTS) {
-                    assert(value.includes('noConfigDebugAdapterEndpoints-1234567899'));
+                    assert(value.includes('endpoint-'));
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
                     assert(value === bundledDebugPath);
                 } else if (key === 'PYDEVD_DISABLE_FILE_VALIDATION') {
@@ -99,7 +103,7 @@ suite('setup for no-config debug scenario', function () {
 
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
-        const expectedPattern = new RelativePattern(tempDirPath, '**/*');
+        const expectedPattern = new RelativePattern(path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'), '**/*');
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
 
@@ -162,6 +166,29 @@ suite('setup for no-config debug scenario', function () {
         }
 
         sinon.assert.calledWith(debugStub, undefined, expectedConfig, optionsExpected);
+    });
+
+    test('should check if tempFilePath exists when debuggerAdapterEndpointFolder exists', async () => {
+        // Arrange
+        const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
+        context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
+
+        const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+        const fsUnlinkSyncStub = sinon.stub(fs, 'unlinkSync');
+
+        // Act
+        await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
+
+        // Assert
+        sinon.assert.calledWith(
+            fsExistsSyncStub,
+            sinon.match((value: any) => value.includes('endpoint-')),
+        );
+        sinon.assert.calledOnce(fsUnlinkSyncStub);
+
+        // Cleanup
+        fsExistsSyncStub.restore();
+        fsUnlinkSyncStub.restore();
     });
 });
 
