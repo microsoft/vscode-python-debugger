@@ -37,7 +37,10 @@ export async function registerNoConfigDebug(
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
     // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
-    const workspaceUri = workspace.workspaceFolders?.[0]?.uri;
+    let workspaceUri = workspace.workspaceFile?.fsPath;
+    if (!workspaceUri) {
+        workspaceUri = workspace.workspaceFolders?.map((e) => e.uri.fsPath).join(';');
+    }
     if (!workspaceUri) {
         traceError('No workspace folder found');
         return Promise.resolve(new Disposable(() => {}));
