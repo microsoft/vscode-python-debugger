@@ -12,19 +12,18 @@ export async function getConfigurationsForWorkspace(workspace: WorkspaceFolder):
     traceLog('Getting configurations for workspace');
     const filename = path.join(workspace.uri.fsPath, '.vscode', 'launch.json');
     if (!(await fs.pathExists(filename))) {
-        // Check launch config in the workspace file
-        const codeWorkspaceConfig = getConfiguration('launch', workspace);
-        if (!codeWorkspaceConfig.configurations || !Array.isArray(codeWorkspaceConfig.configurations)) {
-            return [];
-        }
-        traceLog('Using configuration in workspace');
-        return codeWorkspaceConfig.configurations;
+        return getConfigurationsFromSettings(workspace);
     }
-
     const text = await fs.readFile(filename, 'utf-8');
     const parsed = parse(text, [], { allowTrailingComma: true, disallowComments: false });
-    if (!parsed.configurations || !Array.isArray(parsed.configurations)) {
-        throw Error('Missing field in launch.json: configurations');
+    // no launch.json or no configurations found in launch.json, look in settings.json
+    if (!parsed || !parsed.configurations) {
+        traceLog('No configurations found in launch.json, looking in settings.json.');
+        return getConfigurationsFromSettings(workspace);
+    }
+    // configurations found in launch.json, verify them then return
+    if (!Array.isArray(parsed.configurations) || parsed.configurations.length === 0) {
+        throw Error('Invalid configurations in launch.json');
     }
     if (!parsed.version) {
         throw Error('Missing field in launch.json: version');
@@ -41,4 +40,19 @@ export async function getConfigurationsByUri(uri?: Uri): Promise<DebugConfigurat
         }
     }
     return [];
+}
+
+export function getConfigurationsFromSettings(workspace: WorkspaceFolder): DebugConfiguration[] {
+    // look in settings.json
+    const codeWorkspaceConfig = getConfiguration('launch', workspace);
+    // if this includes user configs, how do I make sure it selects the workspace ones first
+    if (
+        !codeWorkspaceConfig.configurations ||
+        !Array.isArray(codeWorkspaceConfig.configurations) ||
+        codeWorkspaceConfig.configurations.length === 0
+    ) {
+        throw Error('No configurations found in launch.json or settings.json');
+    }
+    traceLog('Using configuration in workspace settings.json.');
+    return codeWorkspaceConfig.configurations;
 }

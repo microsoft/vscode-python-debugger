@@ -1,0 +1,150 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2025-01-15 10:14:16Z",
+      "lastUpdatedDate": "2025-01-15 10:14:16Z"
+    }
+  },
+  "results": {
+    "a9bb48acab0991d979cacbdeb12c070d85c3991db87ef562ca1911c6bd44794e": {
+      "signature": "a9bb48acab0991d979cacbdeb12c070d85c3991db87ef562ca1911c6bd44794e",
+      "alternativeSignatures": [
+        "eda82faebade0e5fe8ad4afbf3ea677c294d3be3713d6a6a2b5ff0f5122ad623"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_linux_amd64.so",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA3003",
+      "createdDate": "2025-01-15 10:14:16Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "d10b28a04ea6f37bf544021fe269e1d116971ed96309424ce6f3948a78b3dd14": {
+      "signature": "d10b28a04ea6f37bf544021fe269e1d116971ed96309424ce6f3948a78b3dd14",
+      "alternativeSignatures": [
+        "7728a15920f8919ec815f1a3b132ca349bfc49bfe872e8ae4e7267b052afa868"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/pydevd_attach_to_process/attach_linux_amd64.so",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA3030",
+      "createdDate": "2025-01-15 10:14:16Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "24060ab64146e1d968780333db6b0374f92538144527497b66112a6487b0460e": {
+      "signature": "24060ab64146e1d968780333db6b0374f92538144527497b66112a6487b0460e",
+      "alternativeSignatures": [
+        "e1efc73ee8381f2ca92ddbe6cf492d9fe5be200f271670d5b4eb66d46510f51c"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp39-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:16Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "ef8a10ec6e0b3a56efdc8bfcb5935ca2f84922382bdc4461ca73288424c3945e": {
+      "signature": "ef8a10ec6e0b3a56efdc8bfcb5935ca2f84922382bdc4461ca73288424c3945e",
+      "alternativeSignatures": [
+        "02b1aa6e50383300500633df7de80d91178177ccc665f068e8fbdbc81468d05c"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.cp39-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:16Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "2d3403b3a4a523cedfc8c4ce6e2c23ec60ead5788591a95b7fa15b5fea955bc5": {
+      "signature": "2d3403b3a4a523cedfc8c4ce6e2c23ec60ead5788591a95b7fa15b5fea955bc5",
+      "alternativeSignatures": [
+        "9ab9c4b3c0f0ead32c8db513fd722e69b0f227d8a90a2004ba660a0afcda250b"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp310-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:25Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "2f1d85ce0b29a4f99c6297078b1b792c3d43c33824c6826671b3db40c07ff648": {
+      "signature": "2f1d85ce0b29a4f99c6297078b1b792c3d43c33824c6826671b3db40c07ff648",
+      "alternativeSignatures": [
+        "d0e5bf91a96af78edf77d20b504f0b6473812b93a5b470a5879b864a78fb061f"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp311-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:25Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "22ee53d01c6cc3cc7a927a508e201b804d856cee3bd5a872fa4d4e629b840a7f": {
+      "signature": "22ee53d01c6cc3cc7a927a508e201b804d856cee3bd5a872fa4d4e629b840a7f",
+      "alternativeSignatures": [
+        "54064cf443446bfc97cc47d04e23581c7489bdcdc0011c544f0eef48b11ed348"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_cython.cp312-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:25Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "255e1ecfc10b8f727eff4a80ebb9920a2402d9e2f9f77591b75de212e625b3a8": {
+      "signature": "255e1ecfc10b8f727eff4a80ebb9920a2402d9e2f9f77591b75de212e625b3a8",
+      "alternativeSignatures": [
+        "9ad6d2cf4bbef4cb375c30c7aa8bbcda2119406221e9431f290734f7d2d23d32"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_frame_eval/pydevd_frame_evaluator.cp310-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:25Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    },
+    "cb636c5012043d0607ac8124e85915985c4cf5cb2cb0a92a5bae075ce268ffe9": {
+      "signature": "cb636c5012043d0607ac8124e85915985c4cf5cb2cb0a92a5bae075ce268ffe9",
+      "alternativeSignatures": [
+        "78f85f1da48efa2d27199a3f998b513e043839b654c1dafd7958d666f8d4a4da"
+      ],
+      "target": "extension/bundled/libs/debugpy/_vendored/pydevd/_pydevd_sys_monitoring/_pydevd_sys_monitoring_cython.cp312-win_amd64.pyd",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2025-01-15 10:14:25Z",
+      "expirationDate": "2025-07-04 10:36:14Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-01-15 10:36:14Z"
+    }
+  }
+}
