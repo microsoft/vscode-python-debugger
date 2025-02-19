@@ -67,8 +67,8 @@ export async function registerNoConfigDebug(
     // Add env var for PYDEVD_DISABLE_FILE_VALIDATION to disable extra output in terminal when starting the debug session.
     collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
 
-    // Add env vars for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
-    collection.replace('DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
+    // Add env vars for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
+    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
 
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
