@@ -254,6 +254,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             showReturnValue: !!debugConfiguration.showReturnValue,
             subProcess: !!debugConfiguration.subProcess,
             autoStartBrowser: !!debugConfiguration,
+            autoStartBrowserURL: debugConfiguration.autoStartBrowserURL,
             watson: name.toLowerCase().indexOf('watson') >= 0,
             pyspark: name.toLowerCase().indexOf('pyspark') >= 0,
             gevent: name.toLowerCase().indexOf('gevent') >= 0,
