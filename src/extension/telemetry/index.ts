@@ -691,7 +691,6 @@ export interface IEventNamePropertyMapping {
      */
     [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
 
-
     /**
      * Telemetry event sent when no-config debugging is used.
      */
