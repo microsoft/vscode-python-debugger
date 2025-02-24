@@ -251,8 +251,8 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug.success_activation" : {
-          "codeloadingtime" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
+          "codeloadingtime" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "errorname" : { "classification": "CallstackOrException", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUG_SUCCESS_ACTIVATION]: {};
@@ -260,14 +260,14 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent when debug in terminal button was used to debug current file.
      */
     /* __GDPR__
-        "debug_in_terminal_button" : { "owner": "paulacamargo25" }
+        "debug_in_terminal_button" : { "owner": "eleanorjboyd" }
     */
     [EventName.DEBUG_IN_TERMINAL_BUTTON]: never | undefined;
     /**
      * Telemetry event sent when debug using launch.json button was used to debug.
      */
     /* __GDPR__
-        "debug_using_launch_config_button" : { "owner": "paulacamargo25" }
+        "debug_using_launch_config_button" : { "owner": "eleanorjboyd" }
     */
     [EventName.DEBUG_USING_LAUNCH_CONFIG_BUTTON]: never | undefined;
     /**
@@ -275,7 +275,7 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug_adapter.using_wheels_path" : {
-          "usingwheels" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
+          "usingwheels" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" }
        }
      */
 
@@ -292,9 +292,9 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug_session.start" : {
-          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
-          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
+          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" },
+          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUG_SESSION_START]: {
@@ -322,9 +322,9 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug_session.error" : {
-          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
-          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
+          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" },
+          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" }
 
        }
      */
@@ -354,9 +354,9 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug_session.stop" : {
-          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
-          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
+          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" },
+          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUG_SESSION_STOP]: {
@@ -384,9 +384,9 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debug_session.user_code_running" : {
-          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" },
-          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "paulacamargo25" }
+          "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "trigger" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" },
+          "console" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth", "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUG_SESSION_USER_CODE_RUNNING]: {
@@ -414,25 +414,25 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debugger" : {
-          "trigger" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "console" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "hasenvvars": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "hasargs": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "django": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "fastapi": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "flask": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "jinja": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "islocalhost": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "ismodule": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "issudo": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "stoponentry": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "showreturnvalue": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "pyramid": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "subprocess": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "watson": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "pyspark": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "gevent": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "scrapy": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
+          "trigger" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "console" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "hasenvvars": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "hasargs": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "django": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "fastapi": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "flask": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "jinja": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "islocalhost": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "ismodule": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "issudo": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "stoponentry": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "showreturnvalue": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "pyramid": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "subprocess": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "watson": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "pyspark": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "gevent": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "scrapy": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUGGER]: {
@@ -570,7 +570,7 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debugger.attach_to_child_process" : {
-           "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "isMeasurement": true, "owner": "paulacamargo25" }
+           "duration" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "isMeasurement": true, "owner": "eleanorjboyd" }
        }
      */
     [EventName.DEBUGGER_ATTACH_TO_CHILD_PROCESS]: never | undefined;
@@ -578,7 +578,7 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent when attaching to a local process.
      */
     /* __GDPR__
-       "debugger.attach_to_local_process" : { "owner": "paulacamargo25" }
+       "debugger.attach_to_local_process" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS]: never | undefined;
     /**
@@ -586,13 +586,13 @@ export interface IEventNamePropertyMapping {
      */
     /* __GDPR__
        "debugger.configuration.prompts" : {
-          "configurationtype" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "autodetecteddjangomanagepypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "autodetectedpyramidinipath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "autodetectedfastapimainpypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "autodetectedflaskapppypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" },
-          "browsefilevalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "paulacamargo25" }
+          "configurationtype" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "autodetecteddjangomanagepypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "autodetectedpyramidinipath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "autodetectedfastapimainpypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "autodetectedflaskapppypath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "manuallyenteredavalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" },
+          "browsefilevalue" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" }
        }
      */
 
@@ -645,7 +645,7 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent when providing completion provider in launch.json. It is sent just *after* inserting the completion.
      */
     /* __GDPR__
-       "debugger.configuration.prompts.in.launch.json" : { "owner": "paulacamargo25" }
+       "debugger.configuration.prompts.in.launch.json" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_CONFIGURATION_PROMPTS_IN_LAUNCH_JSON]: never | undefined;
     /**
@@ -659,14 +659,14 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent when the user use the report issue command.
      */
     /* __GDPR__
-      "use_report_issue_command" : { "owner": "paulacamargo25" }
+      "use_report_issue_command" : { "owner": "eleanorjboyd" }
      */
     [EventName.USE_REPORT_ISSUE_COMMAND]: unknown;
     /**
      * Telemetry event sent when providing dynamic configuration for debugger
      */
     /* __GDPR__
-       "debugger_dynamic_config" : { "owner": "paulacamargo25" }
+       "debugger_dynamic_config" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_DYNAMIC_CONFIGURATION]: {
         /**
@@ -680,14 +680,14 @@ export interface IEventNamePropertyMapping {
      * Telemetry event sent when the debugger is running with a non supports python versions minor than 3.7.
      */
     /* __GDPR__
-       "DEBUGGER_PYTHON_37_DEPRECATED" : { "owner": "paulacamargo25" }
+       "DEBUGGER_PYTHON_37_DEPRECATED" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_PYTHON_37_DEPRECATED]: never | undefined;
     /**
      * Telemetry event sent when displaying inline values in the debugger.
      */
     /* __GDPR__
-       "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "paulacamargo25" }
+       "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
 }
