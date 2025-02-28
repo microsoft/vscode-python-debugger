@@ -51,7 +51,8 @@ export function getConfigurationsFromSettings(workspace: WorkspaceFolder): Debug
         !Array.isArray(codeWorkspaceConfig.configurations) ||
         codeWorkspaceConfig.configurations.length === 0
     ) {
-        throw Error('No configurations found in launch.json or settings.json');
+        traceLog('No configurations found in settings.json or launch.json.');
+        return [];
     }
     traceLog('Using configuration in workspace settings.json.');
     return codeWorkspaceConfig.configurations;
