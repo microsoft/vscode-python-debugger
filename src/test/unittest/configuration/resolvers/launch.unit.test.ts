@@ -953,6 +953,39 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             });
         });
 
+        test('Preserve serverReadyAction when already defined in configuration', async () => {
+            const pythonPath = `PythonPath_${new Date().toString()}`;
+            const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+            const pythonFile = 'xyz.py';
+            setupIoc(pythonPath);
+            setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+
+            const customServerReadyAction = {
+                pattern: '.*Running on (http://\\S+:[0-9]+).*',
+                uriFormat: '%s/custom',
+                action: 'debugWithChrome',
+            };
+
+            testsForautoStartBrowser.forEach(async (testParams) => {
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    ...testParams,
+                    serverReadyAction: customServerReadyAction,
+                });
+
+                expect(debugConfig).to.have.property('serverReadyAction', customServerReadyAction);
+                if (!debugConfig) {
+                    throw new Error('Debug config is undefined');
+                }
+                expect(debugConfig.serverReadyAction).to.deep.equal(customServerReadyAction);
+                expect(debugConfig.serverReadyAction).to.not.deep.equal({
+                    pattern: '.*(https?:\\/\\/\\S+:[0-9]+\\/?).*',
+                    uriFormat: '%s',
+                    action: 'openExternally',
+                });
+            });
+        });
+
         test('Send consoleName value to debugpy as consoleTitle', async () => {
             const consoleName = 'My Console Name';
             const pythonPath = `PythonPath_${new Date().toString()}`;
