@@ -146,7 +146,11 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         }
         const isFastAPI = LaunchConfigurationResolver.isDebuggingFastAPI(debugConfiguration);
         const isFlask = LaunchConfigurationResolver.isDebuggingFlask(debugConfiguration);
-        if (debugConfiguration.autoStartBrowser && (debugConfiguration.django || isFlask)) {
+        if (
+            debugConfiguration.autoStartBrowser &&
+            (debugConfiguration.django || isFlask) &&
+            !debugConfiguration.serverReadyAction
+        ) {
             debugConfiguration.serverReadyAction = {
                 pattern: '.*(https?:\\/\\/\\S+:[0-9]+\\/?).*',
                 uriFormat: '%s',
