@@ -690,12 +690,4 @@ export interface IEventNamePropertyMapping {
        "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
-
-    /**
-     * Telemetry event sent when no-config debugging is used.
-     */
-    /* __GDPR__
-        "DEBUGGER_NO_CONFIG_DEBUGGING" : { "owner": "eleanorjboyd" }
-     */
-    [EventName.DEBUGGER_NO_CONFIG_DEBUGGING]: never | undefined;
 }
