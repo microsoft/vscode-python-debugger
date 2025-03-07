@@ -303,6 +303,7 @@ export interface IEventNamePropertyMapping {
          * - `launch`: Launch/start new code and debug it.
          * - `attach`: Attach to an exiting python process (remote debugging).
          * - `test`: Debugging python tests.
+         * - `noConfig`: No config debugging.
          *
          * @type {TriggerType}
          */

@@ -147,7 +147,7 @@ export interface DebugConfigurationArguments extends LaunchRequestArguments, Att
 
 export type ConsoleType = 'internalConsole' | 'integratedTerminal' | 'externalTerminal';
 
-export type TriggerType = 'launch' | 'attach' | 'test';
+export type TriggerType = 'launch' | 'attach' | 'test' | 'noConfig';
 
 export type IStartupDurations = Record<
     'totalNonBlockingActivateTime' | 'totalActivateTime' | 'startActivateTime' | 'codeLoadingTime',

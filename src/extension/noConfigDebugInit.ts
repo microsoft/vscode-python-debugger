@@ -14,6 +14,9 @@ import {
 } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
 import { traceError, traceVerbose } from './common/log/logging';
+import { sendTelemetryEvent } from './telemetry';
+import { EventName } from './telemetry/constants';
+import { TriggerType } from './types';
 
 /**
  * Registers the configuration-less debugging setup for the extension.
@@ -84,6 +87,10 @@ export async function registerNoConfigDebug(
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
     const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*'));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
+        sendTelemetryEvent(EventName.DEBUG_SESSION_START, undefined, {
+            trigger: 'noConfig' as TriggerType,
+        });
+
         const filePath = uri.fsPath;
         fs.readFile(filePath, (err, data) => {
             const dataParse = data.toString();
