@@ -1,4 +1,4 @@
-name: Info-Needed Closer
+Sur name: Info-Needed Closer
 on:
   schedule:
     - cron: 20 12 * * * # 5:20am Redmond
