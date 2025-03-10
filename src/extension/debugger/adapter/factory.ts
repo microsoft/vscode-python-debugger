@@ -159,7 +159,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
         const prompts = [Interpreters.changePythonInterpreter, Common.doNotShowAgain];
         const selection = await showErrorMessage(
-            l10n.t('The debugger in the python extension no longer supports python versions minor than 3.8.'),
+            l10n.t('The debugger in the python extension no longer supports python versions minor than 3.9.'),
             { modal: true },
             ...prompts,
         );
@@ -181,7 +181,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         if (interpreter) {
             if (
                 (interpreter.version?.major ?? 0) < 3 ||
-                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 7)
+                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 8)
             ) {
                 this.showDeprecatedPythonMessage();
             }
