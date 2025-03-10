@@ -66,6 +66,8 @@ export async function registerNoConfigDebug(
             fs.unlinkSync(tempFilePath);
         }
     }
+    // clear the env var collection to remove any existing env vars
+    collection.clear();
 
     // Add env var for PYDEVD_DISABLE_FILE_VALIDATION to disable extra output in terminal when starting the debug session.
     collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
