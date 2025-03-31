@@ -181,7 +181,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         if (interpreter) {
             if (
                 (interpreter.version?.major ?? 0) < 3 ||
-                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 9)
+                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 8)
             ) {
                 this.showDeprecatedPythonMessage();
             }
