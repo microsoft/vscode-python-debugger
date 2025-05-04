@@ -87,7 +87,7 @@ export async function registerNoConfigDebug(
     );
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*'));
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*.txt'));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
         sendTelemetryEvent(EventName.DEBUG_SESSION_START, undefined, {
             trigger: 'noConfig' as TriggerType,
@@ -95,13 +95,13 @@ export async function registerNoConfigDebug(
 
         const filePath = uri.fsPath;
         fs.readFile(filePath, (err, data) => {
-            const dataParse = data.toString();
             if (err) {
                 traceError(`Error reading debuggerAdapterEndpoint.txt file: ${err}`);
                 return;
             }
             try {
                 // parse the client port
+                const dataParse = data.toString();
                 const jsonData = JSON.parse(dataParse);
                 const clientPort = jsonData.client?.port;
                 traceVerbose(`Parsed client port: ${clientPort}`);

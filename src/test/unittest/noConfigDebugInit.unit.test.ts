@@ -99,7 +99,10 @@ suite('setup for no-config debug scenario', function () {
 
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
-        const expectedPattern = new RelativePattern(path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'), '**/*');
+        const expectedPattern = new RelativePattern(
+            path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'),
+            '**/*.txt',
+        );
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
 
