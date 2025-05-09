@@ -20,4 +20,6 @@
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true
     },
+    "git.branchProtection": ["main"],
+    "git.branchRandomName.enable": true,
 }

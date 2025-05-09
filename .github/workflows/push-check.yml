@@ -8,6 +8,8 @@ on:
       - 'release/*'
       - 'release-*'
 
+permissions: {}
+
 env:
   NODE_VERSION: 18.17.1
   TEST_RESULTS_DIRECTORY: .
@@ -22,11 +24,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Build VSIX
         uses: ./.github/actions/build-vsix
         with:
-          node_version: ${{ env.NODE_VERSION}}
+          node_version: ${{ env.NODE_VERSION }}
 
   lint:
     name: Lint
@@ -34,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Lint
         uses: ./.github/actions/lint
@@ -57,6 +63,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ env.special-working-directory-relative }}
+          persist-credentials: false
 
       # Install bundled libs using 3.9 even though you test it on other versions.
       - name: Use Python 3.9
