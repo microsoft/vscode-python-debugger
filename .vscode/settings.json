@@ -20,7 +20,6 @@
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true
     },
-    "python.linting.flake8Enabled": true,
     "git.branchProtection": ["main"],
     "git.branchRandomName.enable": true,
 }
