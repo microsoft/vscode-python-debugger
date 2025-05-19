@@ -8,11 +8,19 @@ import { registerLogger, traceError } from './common/log/logging';
 import { sendTelemetryEvent } from './telemetry';
 import { EventName } from './telemetry/constants';
 import { IExtensionApi } from './apiTypes';
+import { commands } from 'vscode';
+import { getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
 
 export async function activate(context: IExtensionContext): Promise<IExtensionApi | undefined> {
     const outputChannel = createOutputChannel('Python Debugger');
     context.subscriptions.push(outputChannel, registerLogger(outputChannel));
     context.subscriptions.push(registerCommand(Commands.ViewOutput, () => outputChannel.show()));
+
+    context.subscriptions.push(
+        commands.registerCommand('python.getDebugpyPackagePath', () => {
+            return getDebugpyPackagePath();
+        }),
+    );
 
     try {
         const api = await registerDebugger(context);
