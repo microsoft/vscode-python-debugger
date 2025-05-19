@@ -11,7 +11,6 @@ import { IExtensionApi } from './apiTypes';
 import { commands } from 'vscode';
 import { getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
 
-
 export async function activate(context: IExtensionContext): Promise<IExtensionApi | undefined> {
     const outputChannel = createOutputChannel('Python Debugger');
     context.subscriptions.push(outputChannel, registerLogger(outputChannel));
