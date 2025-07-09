@@ -77,7 +77,13 @@ export async function registerNoConfigDebug(
 
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
-    collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`);
+
+    // Check if the current PATH already ends with a path separator to avoid double separators
+    const currentPath = process.env.PATH || '';
+    const needsSeparator = currentPath.length > 0 && !currentPath.endsWith(pathSeparator);
+    const pathValueToAppend = needsSeparator ? `${pathSeparator}${noConfigScriptsDir}` : noConfigScriptsDir;
+
+    collection.append('PATH', pathValueToAppend);
 
     const bundledDebugPath = path.join(extPath, 'bundled', 'libs', 'debugpy');
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
