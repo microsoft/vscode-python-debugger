@@ -71,13 +71,7 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === 'PATH') {
-                    // The value should be the scripts directory, with or without separator
-                    // depending on whether the current PATH ends with a separator
-                    const pathSeparator = process.platform === 'win32' ? ';' : ':';
-                    const currentPath = process.env.PATH || '';
-                    const needsSeparator = currentPath.length > 0 && !currentPath.endsWith(pathSeparator);
-                    const expectedValue = needsSeparator ? `${pathSeparator}${noConfigScriptsDir}` : noConfigScriptsDir;
-                    assert(value === expectedValue);
+                    assert(value.includes(noConfigScriptsDir));
                 }
             })
             .returns(envVarCollectionAppendStub);
@@ -108,19 +102,21 @@ suite('setup for no-config debug scenario', function () {
             environmentVariableCollectionMock
                 .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
                 .returns(envVarCollectionReplaceStub);
-            
+
             environmentVariableCollectionMock
                 .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
                 .callback((key, value) => {
                     if (key === 'PATH') {
-                        // When PATH already ends with separator, we should NOT add another one
+                        // Since PATH already ends with separator, we should NOT add another one
                         assert(value === noConfigScriptsDir);
                         assert(!value.startsWith(pathSeparator));
                     }
                 })
                 .returns(envVarCollectionAppendStub);
 
-            context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
+            context
+                .setup((c) => c.environmentVariableCollection)
+                .returns(() => environmentVariableCollectionMock.object);
 
             setupFileSystemWatchers();
 
@@ -153,19 +149,21 @@ suite('setup for no-config debug scenario', function () {
             environmentVariableCollectionMock
                 .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
                 .returns(envVarCollectionReplaceStub);
-            
+
             environmentVariableCollectionMock
                 .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
                 .callback((key, value) => {
                     if (key === 'PATH') {
-                        // When PATH does not end with separator, we should add one
+                        // Since PATH does NOT end with separator, we should add one
                         assert(value === `${pathSeparator}${noConfigScriptsDir}`);
                         assert(value.startsWith(pathSeparator));
                     }
                 })
                 .returns(envVarCollectionAppendStub);
 
-            context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
+            context
+                .setup((c) => c.environmentVariableCollection)
+                .returns(() => environmentVariableCollectionMock.object);
 
             setupFileSystemWatchers();
 
