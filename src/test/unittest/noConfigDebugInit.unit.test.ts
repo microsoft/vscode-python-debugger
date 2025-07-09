@@ -71,7 +71,13 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === 'PATH') {
-                    assert(value === `:${noConfigScriptsDir}`);
+                    // The value should be the scripts directory, with or without separator
+                    // depending on whether the current PATH ends with a separator
+                    const pathSeparator = process.platform === 'win32' ? ';' : ':';
+                    const currentPath = process.env.PATH || '';
+                    const needsSeparator = currentPath.length > 0 && !currentPath.endsWith(pathSeparator);
+                    const expectedValue = needsSeparator ? `${pathSeparator}${noConfigScriptsDir}` : noConfigScriptsDir;
+                    assert(value === expectedValue);
                 }
             })
             .returns(envVarCollectionAppendStub);
@@ -86,6 +92,96 @@ suite('setup for no-config debug scenario', function () {
         // assert that functions called right number of times
         sinon.assert.calledThrice(envVarCollectionReplaceStub);
         sinon.assert.calledOnce(envVarCollectionAppendStub);
+    });
+
+    test('should not add extra separator when PATH already ends with separator', async () => {
+        const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
+        envVarCollectionReplaceStub = sinon.stub();
+        envVarCollectionAppendStub = sinon.stub();
+
+        // Simulate a PATH that already ends with a separator to test the fix
+        const pathSeparator = process.platform === 'win32' ? ';' : ':';
+        const originalPath = process.env.PATH;
+        process.env.PATH = `/some/path${pathSeparator}`;
+
+        try {
+            environmentVariableCollectionMock
+                .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+                .returns(envVarCollectionReplaceStub);
+            
+            environmentVariableCollectionMock
+                .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+                .callback((key, value) => {
+                    if (key === 'PATH') {
+                        // When PATH already ends with separator, we should NOT add another one
+                        assert(value === noConfigScriptsDir);
+                        assert(!value.startsWith(pathSeparator));
+                    }
+                })
+                .returns(envVarCollectionAppendStub);
+
+            context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
+
+            setupFileSystemWatchers();
+
+            // run init for no config debug
+            await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
+
+            // assert that append was called for PATH
+            sinon.assert.calledOnce(envVarCollectionAppendStub);
+        } finally {
+            // Restore original PATH
+            if (originalPath !== undefined) {
+                process.env.PATH = originalPath;
+            } else {
+                delete process.env.PATH;
+            }
+        }
+    });
+
+    test('should add separator when PATH does not end with separator', async () => {
+        const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
+        envVarCollectionReplaceStub = sinon.stub();
+        envVarCollectionAppendStub = sinon.stub();
+
+        // Simulate a PATH that does NOT end with a separator
+        const pathSeparator = process.platform === 'win32' ? ';' : ':';
+        const originalPath = process.env.PATH;
+        process.env.PATH = '/some/path';
+
+        try {
+            environmentVariableCollectionMock
+                .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+                .returns(envVarCollectionReplaceStub);
+            
+            environmentVariableCollectionMock
+                .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+                .callback((key, value) => {
+                    if (key === 'PATH') {
+                        // When PATH does not end with separator, we should add one
+                        assert(value === `${pathSeparator}${noConfigScriptsDir}`);
+                        assert(value.startsWith(pathSeparator));
+                    }
+                })
+                .returns(envVarCollectionAppendStub);
+
+            context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
+
+            setupFileSystemWatchers();
+
+            // run init for no config debug
+            await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
+
+            // assert that append was called for PATH
+            sinon.assert.calledOnce(envVarCollectionAppendStub);
+        } finally {
+            // Restore original PATH
+            if (originalPath !== undefined) {
+                process.env.PATH = originalPath;
+            } else {
+                delete process.env.PATH;
+            }
+        }
     });
 
     test('should create file system watcher for debuggerAdapterEndpointFolder', async () => {
