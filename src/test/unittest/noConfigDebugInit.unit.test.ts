@@ -186,7 +186,7 @@ suite('setup for no-config debug scenario', function () {
         // Arrange
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
-        let createFileSystemWatcherFunct = setupFileSystemWatchers();
+        let createFileSystemWatcherFunct: sinon.SinonStub = setupFileSystemWatchers();
 
         // Act
         await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
@@ -217,10 +217,23 @@ suite('setup for no-config debug scenario', function () {
         });
 
         // create stub of fs.readFile function
-        sinon.stub(fs, 'readFile').callsFake((_path: any, callback: (arg0: null, arg1: Buffer) => void) => {
-            console.log('reading file');
-            callback(null, Buffer.from(JSON.stringify({ client: { port: 5678 } })));
-        });
+        sinon
+            .stub(fs, 'readFile')
+            .callsFake(
+                (
+                    _path: string | Buffer | URL | number,
+                    _options: any,
+                    callback?: (err: NodeJS.ErrnoException | null, data: Buffer) => void,
+                ) => {
+                    if (typeof _options === 'function') {
+                        callback = _options;
+                    }
+                    console.log('reading file');
+                    if (callback) {
+                        callback(null, Buffer.from(JSON.stringify({ client: { port: 5678 } })));
+                    }
+                },
+            );
 
         const debugStub = sinon.stub(utils, 'debugStartDebugging').resolves(true);
 
@@ -233,29 +246,18 @@ suite('setup for no-config debug scenario', function () {
             type: 'python',
             request: 'attach',
             name: 'Attach to Python',
-            connect: {
-                port: 5678,
-                host: 'localhost',
-            },
+            connect: { port: 5678, host: 'localhost' },
         };
-        const optionsExpected: DebugSessionOptions = {
-            noDebug: false,
-        };
+        const optionsExpected: DebugSessionOptions = { noDebug: false };
         const actualConfig = debugStub.getCall(0).args[1];
         const actualOptions = debugStub.getCall(0).args[2];
 
         if (JSON.stringify(actualConfig) !== JSON.stringify(expectedConfig)) {
-            console.log('Config diff:', {
-                expected: expectedConfig,
-                actual: actualConfig,
-            });
+            console.log('Config diff:', { expected: expectedConfig, actual: actualConfig });
         }
 
         if (JSON.stringify(actualOptions) !== JSON.stringify(optionsExpected)) {
-            console.log('Options diff:', {
-                expected: optionsExpected,
-                actual: actualOptions,
-            });
+            console.log('Options diff:', { expected: optionsExpected, actual: actualOptions });
         }
 
         sinon.assert.calledWith(debugStub, undefined, expectedConfig, optionsExpected);
@@ -297,12 +299,18 @@ function setupFileSystemWatchers(): sinon.SinonStub {
         };
     });
     // create stub of fs.readFile function
-    sinon.stub(fs, 'readFile').callsFake(
-        (TypeMoq.It.isAny(),
-        TypeMoq.It.isAny(),
-        (err, data) => {
-            console.log(err, data);
-        }),
-    );
+    sinon
+        .stub(fs, 'readFile')
+        .callsFake(
+            (
+                _path: string | Buffer | URL | number,
+                _options: any,
+                callback?: (err: NodeJS.ErrnoException | null, data: Buffer) => void,
+            ) => {
+                if (callback) {
+                    callback(null, Buffer.from(''));
+                }
+            },
+        );
     return createFileSystemWatcherFunct;
 }
