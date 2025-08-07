@@ -14,8 +14,8 @@ env:
   NODE_VERSION: 20.18.1
   TEST_RESULTS_DIRECTORY: .
   # Force a path with spaces and unicode chars to test extension works in these scenarios
-  special-working-directory: './🐍 🐛'
-  special-working-directory-relative: '🐍 🐛'
+  special-working-directory: './Test Path (with spaces)'
+  special-working-directory-relative: 'Test Path (with spaces)'
 
 jobs:
   build-vsix:
