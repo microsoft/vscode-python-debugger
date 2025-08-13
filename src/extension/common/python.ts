@@ -28,7 +28,18 @@ export interface IInterpreterDetails {
 const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>();
 export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 async function activateExtension() {
+    activateEnvsExtension();
     const extension = extensions.getExtension('ms-python.python');
+    if (extension) {
+        if (!extension.isActive) {
+            await extension.activate();
+        }
+    }
+    return extension;
+}
+
+async function activateEnvsExtension() {
+    const extension = extensions.getExtension('ms-python.vscode-python-envs');
     if (extension) {
         if (!extension.isActive) {
             await extension.activate();
