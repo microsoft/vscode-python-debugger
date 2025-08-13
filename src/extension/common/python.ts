@@ -28,6 +28,7 @@ export interface IInterpreterDetails {
 const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>();
 export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 async function activateExtension() {
+    console.log('Activating Python extension...');
     activateEnvsExtension();
     const extension = extensions.getExtension('ms-python.python');
     if (extension) {
@@ -35,6 +36,7 @@ async function activateExtension() {
             await extension.activate();
         }
     }
+    console.log('Python extension activated.');
     return extension;
 }
 
