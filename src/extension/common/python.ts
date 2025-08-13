@@ -2,7 +2,13 @@
 // Licensed under the MIT License.
 
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Environment, EnvironmentPath, PythonExtension, Resource } from '@vscode/python-extension';
+import {
+    ActiveEnvironmentPathChangeEvent,
+    Environment,
+    EnvironmentPath,
+    PythonExtension,
+    Resource,
+} from '@vscode/python-extension';
 import { commands, EventEmitter, extensions, Uri, Event, Disposable } from 'vscode';
 import { createDeferred } from './utils/async';
 import { traceError, traceLog } from './log/logging';
@@ -48,8 +54,16 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
 
         if (api) {
             disposables.push(
-                api.environments.onDidChangeActiveEnvironmentPath((e) => {
-                    onDidChangePythonInterpreterEvent.fire({ path: [e.path], resource: e.resource?.uri });
+                api.environments.onDidChangeActiveEnvironmentPath((e: ActiveEnvironmentPathChangeEvent) => {
+                    let resourceUri: Uri | undefined;
+                    if (e.resource instanceof Uri) {
+                        resourceUri = e.resource;
+                    }
+                    if (e.resource && 'uri' in e.resource) {
+                        // WorkspaceFolder type
+                        resourceUri = e.resource.uri;
+                    }
+                    onDidChangePythonInterpreterEvent.fire({ path: [e.path], resource: resourceUri });
                 }),
             );
 
