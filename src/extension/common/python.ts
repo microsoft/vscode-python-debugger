@@ -2,7 +2,13 @@
 // Licensed under the MIT License.
 
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Environment, EnvironmentPath, PythonExtension, Resource } from '@vscode/python-extension';
+import {
+    ActiveEnvironmentPathChangeEvent,
+    Environment,
+    EnvironmentPath,
+    PythonExtension,
+    Resource,
+} from '@vscode/python-extension';
 import { commands, EventEmitter, extensions, Uri, Event, Disposable } from 'vscode';
 import { createDeferred } from './utils/async';
 import { traceError, traceLog } from './log/logging';
@@ -22,7 +28,20 @@ export interface IInterpreterDetails {
 const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>();
 export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 async function activateExtension() {
+    console.log('Activating Python extension...');
+    activateEnvsExtension();
     const extension = extensions.getExtension('ms-python.python');
+    if (extension) {
+        if (!extension.isActive) {
+            await extension.activate();
+        }
+    }
+    console.log('Python extension activated.');
+    return extension;
+}
+
+async function activateEnvsExtension() {
+    const extension = extensions.getExtension('ms-python.vscode-python-envs');
     if (extension) {
         if (!extension.isActive) {
             await extension.activate();
@@ -48,8 +67,16 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
 
         if (api) {
             disposables.push(
-                api.environments.onDidChangeActiveEnvironmentPath((e) => {
-                    onDidChangePythonInterpreterEvent.fire({ path: [e.path], resource: e.resource?.uri });
+                api.environments.onDidChangeActiveEnvironmentPath((e: ActiveEnvironmentPathChangeEvent) => {
+                    let resourceUri: Uri | undefined;
+                    if (e.resource instanceof Uri) {
+                        resourceUri = e.resource;
+                    }
+                    if (e.resource && 'uri' in e.resource) {
+                        // WorkspaceFolder type
+                        resourceUri = e.resource.uri;
+                    }
+                    onDidChangePythonInterpreterEvent.fire({ path: [e.path], resource: resourceUri });
                 }),
             );
 
@@ -89,8 +116,13 @@ export async function getActiveEnvironmentPath(resource?: Resource) {
 export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
     const api = await getPythonExtensionEnviromentAPI();
     const environment = await api.environments.resolveEnvironment(api.environments.getActiveEnvironmentPath(resource));
-    if (environment?.executable.uri) {
-        return { path: [environment?.executable.uri.fsPath], resource };
+    const rawExecPath = environment?.executable.uri?.fsPath;
+    if (rawExecPath) {
+        let execPath = rawExecPath;
+        if (rawExecPath.includes(' ') && !(rawExecPath.startsWith('"') && rawExecPath.endsWith('"'))) {
+            execPath = `"${rawExecPath}"`;
+        }
+        return { path: [execPath], resource };
     }
     return { path: undefined, resource };
 }
