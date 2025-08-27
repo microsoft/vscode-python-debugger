@@ -2,7 +2,7 @@ import * as cp from 'child_process';
 import * as path from 'path';
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
-import { PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
+import { PVSC_ENVS_EXTENSION_ID_FOR_TESTS, PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
 import { OSType, getOSType } from '../extension/common/platform';
 
 async function main() {
@@ -20,17 +20,27 @@ async function main() {
         // Use cp.spawn / cp.exec for custom setup
         if (getOSType() === OSType.Windows) {
             const exec = path.basename(cliPath);
-            cp.spawnSync(exec, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
-                cwd: path.dirname(cliPath),
-                encoding: 'utf-8',
-                stdio: 'inherit',
-            });
+            console.log(`Using ${exec} to run tests`);
+            cp.spawnSync(
+                exec,
+                [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
+                {
+                    cwd: path.dirname(cliPath),
+                    encoding: 'utf-8',
+                    stdio: 'inherit',
+                },
+            );
         } else {
-            cp.spawnSync(cliPath, [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS], {
-                encoding: 'utf-8',
-                stdio: 'inherit',
-            });
+            cp.spawnSync(
+                cliPath,
+                [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
+                {
+                    encoding: 'utf-8',
+                    stdio: 'inherit',
+                },
+            );
         }
+        console.log('Extensions installed, ready to run tests.');
 
         // Run the extension test
         await runTests({
