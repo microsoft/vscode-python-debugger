@@ -3,7 +3,6 @@ import * as path from 'path';
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 import { PVSC_ENVS_EXTENSION_ID_FOR_TESTS, PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
-import { OSType, getOSType } from '../extension/common/platform';
 
 async function main() {
     try {
@@ -18,27 +17,48 @@ async function main() {
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
         // Use cp.spawn / cp.exec for custom setup
-        if (getOSType() === OSType.Windows) {
-            const exec = path.basename(cliPath);
-            console.log(`Using ${exec} to run tests`);
-            cp.spawnSync(
-                exec,
-                [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
-                {
-                    cwd: path.dirname(cliPath),
-                    encoding: 'utf-8',
-                    stdio: 'inherit',
-                },
-            );
-        } else {
-            cp.spawnSync(
+        const isWin = process.platform === 'win32';
+        if (isWin) {
+            console.log('[DEBUG] Windows detected');
+            console.log('[DEBUG] cliPath:', cliPath);
+            console.log('[DEBUG] args:', args);
+            console.log('[DEBUG] cwd:', path.dirname(cliPath));
+            const installResult = cp.spawnSync(
                 cliPath,
                 [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
                 {
-                    encoding: 'utf-8',
+                    cwd: path.dirname(cliPath),
+                    encoding: 'utf8',
+                    stdio: 'inherit',
+                    shell: true,
+                },
+            );
+            console.log('[DEBUG] installResult:', installResult);
+            if (installResult.error) {
+                console.error('Extension installation error:', installResult.error);
+            }
+            if (installResult.status !== 0) {
+                console.error(`Extension installation failed with exit code: ${installResult.status}`);
+            }
+        } else {
+            console.log('[DEBUG] Non-Windows detected');
+            console.log('[DEBUG] cliPath:', cliPath);
+            console.log('[DEBUG] args:', args);
+            const installResult = cp.spawnSync(
+                cliPath,
+                [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
+                {
+                    encoding: 'utf8',
                     stdio: 'inherit',
                 },
             );
+            console.log('[DEBUG] installResult:', installResult);
+            if (installResult.error) {
+                console.error('Extension installation error:', installResult.error);
+            }
+            if (installResult.status !== 0) {
+                console.error(`Extension installation failed with exit code: ${installResult.status}`);
+            }
         }
         console.log('Extensions installed, ready to run tests.');
 
