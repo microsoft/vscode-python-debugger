@@ -39,6 +39,12 @@ async function main() {
             }
             if (installResult.status !== 0) {
                 console.error(`Extension installation failed with exit code: ${installResult.status}`);
+                if (installResult.stderr) {
+                    console.error('[DEBUG] stderr:', installResult.stderr.toString());
+                }
+                if (installResult.stdout) {
+                    console.error('[DEBUG] stdout:', installResult.stdout.toString());
+                }
             }
         } else {
             console.log('[DEBUG] Non-Windows detected');
@@ -58,6 +64,12 @@ async function main() {
             }
             if (installResult.status !== 0) {
                 console.error(`Extension installation failed with exit code: ${installResult.status}`);
+                if (installResult.stderr) {
+                    console.error('[DEBUG] stderr:', installResult.stderr.toString());
+                }
+                if (installResult.stdout) {
+                    console.error('[DEBUG] stdout:', installResult.stdout.toString());
+                }
             }
         }
         console.log('Extensions installed, ready to run tests.');
