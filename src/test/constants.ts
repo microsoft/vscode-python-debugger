@@ -33,6 +33,8 @@ function isMultiRootTest() {
 export const EXTENSION_ROOT_DIR_FOR_TESTS = path.join(__dirname, '..', '..');
 export const PVSC_EXTENSION_ID_FOR_TESTS = 'ms-python.python';
 
+export const PVSC_ENVS_EXTENSION_ID_FOR_TESTS = 'ms-python.vscode-python-envs';
+
 export const SMOKE_TEST_EXTENSIONS_DIR = path.join(
     EXTENSION_ROOT_DIR_FOR_TESTS,
     'tmp',
