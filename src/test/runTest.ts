@@ -23,28 +23,32 @@ async function main() {
             console.log('[DEBUG] cliPath:', cliPath);
             console.log('[DEBUG] args:', args);
             console.log('[DEBUG] cwd:', path.dirname(cliPath));
-            const installResult = cp.spawnSync(
-                cliPath,
-                [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
-                {
-                    cwd: path.dirname(cliPath),
-                    encoding: 'utf8',
-                    stdio: 'inherit',
-                    shell: true,
-                },
-            );
-            console.log('[DEBUG] installResult:', installResult);
-            if (installResult.error) {
-                console.error('Extension installation error:', installResult.error);
-            }
-            if (installResult.status !== 0) {
-                console.error(`Extension installation failed with exit code: ${installResult.status}`);
-                if (installResult.stderr) {
-                    console.error('[DEBUG] stderr:', installResult.stderr.toString());
+            try {
+                const installResult = cp.spawnSync(
+                    cliPath,
+                    [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
+                    {
+                        cwd: path.dirname(cliPath),
+                        encoding: 'utf8',
+                        stdio: 'inherit',
+                        shell: true,
+                    },
+                );
+                console.log('[DEBUG] installResult:', installResult);
+                if (installResult.error) {
+                    console.error('Extension installation error:', installResult.error);
                 }
-                if (installResult.stdout) {
-                    console.error('[DEBUG] stdout:', installResult.stdout.toString());
+                if (installResult.status !== 0) {
+                    console.error(`Extension installation failed with exit code: ${installResult.status}`);
+                    if (installResult.stderr) {
+                        console.error('[DEBUG] stderr:', installResult.stderr.toString());
+                    }
+                    if (installResult.stdout) {
+                        console.error('[DEBUG] stdout:', installResult.stdout.toString());
+                    }
                 }
+            } catch (ex) {
+                console.error('Exception during extension installation:', ex);
             }
         } else {
             console.log('[DEBUG] Non-Windows detected');
