@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { use, expect } from 'chai';
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../constants';
 import { PythonInlineValueProvider } from '../../../extension/debugger/inlineValue/pythonInlineValueProvider';
-import { workspace, Range, InlineValueContext, WorkspaceConfiguration } from 'vscode';
+import { workspace, Range, InlineValueContext, WorkspaceConfiguration, InlineValue } from 'vscode';
 import * as vscodeapi from '../../../extension/common/vscodeapi';
 
 use(chaiAsPromised);
@@ -98,102 +98,39 @@ suite('Debugging - pythonInlineProvider', () => {
         const context = { frameId: 0, stoppedLocation: new Range(4, 1, 4, 1) } as InlineValueContext;
 
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
-        const expected = [
+        const expected: InlineValue[] = [
             {
-                range: {
-                    c: {
-                        c: 0,
-                        e: 0,
-                    },
-                    e: {
-                        c: 0,
-                        e: 4,
-                    },
-                },
+                range: new Range(0, 0, 0, 4),
                 variableName: 'var1',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 0,
-                        e: 6,
-                    },
-                    e: {
-                        c: 0,
-                        e: 10,
-                    },
-                },
+                range: new Range(0, 6, 0, 10),
                 variableName: 'var2',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 1,
-                        e: 0,
-                    },
-                    e: {
-                        c: 1,
-                        e: 4,
-                    },
-                },
+                range: new Range(1, 0, 1, 4),
                 variableName: 'var3',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 2,
-                        e: 0,
-                    },
-                    e: {
-                        c: 2,
-                        e: 4,
-                    },
-                },
+                range: new Range(2, 0, 2, 4),
                 variableName: 'var4',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 3,
-                        e: 0,
-                    },
-                    e: {
-                        c: 3,
-                        e: 4,
-                    },
-                },
+                range: new Range(3, 0, 3, 4),
                 variableName: 'var5',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 4,
-                        e: 7,
-                    },
-                    e: {
-                        c: 4,
-                        e: 11,
-                    },
-                },
+                range: new Range(4, 7, 4, 11),
                 variableName: 'var1',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 4,
-                        e: 14,
-                    },
-                    e: {
-                        c: 4,
-                        e: 18,
-                    },
-                },
+                range: new Range(4, 14, 4, 18),
                 variableName: 'var2',
                 caseSensitiveLookup: false,
             },
@@ -244,55 +181,19 @@ suite('Debugging - pythonInlineProvider', () => {
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
             {
-                range: {
-                    c: {
-                        c: 3,
-                        e: 8,
-                    },
-                    e: {
-                        c: 3,
-                        e: 17,
-                    },
-                },
+                range: new Range(3, 8, 3, 17),
                 expression: 'self.name',
             },
             {
-                range: {
-                    c: {
-                        c: 4,
-                        e: 8,
-                    },
-                    e: {
-                        c: 4,
-                        e: 16,
-                    },
-                },
+                range: new Range(4, 8, 4, 16),
                 expression: 'self.age',
             },
             {
-                range: {
-                    c: {
-                        c: 7,
-                        e: 18,
-                    },
-                    e: {
-                        c: 7,
-                        e: 27,
-                    },
-                },
+                range: new Range(7, 18, 7, 27),
                 expression: 'self.name',
             },
             {
-                range: {
-                    c: {
-                        c: 7,
-                        e: 29,
-                    },
-                    e: {
-                        c: 7,
-                        e: 37,
-                    },
-                },
+                range: new Range(7, 29, 7, 37),
                 expression: 'self.age',
             },
         ];
@@ -352,16 +253,7 @@ suite('Debugging - pythonInlineProvider', () => {
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
             {
-                range: {
-                    c: {
-                        c: 11,
-                        e: 0,
-                    },
-                    e: {
-                        c: 11,
-                        e: 10,
-                    },
-                },
+                range: new Range(11, 0, 11, 10),
                 expression: 'person1.id',
             },
         ];
@@ -411,128 +303,47 @@ suite('Debugging - pythonInlineProvider', () => {
         const result = await inlineValueProvider.provideInlineValues(document, viewPort, context);
         const expected = [
             {
-                range: {
-                    c: {
-                        c: 0,
-                        e: 0,
-                    },
-                    e: {
-                        c: 0,
-                        e: 9,
-                    },
-                },
+                range: new Range(0, 0, 0, 9),
                 variableName: 'some_list',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 1,
-                        e: 0,
-                    },
-                    e: {
-                        c: 1,
-                        e: 1,
-                    },
-                },
+                range: new Range(1, 0, 1, 1),
                 variableName: 'x',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 2,
-                        e: 4,
-                    },
-                    e: {
-                        c: 2,
-                        e: 5,
-                    },
-                },
+                range: new Range(2, 4, 2, 5),
                 variableName: 'n',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 2,
-                        e: 13,
-                    },
-                    e: {
-                        c: 2,
-                        e: 22,
-                    },
-                },
+                range: new Range(2, 13, 2, 22),
                 variableName: 'some_list',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 2,
-                        e: 27,
-                    },
-                    e: {
-                        c: 2,
-                        e: 28,
-                    },
-                },
+                range: new Range(2, 27, 2, 28),
                 variableName: 'x',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 3,
-                        e: 13,
-                    },
-                    e: {
-                        c: 3,
-                        e: 14,
-                    },
-                },
+                range: new Range(3, 13, 3, 14),
                 variableName: 'n',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 3,
-                        e: 16,
-                    },
-                    e: {
-                        c: 3,
-                        e: 17,
-                    },
-                },
+                range: new Range(3, 16, 3, 17),
                 variableName: 'x',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 5,
-                        e: 13,
-                    },
-                    e: {
-                        c: 5,
-                        e: 14,
-                    },
-                },
+                range: new Range(5, 13, 5, 14),
                 variableName: 'n',
                 caseSensitiveLookup: false,
             },
             {
-                range: {
-                    c: {
-                        c: 5,
-                        e: 16,
-                    },
-                    e: {
-                        c: 5,
-                        e: 17,
-                    },
-                },
+                range: new Range(5, 16, 5, 17),
                 variableName: 'x',
                 caseSensitiveLookup: false,
             },
