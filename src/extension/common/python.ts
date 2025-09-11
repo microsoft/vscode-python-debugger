@@ -39,7 +39,6 @@ async function activateExtension() {
     console.log('Python extension activated.');
     return extension;
 }
-
 async function activateEnvsExtension() {
     const extension = extensions.getExtension('ms-python.vscode-python-envs');
     if (extension) {
