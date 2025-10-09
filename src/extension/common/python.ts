@@ -11,19 +11,16 @@ import {
     ResolvedEnvironment,
     Resource,
 } from '@vscode/python-extension';
-import { commands, EventEmitter, extensions, Uri, Event, Disposable, Extension } from 'vscode';
-import { createDeferred } from './utils/async';
+import { commands, EventEmitter, extensions, Uri, Event, Disposable } from 'vscode';
 import { traceError, traceLog } from './log/logging';
+import { PythonEnvironment, PythonEnvironmentApi, PythonEnvsExtension } from '../envExtApi';
 
-/**
- * Interface for the Python extension API.
- */
-interface IExtensionApi {
-    ready: Promise<void>;
-    settings: {
-        getExecutionDetails(resource?: Resource): { execCommand: string[] | undefined };
-    };
-}
+// interface IExtensionApi {
+//     ready: Promise<void>;
+//     settings: {
+//         getExecutionDetails(resource?: Resource): { execCommand: string[] | undefined };
+//     };
+// }
 
 /**
  * Details about a Python interpreter.
@@ -70,20 +67,18 @@ async function activateEnvsExtension(): Promise<Extension<any> | undefined> {
     return extension;
 }
 
-/**
- * Gets the Python extension's API interface.
- * @returns The Python extension API or undefined if not available
- */
-async function getPythonExtensionAPI(): Promise<IExtensionApi | undefined> {
-    const extension = await activateExtension();
-    return extension?.exports as IExtensionApi;
+async function getPythonEnviromentExtensionAPI(): Promise<PythonEnvironmentApi> {
+    // Load the Python extension API
+    await activateEnvsExtension();
+    return await PythonEnvsExtension.api();
 }
 
-/**
- * Gets the Python extension's environment API.
- * @returns The Python extension environment API
- */
-async function getPythonExtensionEnviromentAPI(): Promise<PythonExtension> {
+// async function getLegacyPythonExtensionAPI(): Promise<IExtensionApi | undefined> {
+//     const extension = await activateExtension();
+//     return extension?.exports as IExtensionApi;
+// }
+
+async function getLegacyPythonExtensionEnviromentAPI(): Promise<PythonExtension> {
     // Load the Python extension API
     await activateExtension();
     return await PythonExtension.api();
@@ -95,7 +90,7 @@ async function getPythonExtensionEnviromentAPI(): Promise<PythonExtension> {
  */
 export async function initializePython(disposables: Disposable[]): Promise<void> {
     try {
-        const api = await getPythonExtensionEnviromentAPI();
+        const api = await getLegacyPythonExtensionEnviromentAPI();
 
         if (api) {
             disposables.push(
@@ -140,51 +135,80 @@ export async function runPythonExtensionCommand(command: string, ...rest: any[])
  * @returns Array of command components or undefined if not available
  */
 export async function getSettingsPythonPath(resource?: Uri): Promise<string[] | undefined> {
-    const api = await getPythonExtensionAPI();
-    return api?.settings.getExecutionDetails(resource).execCommand;
+    // const api = await getLegacyPythonExtensionAPI();
+    // return api?.settings.getExecutionDetails(resource).execCommand;
+
+    const apiNew = await getPythonEnviromentExtensionAPI();
+    const abc: PythonEnvironment[] = await apiNew.getEnvironments(resource || 'all');
+    console.log('Python envs:', abc);
+    return undefined;
 }
 
-/**
- * Returns the environment variables used by the extension for a resource, which includes the custom
- * variables configured by user in `.env` files.
- * @param resource Optional workspace resource to get environment variables for
- * @returns Environment variables object
- */
-export async function getEnvironmentVariables(resource?: Resource): Promise<EnvironmentVariables> {
-    const api = await getPythonExtensionEnviromentAPI();
-    return Promise.resolve(api.environments.getEnvironmentVariables(resource));
+export async function getEnvironmentVariables(resource?: Resource) {
+    const api = await getLegacyPythonExtensionEnviromentAPI();
+    return api.environments.getEnvironmentVariables(resource);
 }
 
-/**
- * Returns details for the given environment, or `undefined` if the env is invalid.
- * @param env Environment to resolve (can be Environment object, path, or string)
- * @returns Resolved environment details
- */
 export async function resolveEnvironment(
     env: Environment | EnvironmentPath | string,
+): Promise<PythonEnvironment | undefined> {
+    // const api = await getLegacyPythonExtensionEnviromentAPI();
+    // return api.environments.resolveEnvironment(env);
+
+    const apiNew = await getPythonEnviromentExtensionAPI();
+
+    // Handle different input types for the new API
+    if (typeof env === 'string') {
+        // Convert string path to Uri for the new API
+        return apiNew.resolveEnvironment(Uri.file(env));
+    } else if (typeof env === 'object' && 'path' in env) {
+        // EnvironmentPath has a uri property
+        return apiNew.resolveEnvironment(Uri.file(env.path));
+    } else {
+        return undefined;
+    }
+}
+
+export async function legacyResolveEnvironment(
+    env: Environment | EnvironmentPath | string,
 ): Promise<ResolvedEnvironment | undefined> {
-    const api = await getPythonExtensionEnviromentAPI();
+    const api = await getLegacyPythonExtensionEnviromentAPI();
     return api.environments.resolveEnvironment(env);
 }
 
-/**
- * Returns the environment configured by user in settings. Note that this can be an invalid environment, use
- * resolve the environment to get full details.
- * @param resource Optional workspace resource to get active environment for
- * @returns Path to the active environment
- */
-export async function getActiveEnvironmentPath(resource?: Resource): Promise<EnvironmentPath> {
-    const api = await getPythonExtensionEnviromentAPI();
+export async function getLegacyActiveEnvironmentPath(resource?: Resource) {
+    const api = await getLegacyPythonExtensionEnviromentAPI();
     return api.environments.getActiveEnvironmentPath(resource);
 }
 
+export async function getActiveEnvironmentPath(resource?: Resource): Promise<PythonEnvironment | undefined> {
+    const api = await getPythonEnviromentExtensionAPI();
+
+    // Convert Resource to Uri if it exists
+    let resourceUri: Uri | undefined;
+    if (resource instanceof Uri) {
+        resourceUri = resource;
+    } else if (resource && 'uri' in resource) {
+        // WorkspaceFolder type
+        resourceUri = resource.uri;
+    }
+
+    return api.getEnvironment(resourceUri);
+}
+
 /**
- * Gets detailed information about the active Python interpreter.
- * @param resource Optional workspace resource to get interpreter details for
- * @returns Interpreter details including path and resource information
+ * Gets Python interpreter details using the legacy Python extension API.
+ *
+ * This function retrieves the active Python environment for a given resource using the
+ * legacy @vscode/python-extension API. It resolves the environment to get the executable
+ * path and handles path quoting for paths containing spaces.
+ *
+ * @param resource Optional URI to specify the workspace/folder context for interpreter selection
+ * @returns Promise resolving to interpreter details containing the executable path and resource
  */
-export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
-    const api = await getPythonExtensionEnviromentAPI();
+export async function getLegacyInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
+    const api = await getLegacyPythonExtensionEnviromentAPI();
+
     const environment = await api.environments.resolveEnvironment(api.environments.getActiveEnvironmentPath(resource));
     if (environment?.executable.uri) {
         return { path: [environment?.executable.uri.fsPath], resource };
@@ -192,34 +216,34 @@ export async function getInterpreterDetails(resource?: Uri): Promise<IInterprete
     return { path: undefined, resource };
 }
 
-/**
- * Checks if any Python interpreters are available in the system.
- * @returns True if interpreters are found, false otherwise
- */
-export async function hasInterpreters(): Promise<boolean> {
-    const api = await getPythonExtensionEnviromentAPI();
-    const onAddedToCollection = createDeferred();
-    api.environments.onDidChangeEnvironments(async () => {
-        if (api.environments.known) {
-            onAddedToCollection.resolve();
-        }
-    });
-    const initialEnvs = api.environments.known;
-    if (initialEnvs.length > 0) {
-        return true;
+export function quoteStringIfNecessary(arg: string): string {
+    // Always return if already quoted to avoid double-quoting
+    if (arg.startsWith('"') && arg.endsWith('"')) {
+        return arg;
     }
-    // Initiates a refresh of Python environments within the specified scope.
-    await Promise.race([onAddedToCollection.promise, api?.environments.refreshEnvironments()]);
 
-    return api.environments.known.length > 0;
+    // Quote if contains common shell special characters that are problematic across multiple shells
+    // Includes: space, &, |, <, >, ;, ', ", `, (, ), [, ], {, }, $
+    const needsQuoting = /[\s&|<>;'"`()\[\]{}$]/.test(arg);
+
+    return needsQuoting ? `"${arg}"` : arg;
 }
 
-/**
- *  Gets environments known to the extension at the time of fetching the property. Note this may not
- * contain all environments in the system as a refresh might be going on.
- * @returns Array of known Python environments
- */
-export async function getInterpreters(): Promise<readonly Environment[]> {
-    const api = await getPythonExtensionEnviromentAPI();
-    return api.environments.known || [];
+export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
+    const api = await getPythonEnviromentExtensionAPI();
+
+    // A promise that resolves to the current Python environment, or undefined if none is set.
+    const env: PythonEnvironment | undefined = await api.getEnvironment(resource);
+    // resolve the environment to get full details
+    const resolvedEnv = env ? await api.resolveEnvironment(env?.environmentPath) : undefined;
+    const executablePath = resolvedEnv?.execInfo.activatedRun?.executable
+        ? resolvedEnv.execInfo.activatedRun.executable
+        : resolvedEnv?.execInfo.run.executable;
+
+    // Quote the executable path if necessary
+    const a: IInterpreterDetails = {
+        path: executablePath ? [quoteStringIfNecessary(executablePath)] : undefined,
+        resource,
+    };
+    return a;
 }

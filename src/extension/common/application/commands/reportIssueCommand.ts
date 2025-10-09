@@ -8,7 +8,6 @@ import * as path from 'path';
 import { executeCommand } from '../../vscodeapi';
 import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 import { EXTENSION_ROOT_DIR } from '../../constants';
-import { getRawVersion } from '../../settings';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
 
@@ -22,9 +21,9 @@ export async function openReportIssue(): Promise<void> {
     const userTemplate = await fs.readFile(userDataTemplatePath, 'utf8');
     const interpreterPath = await getActiveEnvironmentPath();
     const interpreter = await resolveEnvironment(interpreterPath);
-    const virtualEnvKind = interpreter?.environment?.type || 'Unknown';
+    const virtualEnvKind = interpreter?.envId.managerId ?? 'N/A';
 
-    const pythonVersion = getRawVersion(interpreter?.version);
+    const pythonVersion = interpreter?.version ?? 'unknown';
     await executeCommand('workbench.action.openIssueReporter', {
         extensionId: 'ms-python.debugpy',
         issueBody: template,

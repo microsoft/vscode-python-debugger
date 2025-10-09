@@ -23,8 +23,8 @@ import { getInterpreterDetails, resolveEnvironment, runPythonExtensionCommand } 
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
-import { ResolvedEnvironment } from '@vscode/python-extension';
 import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
+import { PythonEnvironment } from '../../envExtApi';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -177,15 +177,32 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
     }
 
-    private async getExecutableCommand(interpreter: ResolvedEnvironment | undefined): Promise<string[]> {
+    /**
+     * Extracts the executable command from a resolved Python environment.
+     *
+     * This function takes a resolved Python environment and returns the path to the Python
+     * executable as a string array suitable for spawning processes. It also performs version
+     * validation, showing a deprecation warning if the Python version is below 3.9.
+     *
+     * @param interpreter The resolved Python environment containing executable path and version info
+     * @returns Promise resolving to an array containing the Python executable path, or empty array if no interpreter
+     */
+    private async getExecutableCommand(interpreter: PythonEnvironment | undefined): Promise<string[]> {
         if (interpreter) {
-            if (
-                (interpreter.version?.major ?? 0) < 3 ||
-                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) < 9)
-            ) {
+            const executablePath = interpreter.execInfo.activatedRun?.executable ?? interpreter.execInfo.run.executable;
+            const version = interpreter.version;
+
+            // Parse version string (e.g., "3.8.10" -> major: 3, minor: 8)
+            const parseMajorMinor = (v: string) => {
+                const m = v.match(/^(\d+)(?:\.(\d+))?/);
+                return { major: m ? Number(m[1]) : 0, minor: m && m[2] ? Number(m[2]) : 0 };
+            };
+            const { major, minor } = parseMajorMinor(version || '');
+
+            if (major < 3 || (major <= 3 && minor < 9)) {
                 this.showDeprecatedPythonMessage();
             }
-            return interpreter.path.length > 0 ? [interpreter.path] : [];
+            return executablePath ? [executablePath] : [];
         }
         return [];
     }
