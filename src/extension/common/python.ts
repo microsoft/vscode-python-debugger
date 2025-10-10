@@ -115,13 +115,8 @@ export async function getActiveEnvironmentPath(resource?: Resource) {
 export async function getInterpreterDetails(resource?: Uri): Promise<IInterpreterDetails> {
     const api = await getPythonExtensionEnviromentAPI();
     const environment = await api.environments.resolveEnvironment(api.environments.getActiveEnvironmentPath(resource));
-    const rawExecPath = environment?.executable.uri?.fsPath;
-    if (rawExecPath) {
-        let execPath = rawExecPath;
-        if (rawExecPath.includes(' ') && !(rawExecPath.startsWith('"') && rawExecPath.endsWith('"'))) {
-            execPath = `"${rawExecPath}"`;
-        }
-        return { path: [execPath], resource };
+    if (environment?.executable.uri) {
+        return { path: [environment?.executable.uri.fsPath], resource };
     }
     return { path: undefined, resource };
 }
