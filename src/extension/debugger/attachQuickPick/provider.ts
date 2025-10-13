@@ -7,7 +7,7 @@ import { l10n } from 'vscode';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
-import { WmicProcessParser } from './wmicProcessParser';
+import { PowerShellProcessParser } from './powerShellProcessParser';
 import { getEnvironmentVariables } from '../../common/python';
 import { plainExec } from '../../common/process/rawProcessApis';
 import { logProcess } from '../../common/process/logger';
@@ -65,17 +65,18 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         } else if (osType === OSType.Linux) {
             processCmd = PsProcessParser.psLinuxCommand;
         } else if (osType === OSType.Windows) {
-            processCmd = WmicProcessParser.wmicCommand;
+            processCmd = PowerShellProcessParser.powerShellCommand;
         } else {
             throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
         }
 
         const customEnvVars = await getEnvironmentVariables();
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
+        console.log(output);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
 
         return osType === OSType.Windows
-            ? WmicProcessParser.parseProcesses(output.stdout)
+            ? PowerShellProcessParser.parseProcesses(output.stdout)
             : PsProcessParser.parseProcesses(output.stdout);
     }
 }
