@@ -8,18 +8,7 @@
 import { IAttachItem, ProcessListCommand } from './types';
 
 export namespace PowerShellProcessParser {
-    const powerShellNameTitle = 'Name';
-    const powerShellCommandLineTitle = 'CommandLine';
-    const powerShellPidTitle = 'ProcessId';
-    const defaultEmptyEntry: IAttachItem = {
-        label: '',
-        description: '',
-        detail: '',
-        id: '',
-        processName: '',
-        commandLine: '',
-    };
-
+    
     // Perf numbers on Win10:
     // | # of processes | Time (ms) |
     // |----------------+-----------|
@@ -33,54 +22,31 @@ export namespace PowerShellProcessParser {
     };
 
     export function parseProcesses(processes: string): IAttachItem[] {
-        const lines: string[] = processes.split('\r\n');
+        const processesArray = JSON.parse(processes);
         const processEntries: IAttachItem[] = [];
-        let entry = { ...defaultEmptyEntry };
-        for (const line of lines) {
-            if (!line.length) {
+        for (const process of processesArray) {
+            if (!process.ProcessId) {
                 continue;
             }
-
-            parseLineFromPowerShell(line, entry);
-
-            // Each entry of processes has ProcessId as the last line
-            if (line.lastIndexOf(powerShellPidTitle, 0) === 0) {
-                processEntries.push(entry);
-                entry = { ...defaultEmptyEntry };
-                console.log(line);
-                console.log('pushed' + JSON.stringify(entry));
-            }
-        }
-
-        return processEntries;
-    }
-
-    function parseLineFromPowerShell(line: string, item: IAttachItem): IAttachItem {
-        const splitter = line.indexOf(':');
-        const currentItem = item;
-
-        if (splitter > 0) {
-            const key = line.slice(0, splitter).trim().replace(/\s+/g, '');
-            let value = line.slice(splitter + 1).trim();
-            if (key === powerShellNameTitle) {
-                currentItem.label = value;
-                currentItem.processName = value;
-            } else if (key === powerShellPidTitle) {
-                currentItem.description = value;
-                currentItem.id = value;
-            } else if (key === powerShellCommandLineTitle) {
-                const dosDevicePrefix = '\\??\\'; // DOS device prefix, see https://reverseengineering.stackexchange.com/a/15178
-                if (value.lastIndexOf(dosDevicePrefix, 0) === 0) {
-                    value = value.slice(dosDevicePrefix.length);
+            const entry: IAttachItem = {
+                label: process.Name || '',
+                processName: process.Name || '',
+                description: String(process.ProcessId),
+                id: String(process.ProcessId),
+                detail: '',
+                commandLine: '',
+            };
+            if (process.CommandLine) {
+                const dosDevicePrefix = '\\??\\';// DOS device prefix, see https://reverseengineering.stackexchange.com/a/15178
+                let commandLine = process.CommandLine;
+                if (commandLine.startsWith(dosDevicePrefix)) {
+                    commandLine = commandLine.slice(dosDevicePrefix.length);
                 }
-
-                currentItem.detail = value;
-                currentItem.commandLine = value;
+                entry.detail = commandLine;
+                entry.commandLine = commandLine;
             }
-            
-            console.log(`key='${key}', value='${value}' item=${JSON.stringify(currentItem)}`);
+            processEntries.push(entry);
         }
-
-        return currentItem;
+        return processEntries;
     }
 }
