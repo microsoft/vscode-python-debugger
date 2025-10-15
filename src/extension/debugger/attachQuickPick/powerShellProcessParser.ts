@@ -8,7 +8,6 @@
 import { IAttachItem, ProcessListCommand } from './types';
 
 export namespace PowerShellProcessParser {
-    
     // Perf numbers on Win10:
     // | # of processes | Time (ms) |
     // |----------------+-----------|
@@ -18,27 +17,31 @@ export namespace PowerShellProcessParser {
     // |           1308 |      1132 |
     export const powerShellCommand: ProcessListCommand = {
         command: 'powershell',
-        args: ['-ExecutionPolicy','ByPass','-File','D:\\vscode-python-debugger\\bundled\\scripts\\noConfigScripts\\processSelect.ps1'],
+        args: [
+            '-Command',
+            '$processes = if (Get-Command Get-CimInstance -ErrorAction SilentlyContinue) { Get-CimInstance Win32_Process } else { Get-WmiObject Win32_Process }; \
+             $processes | % { @{ name = $_.Name; commandLine = $_.CommandLine; processId = $_.ProcessId } } | ConvertTo-Json',
+        ], // Get-WmiObject For the legacy compatibility
     };
 
     export function parseProcesses(processes: string): IAttachItem[] {
         const processesArray = JSON.parse(processes);
         const processEntries: IAttachItem[] = [];
         for (const process of processesArray) {
-            if (!process.ProcessId) {
+            if (!process.processId) {
                 continue;
             }
             const entry: IAttachItem = {
-                label: process.Name || '',
-                processName: process.Name || '',
-                description: String(process.ProcessId),
-                id: String(process.ProcessId),
+                label: process.name || '',
+                processName: process.name || '',
+                description: String(process.processId),
+                id: String(process.processId),
                 detail: '',
                 commandLine: '',
             };
-            if (process.CommandLine) {
-                const dosDevicePrefix = '\\??\\';// DOS device prefix, see https://reverseengineering.stackexchange.com/a/15178
-                let commandLine = process.CommandLine;
+            if (process.commandLine) {
+                const dosDevicePrefix = '\\??\\'; // DOS device prefix, see https://reverseengineering.stackexchange.com/a/15178
+                let commandLine = process.commandLine;
                 if (commandLine.startsWith(dosDevicePrefix)) {
                     commandLine = commandLine.slice(dosDevicePrefix.length);
                 }
