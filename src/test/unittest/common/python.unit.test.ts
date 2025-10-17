@@ -324,7 +324,8 @@ suite('Python API Tests', () => {
 
             const result = await pythonApi.getInterpreterDetails();
 
-            expect(result.path).to.deep.equal([pythonPath]);
+            // Use Uri.file().fsPath to get platform-normalized path for comparison
+            expect(result.path).to.deep.equal([Uri.file(pythonPath).fsPath]);
             expect(result.resource).to.be.undefined;
         });
 
@@ -342,7 +343,8 @@ suite('Python API Tests', () => {
 
             const result = await pythonApi.getInterpreterDetails(resource);
 
-            expect(result.path).to.deep.equal([pythonPath]);
+            // Use Uri.file().fsPath to get platform-normalized path for comparison
+            expect(result.path).to.deep.equal([Uri.file(pythonPath).fsPath]);
             expect(result.resource).to.deep.equal(resource);
         });
 
