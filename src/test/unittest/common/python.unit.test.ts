@@ -194,6 +194,7 @@ suite('Python API Tests', () => {
 
     suite('getEnvironmentVariables', () => {
         test('Should return environment variables from Python extension API', async () => {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             const expectedVars = { PATH: '/usr/bin', PYTHONPATH: '/usr/lib/python3' };
             mockPythonEnvApi.environments.getEnvironmentVariables.returns(Promise.resolve(expectedVars));
 
@@ -207,6 +208,7 @@ suite('Python API Tests', () => {
 
         test('Should get environment variables for specific resource', async () => {
             const resource = Uri.file('/workspace/file.py');
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             const expectedVars = { PATH: '/usr/bin' };
             mockPythonEnvApi.environments.getEnvironmentVariables.returns(Promise.resolve(expectedVars));
 
@@ -216,6 +218,19 @@ suite('Python API Tests', () => {
 
             expect(result).to.deep.equal(expectedVars);
             sinon.assert.calledWith(mockPythonEnvApi.environments.getEnvironmentVariables, resource);
+        });
+
+        test('Should handle undefined resource and return workspace environment variables', async () => {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            const expectedVars = { PATH: '/usr/bin', PYTHONPATH: '/workspace/python' };
+            mockPythonEnvApi.environments.getEnvironmentVariables.returns(Promise.resolve(expectedVars));
+
+            sinon.stub(PythonExtension, 'api').resolves(mockPythonEnvApi);
+
+            const result = await pythonApi.getEnvironmentVariables(undefined);
+
+            expect(result).to.deep.equal(expectedVars);
+            sinon.assert.calledWith(mockPythonEnvApi.environments.getEnvironmentVariables, undefined);
         });
     });
 
@@ -333,9 +348,12 @@ suite('Python API Tests', () => {
 
         test('Should quote path with spaces', async () => {
             const pythonPath = '/path with spaces/python3';
+            const mockUri = {
+                fsPath: pythonPath,
+            };
             const mockEnv: ResolvedEnvironment = {
                 id: 'test-env',
-                executable: { uri: Uri.file(pythonPath) },
+                executable: { uri: mockUri },
             } as ResolvedEnvironment;
 
             mockPythonEnvApi.environments.getActiveEnvironmentPath.returns({ path: pythonPath });
