@@ -1243,7 +1243,7 @@ export interface PythonEnvironmentVariablesApi {
      * @param baseEnvVar The base environment variables that should be used as a starting point.
      */
     getEnvironmentVariables(
-        uri: Uri,
+        uri: Uri | undefined,
         overrides?: ({ [key: string]: string | undefined } | Uri)[],
         baseEnvVar?: { [key: string]: string | undefined },
     ): Promise<{ [key: string]: string | undefined }>;

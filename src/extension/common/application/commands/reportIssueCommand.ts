@@ -10,6 +10,7 @@ import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 import { EXTENSION_ROOT_DIR } from '../../constants';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
+import { PythonEnvironment } from '../../../envExtApi';
 
 /**
  * Allows the user to report an issue related to the Python Debugger extension using our template.
@@ -19,11 +20,17 @@ export async function openReportIssue(): Promise<void> {
     const userDataTemplatePath = path.join(EXTENSION_ROOT_DIR, 'resources', 'report_issue_user_data_template.md');
     const template = await fs.readFile(templatePath, 'utf8');
     const userTemplate = await fs.readFile(userDataTemplatePath, 'utf8');
+    // get active environment and resolve it
     const interpreterPath = await getActiveEnvironmentPath();
-    const interpreter = await resolveEnvironment(interpreterPath);
-    const virtualEnvKind = interpreter?.envId.managerId ?? 'N/A';
-
+    let interpreter: PythonEnvironment | undefined = undefined;
+    if (interpreterPath && 'environmentPath' in interpreterPath) {
+        interpreter = interpreterPath ? await resolveEnvironment(interpreterPath.environmentPath.fsPath) : undefined;
+    } else if (interpreterPath && 'path' in interpreterPath) {
+        interpreter = interpreterPath ? await resolveEnvironment(interpreterPath.path) : undefined;
+    }
+    const virtualEnvKind = interpreter && interpreter.envId ? interpreter.envId.managerId : 'Unknown';
     const pythonVersion = interpreter?.version ?? 'unknown';
+
     await executeCommand('workbench.action.openIssueReporter', {
         extensionId: 'ms-python.debugpy',
         issueBody: template,
