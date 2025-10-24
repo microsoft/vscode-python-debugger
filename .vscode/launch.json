@@ -27,9 +27,9 @@
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionTestsPath=${workspaceFolder}/out/test/unittest/index"
             ],
-            "env": {
-                "TEST_GREP": "Python API Tests"
-            },
+            // "env": {
+            //     "TEST_GREP": "Python API Tests"
+            // },
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "preLaunchTask": "tasks: watch-tests"
         }
