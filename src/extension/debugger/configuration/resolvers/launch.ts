@@ -8,7 +8,7 @@ import { getOSType, OSType } from '../../../common/platform';
 import { getEnvFile } from '../../../common/settings';
 import { DebuggerTypeName } from '../../../constants';
 import { DebugOptions, DebugPurpose, LaunchRequestArguments } from '../../../types';
-import { resolveVariables } from '../utils/common';
+import { resolveWorkspaceVariables } from '../utils/common';
 import { BaseConfigurationResolver } from './base';
 import { getDebugEnvironmentVariables, getProgram } from './helper';
 import { getConfiguration } from '../../../common/vscodeapi';
@@ -83,7 +83,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
             debugConfiguration.cwd = workspaceFolder.fsPath;
         }
         if (typeof debugConfiguration.envFile !== 'string' && workspaceFolder) {
-            debugConfiguration.envFile = resolveVariables(
+            debugConfiguration.envFile = resolveWorkspaceVariables(
                 getEnvFile('python', workspaceFolder),
                 workspaceFolder.fsPath,
                 undefined,

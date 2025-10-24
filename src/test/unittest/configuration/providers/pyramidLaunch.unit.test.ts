@@ -12,10 +12,10 @@ import { Uri } from 'vscode';
 import { DebugConfigStrings } from '../../../../extension/common/utils/localize';
 import { MultiStepInput } from '../../../../extension/common/multiStepInput';
 import { DebuggerTypeName } from '../../../../extension/constants';
-import { resolveVariables } from '../../../../extension/debugger/configuration/utils/common';
 import * as pyramidLaunch from '../../../../extension/debugger/configuration/providers/pyramidLaunch';
 import { DebugConfigurationState } from '../../../../extension/debugger/types';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
+import { resolveWorkspaceVariables } from '../../../../extension/debugger/configuration/utils/common';
 
 suite('Debugging - Configuration Provider Pyramid', () => {
     let input: MultiStepInput<DebugConfigurationState>;
@@ -52,7 +52,7 @@ suite('Debugging - Configuration Provider Pyramid', () => {
     test('Resolve variables (with resource)', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         workspaceStub.returns(folder);
-        const resolvedPath = resolveVariables('${workspaceFolder}/one.py', undefined, folder);
+        const resolvedPath = resolveWorkspaceVariables('${workspaceFolder}/one.py', undefined, folder);
 
         expect(resolvedPath).to.be.equal(`${folder.uri.fsPath}/one.py`);
     });

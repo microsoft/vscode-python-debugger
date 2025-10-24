@@ -13,7 +13,7 @@ import { EventName } from '../../../telemetry/constants';
 import { DebuggerTypeName } from '../../../constants';
 import { LaunchRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
-import { resolveVariables } from '../utils/common';
+import { resolveWorkspaceVariables } from '../utils/common';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -73,7 +73,7 @@ export async function validateIniPath(
     if (!selected || selected.trim().length === 0) {
         return error;
     }
-    const resolvedPath = resolveVariables(selected, undefined, folder);
+    const resolvedPath = resolveWorkspaceVariables(selected, undefined, folder);
     if (resolvedPath) {
         if (selected !== defaultValue && !fs.pathExists(resolvedPath)) {
             return error;
