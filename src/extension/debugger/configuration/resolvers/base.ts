@@ -174,6 +174,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             debugConfiguration.python = resolvedInterpreterPath;
         } else if (!debugConfiguration.python) {
             // fallback to pythonPath if python undefined
+            this.pythonPathSource = PythonPathSource.settingsJson;
             debugConfiguration.python = debugConfiguration.pythonPath;
         } else {
             // User provided explicit python path in launch.json
