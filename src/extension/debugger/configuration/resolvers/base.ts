@@ -12,7 +12,7 @@ import { getWorkspaceFolders, getWorkspaceFolder as getVSCodeWorkspaceFolder } f
 import { AttachRequestArguments, DebugOptions, LaunchRequestArguments, PathMapping } from '../../../types';
 import { PythonPathSource } from '../../types';
 import { IDebugConfigurationResolver } from '../types';
-import { resolveVariables } from '../utils/common';
+import { resolveWorkspaceVariables } from '../utils/common';
 import { getProgram } from './helper';
 import { getSettingsPythonPath, getInterpreterDetails } from '../../../common/python';
 import { getOSType, OSType } from '../../../common/platform';
@@ -96,7 +96,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             return;
         }
         if (debugConfiguration.envFile && (workspaceFolder || debugConfiguration.cwd)) {
-            debugConfiguration.envFile = resolveVariables(
+            debugConfiguration.envFile = resolveWorkspaceVariables(
                 debugConfiguration.envFile,
                 (workspaceFolder ? workspaceFolder.fsPath : undefined) || debugConfiguration.cwd,
                 undefined,
@@ -118,7 +118,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
                 : await getSettingsPythonPath(workspaceFolder);
             debugConfiguration.pythonPath = interpreterPath ? interpreterPath[0] : interpreterPath;
         } else {
-            debugConfiguration.pythonPath = resolveVariables(
+            debugConfiguration.pythonPath = resolveWorkspaceVariables(
                 debugConfiguration.pythonPath ? debugConfiguration.pythonPath : undefined,
                 workspaceFolder?.fsPath,
                 undefined,
@@ -137,7 +137,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             debugConfiguration.python = debugConfiguration.pythonPath;
         } else {
             this.pythonPathSource = PythonPathSource.launchJson;
-            debugConfiguration.python = resolveVariables(
+            debugConfiguration.python = resolveWorkspaceVariables(
                 debugConfiguration.python ?? debugConfiguration.pythonPath,
                 workspaceFolder?.fsPath,
                 undefined,
@@ -194,7 +194,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         } else {
             // Expand ${workspaceFolder} variable first if necessary.
             pathMappings = pathMappings.map(({ localRoot: mappedLocalRoot, remoteRoot }) => {
-                const resolvedLocalRoot = resolveVariables(mappedLocalRoot, defaultLocalRoot, undefined);
+                const resolvedLocalRoot = resolveWorkspaceVariables(mappedLocalRoot, defaultLocalRoot, undefined);
                 return {
                     localRoot: resolvedLocalRoot || '',
                     // TODO: Apply to remoteRoot too?
