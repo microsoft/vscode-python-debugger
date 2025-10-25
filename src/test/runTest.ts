@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 import * as path from 'path';
 
-import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import { /*downloadAndUnzipVSCode,*/ resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 import { PVSC_ENVS_EXTENSION_ID_FOR_TESTS, PVSC_EXTENSION_ID_FOR_TESTS } from './constants';
 
 async function main() {
@@ -13,8 +13,10 @@ async function main() {
         // The path to test runner
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './unittest/index');
-        const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        // No need to download a new codium
+        const vscodeExecutablePath = /*await downloadAndUnzipVSCode('stable')*/'/usr/bin/codium'; // TODO: get this path by using $which codium
         const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+        const codiumCliPath = '/usr/bin/codium'; // TODO: get this path by using $which codium
 
         // Use cp.spawn / cp.exec for custom setup
         const isWin = process.platform === 'win32';
@@ -43,7 +45,7 @@ async function main() {
             }
         } else {
             const installResult = cp.spawnSync(
-                cliPath,
+                codiumCliPath,
                 [...args, '--install-extension', PVSC_EXTENSION_ID_FOR_TESTS, PVSC_ENVS_EXTENSION_ID_FOR_TESTS],
                 {
                     encoding: 'utf8',
