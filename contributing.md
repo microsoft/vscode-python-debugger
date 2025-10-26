@@ -2,7 +2,7 @@
 
 Follow the steps below for setup:
 ```
-git clone https://github.com/microsoft/vscode-python-debugger
+git clone https://github.com/wubzbz/vscode-python-debugger-la64.git
 cd vscode-python-debugger
 npm ci
 ```
@@ -24,7 +24,7 @@ nox --session setup_repo
 
 ## Reporting Issues
 
-If you encounter any issues, please report them using the [GitHub Issues](https://github.com/microsoft/vscode-python-debugger/issues) page. Provide as much detail as possible, including steps to reproduce the issue and any relevant logs or screenshots. We also recommend using the Report Issue command in VS Code, selecting Python Debugger as the extension. This helps automatically attach crucial information.
+See [SUPPORT.md](./SUPPORT.md).
 
 ## Submitting Pull Requests
 
