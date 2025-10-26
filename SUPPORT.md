@@ -1,11 +1,88 @@
-# Support
+# Support Guidelines for LoongArch64 Port
 
-## How to file issues and get help  
+## 🎯 Where to Report Issues?
 
-This project uses GitHub Issues to track bugs and feature requests. Please search the [existing issues](https://github.com/microsoft/vscode-python-debugger/issues) before filing new issues to avoid duplicates. For new issues, file your bug or feature request as a new Issue.
+**Please report issues in THIS repository when:**
+- The issue is related to **LoongArch64 architecture**
+- Specific behavior or errors occur only on LoongArch64 platforms
+- Build, installation, or packaging problems with this port
+- Feature requests specific to LoongArch64
 
-For help and questions about using this project, please see the [python+visual-studio-code labels on Stack Overflow](https://stackoverflow.com/questions/tagged/visual-studio-code+python) or the `#vscode` channel on the [microsoft-python server on Discord](https://aka.ms/python-discord-invite).
+**Please report issues in the [OFFICIAL REPOSITORY](https://github.com/microsoft/vscode-python-debugger) when:**
+- The issue occurs across all architectures
+- Related to core Python debugging functionality (not architecture-specific)
+- General feature problems that also appear in official versions
+- Issues related to VSCode core debugging features
 
-## Microsoft Support Policy  
+## 🔍 Issue Categorization Guide
 
-Support for this project is limited to the resources listed above.
+| Issue Type | Report Location | Reason |
+|------------|-----------------|--------|
+| **LoongArch64 build failure** | ✅ **THIS REPOSITORY** | Architecture-specific |
+| **Runtime crash on LoongArch64** | ✅ **THIS REPOSITORY** | Platform-specific |
+| **Debugger connection failure (LA64 only)** | ✅ **THIS REPOSITORY** | Architecture-related network/compatibility |
+| **General Python debugging issue** | ⚠️ **OFFICIAL REPOSITORY** | Core functionality |
+| **VSCode UI related issues** | ⚠️ **OFFICIAL REPOSITORY** | Editor integration |
+| **Uncertain about issue origin** | 🔍 **START HERE** | We can help diagnose |
+
+## 📝 When Reporting Issues, Please Provide
+
+**Required Information:**
+- Complete error messages and stack traces
+- Your LoongArch64 system information (OS, kernel version)
+- Python version and architecture being used
+- Specific commit hash of this port
+
+**Useful Diagnostic Information:**
+```bash
+# System information
+uname -a
+python -c "import sys; print(f'Python {sys.version} on {sys.platform}')"
+
+# Debug information
+export DEBUG="*"  # Enable verbose logging
+```
+
+## ⚠️ Important Notes
+
+**This is a community-maintained port:**
+- This project is NOT officially supported and is maintained by the community
+- Response times may not be as prompt as the official version
+- Some advanced features may have limitations on LoongArch64
+
+**Issue Triage Process:**
+1. First check [existing issues of official repo](https://github.com/microsoft/vscode-python-debugger/issues) and [of this repo](https://github.com/wubzbz/vscode-python-debugger-la64/issues) for similar problems
+2. Provide detailed reproduction steps and environment information
+3. If the issue likely belongs upstream, we will assist in reporting it
+
+Moreover, for help and questions about using **the official project**, please see the [python+visual-studio-code labels on Stack Overflow](https://stackoverflow.com/questions/tagged/visual-studio-code+python) or the `#vscode` channel on the [microsoft-python server on Discord](https://aka.ms/python-discord-invite).
+
+## 🔗 Related Links
+
+- [Official VSCode Python Debugger Repository](https://github.com/microsoft/vscode-python-debugger)
+- [Python debugging in VS Code](https://code.visualstudio.com/docs/python/debugging)
+- [Build Guide for LoongArch64](./BUILD_LA64.md)
+- [Debugpy Repository](https://github.com/microsoft/debugpy)
+
+---
+
+## 💡 Before Reporting
+
+To help us quickly identify the issue:
+
+1. **Test with minimal setup** - Try reproducing with basic configuration
+2. **Check debug logs** - Enable debug mode and include relevant log sections
+3. **Compare with x86_64** - If possible, test if the same issue occurs on x86_64
+4. **Provide reproduction steps** - Clear steps to reproduce the problem
+
+## 🐛 Common LoongArch64-Specific Issues
+
+We're particularly interested in:
+- Memory alignment problems
+- Endianness-related issues
+- Instruction set compatibility
+- Library binding problems
+- Performance characteristics on LA64
+
+**Thank you for helping improve the LoongArch64 port!** 🚀
+
