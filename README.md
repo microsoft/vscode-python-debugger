@@ -1,5 +1,17 @@
 # Python Debugger extension for Visual Studio Code
 
+## Note: This is an Unofficial Fork
+
+This repository is a **community-maintained** fork of the official VSCode Python Debugger extension, specifically ported to support the LoongArch64 architecture. This is not an official Microsoft product and is not supported by the original maintainers.
+
+- Original Project: [link to original repo](https://github.com/microsoft/vscode-python-debugger).
+
+- Purpose: Provide LoongArch64 compatibility for the VSCode Python Debugger extension.
+
+- Support: Community-supported. Issues specific to LoongArch64 should be reported here.
+
+---
+
 A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marketplace.visualstudio.com/VSCode) that supports Python debugging with debugpy. Python Debugger provides a seamless debugging experience by allowing you to set breakpoints, step through code, inspect variables, and perform other essential debugging tasks. The debugpy extension offers debugging support for various types of Python applications including scripts, web applications, remote processes, and multi-threaded processes. 
 
 Note: 
