@@ -68,17 +68,6 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         workspaceFolder: Uri | undefined,
         debugConfiguration: LaunchRequestArguments,
     ): Promise<void> {
-        if (debugConfiguration.python === undefined) {
-            debugConfiguration.python = debugConfiguration.pythonPath;
-        }
-        if (debugConfiguration.debugAdapterPython === undefined) {
-            debugConfiguration.debugAdapterPython = debugConfiguration.pythonPath;
-        }
-        if (debugConfiguration.debugLauncherPython === undefined) {
-            debugConfiguration.debugLauncherPython = debugConfiguration.pythonPath;
-        }
-        delete debugConfiguration.pythonPath;
-
         if (typeof debugConfiguration.cwd !== 'string' && workspaceFolder) {
             debugConfiguration.cwd = workspaceFolder.fsPath;
         }

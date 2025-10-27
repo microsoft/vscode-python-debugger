@@ -125,7 +125,7 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
     }
 
     /**
-     * Resolves Python interpreter paths and handles the legacy pythonPath deprecation.
+     * Resolves Python interpreter paths.
      *
      * @param workspaceFolder The workspace folder URI for variable resolution and interpreter detection
      * @param debugConfiguration The launch configuration to update with resolved Python paths
@@ -145,7 +145,6 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
 
         traceLog(
             `resolveAndUpdatePythonPath - Initial state: ` +
-                `pythonPath='${debugConfiguration.pythonPath}', ` +
                 `python='${debugConfiguration.python}', ` +
                 `debugAdapterPython='${debugConfiguration.debugAdapterPython}', ` +
                 `debugLauncherPython='${debugConfiguration.debugLauncherPython}', ` +
@@ -153,29 +152,11 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
                 `resolvedInterpreterPath='${resolvedInterpreterPath}'`,
         );
 
-        // STEP 1: Resolve legacy pythonPath property (DEPRECATED)
-        // pythonPath will equal user set value, or getInterpreterDetails if undefined or set to command
-        if (debugConfiguration.pythonPath === '${command:python.interpreterPath}' || !debugConfiguration.pythonPath) {
-            this.pythonPathSource = PythonPathSource.settingsJson;
-            debugConfiguration.pythonPath = resolvedInterpreterPath;
-        } else {
-            // User provided explicit pythonPath in launch.json
-            debugConfiguration.pythonPath = resolveWorkspaceVariables(
-                debugConfiguration.pythonPath,
-                workspaceFolder?.fsPath,
-                undefined,
-            );
-        }
-
-        // STEP 2: Resolve current python property (CURRENT STANDARD)
-        if (debugConfiguration.python === '${command:python.interpreterPath}') {
-            // if python is set to the command, resolve it
+        // Resolve current python property
+        if (debugConfiguration.python === '${command:python.interpreterPath}' || !debugConfiguration.python) {
+            // if python is set to the command or undefined, resolve it
             this.pythonPathSource = PythonPathSource.settingsJson;
             debugConfiguration.python = resolvedInterpreterPath;
-        } else if (!debugConfiguration.python) {
-            // fallback to pythonPath if python undefined
-            this.pythonPathSource = PythonPathSource.settingsJson;
-            debugConfiguration.python = debugConfiguration.pythonPath;
         } else {
             // User provided explicit python path in launch.json
             this.pythonPathSource = PythonPathSource.launchJson;
@@ -186,16 +167,12 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             );
         }
 
-        // STEP 3: Set debug adapter and launcher Python paths (backwards compatible)
+        // Set debug adapter and launcher Python paths
         this.setDebugComponentPythonPaths(debugConfiguration);
-
-        // STEP 4: Clean up - remove the deprecated pythonPath property
-        delete debugConfiguration.pythonPath;
     }
 
     /**
-     * Sets debugAdapterPython and debugLauncherPython with backwards compatibility.
-     * Prefers pythonPath over python for these internal properties.
+     * Sets debugAdapterPython and debugLauncherPython.
      *
      * @param debugConfiguration The debug configuration to update
      */
@@ -208,20 +185,11 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
             debugConfiguration.debugLauncherPython === '${command:python.interpreterPath}' ||
             debugConfiguration.debugLauncherPython === undefined;
 
-        // Default fallback path (prefer pythonPath for backwards compatibility)
-        const fallbackPath = debugConfiguration.pythonPath ?? debugConfiguration.python;
-
-        if (debugConfiguration.pythonPath !== debugConfiguration.python) {
-            sendTelemetryEvent(EventName.DEPRECATED_CODE_PATH_USAGE, undefined, {
-                codePath: 'different_python_paths_in_debug_config',
-            });
-        }
-
         if (shouldSetDebugAdapter) {
-            debugConfiguration.debugAdapterPython = fallbackPath;
+            debugConfiguration.debugAdapterPython = debugConfiguration.python;
         }
         if (shouldSetDebugLauncher) {
-            debugConfiguration.debugLauncherPython = fallbackPath;
+            debugConfiguration.debugLauncherPython = debugConfiguration.python;
         }
     }
 
