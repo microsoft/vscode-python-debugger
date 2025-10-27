@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+import * as fs from 'fs';
 import { cloneDeep } from 'lodash';
-import { CancellationToken, DebugConfiguration, QuickPickItem, WorkspaceFolder } from 'vscode';
+import { CancellationToken, DebugConfiguration, QuickPickItem, Uri, WorkspaceFolder } from 'vscode';
 import { DebugConfigStrings } from '../../common/utils/localize';
 import { IMultiStepInputFactory, InputStep, IQuickPickParameters, MultiStepInput } from '../../common/multiStepInput';
 import { AttachRequestArguments, DebugConfigurationArguments, LaunchRequestArguments } from '../../types';
@@ -17,6 +17,7 @@ import { buildPyramidLaunchConfiguration } from './providers/pyramidLaunch';
 import { buildRemoteAttachConfiguration } from './providers/remoteAttach';
 import { IDebugConfigurationResolver } from './types';
 import { buildFileWithArgsLaunchDebugConfiguration } from './providers/fileLaunchWithArgs';
+import { getInterpreterDetails } from '../../common/python';
 
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
     private cacheDebugConfig: DebugConfiguration | undefined = undefined;
@@ -77,6 +78,19 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
                     this.cacheDebugConfig = cloneDeep(debugConfiguration);
                 }
             }
+
+            if (debugConfiguration.program !== undefined) {
+                if (debugConfiguration.python === undefined) {
+                    // If program is a valid file, get interpreter for that file
+                    if (fs.existsSync(debugConfiguration.program) && fs.statSync(debugConfiguration.program).isFile()) {
+                        const interpreter = await getInterpreterDetails(Uri.file(debugConfiguration.program));
+                        if (interpreter?.path && interpreter.path.length > 0) {
+                            debugConfiguration.python = interpreter.path[0];
+                        }
+                    }
+                }
+            }
+
             return this.launchResolver.resolveDebugConfiguration(
                 folder,
                 debugConfiguration as LaunchRequestArguments,
