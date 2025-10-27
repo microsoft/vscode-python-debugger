@@ -6,11 +6,11 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { executeCommand } from '../../vscodeapi';
-import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 import { EXTENSION_ROOT_DIR } from '../../constants';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
 import { PythonEnvironment } from '../../../envExtApi';
+import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 
 /**
  * Allows the user to report an issue related to the Python Debugger extension using our template.

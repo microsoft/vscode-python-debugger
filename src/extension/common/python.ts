@@ -3,7 +3,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Environment, EnvironmentPath, ResolvedEnvironment, Resource } from '@vscode/python-extension';
-import { commands, EventEmitter, extensions, Uri, Event, Disposable } from 'vscode';
+import { commands, EventEmitter, extensions, Uri, Event, Disposable, Extension } from 'vscode';
 import { traceError, traceLog, traceWarn } from './log/logging';
 import { PythonEnvironment, PythonEnvironmentApi, PythonEnvsExtension } from '../envExtApi';
 import {

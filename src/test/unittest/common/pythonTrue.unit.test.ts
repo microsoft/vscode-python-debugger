@@ -8,7 +8,7 @@ import * as sinon from 'sinon';
 import { Uri, Disposable, Extension, extensions } from 'vscode';
 import * as pythonApi from '../../../extension/common/python';
 import * as utilities from '../../../extension/common/utilities';
-import { Environment, EnvironmentPath } from '@vscode/python-extension';
+import { EnvironmentPath } from '@vscode/python-extension';
 import { buildPythonEnvironment } from './helpers';
 
 suite('Python API Tests- useEnvironmentsExtension:true', () => {
@@ -218,11 +218,6 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should resolve environment from Environment object', async () => {
-            const env: Environment = {
-                id: 'test-env',
-                path: '/usr/bin/python3',
-                version: { major: 3, minor: 9, micro: 0 },
-            } as Environment;
             // Use buildPythonEnvironment for realistic mock
             const expectedEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
 

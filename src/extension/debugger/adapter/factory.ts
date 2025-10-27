@@ -19,12 +19,12 @@ import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getInterpreterDetails, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
 import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 import { PythonEnvironment } from '../../envExtApi';
+import { resolveEnvironment, getInterpreterDetails, runPythonExtensionCommand } from '../../common/python';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
