@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 'use strict';
-
+import * as fs from 'fs';
 import * as path from 'path';
 import { CancellationToken, DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
 import { sendTelemetryEvent } from '../../../telemetry';
@@ -137,9 +137,22 @@ export abstract class BaseConfigurationResolver<T extends DebugConfiguration>
         if (!debugConfiguration) {
             return;
         }
+        let interpreterDetailsTarget = workspaceFolder;
 
-        // get the interpreter details in the context of the workspace folder
-        const interpreterDetail = await getInterpreterDetails(workspaceFolder);
+        if (debugConfiguration.program !== undefined) {
+            if (debugConfiguration.python === undefined) {
+                if (debugConfiguration.program === '${file}') {
+                    // If program is ${file}, we cannot determine the interpreter yet
+                    return;
+                }
+                // If program is a valid file, get interpreter for that file
+                if (fs.existsSync(debugConfiguration.program) && fs.statSync(debugConfiguration.program).isFile()) {
+                    interpreterDetailsTarget = Uri.file(debugConfiguration.program);
+                }
+            }
+        }
+        // get the interpreter details in the context of either the workspace folder or the program file
+        const interpreterDetail = await getInterpreterDetails(interpreterDetailsTarget);
         const interpreterPath = interpreterDetail?.path ?? (await getSettingsPythonPath(workspaceFolder));
         const resolvedInterpreterPath = interpreterPath ? interpreterPath[0] : interpreterPath;
 
