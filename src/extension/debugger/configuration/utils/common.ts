@@ -8,36 +8,63 @@
 
 import { Uri, WorkspaceFolder } from 'vscode';
 import { getWorkspaceFolder } from '../../../common/vscodeapi';
+import { sendTelemetryEvent } from '../../../telemetry';
+import { EventName } from '../../../telemetry/constants';
 
 /**
  * @returns whether the provided parameter is a JavaScript String or not.
  */
 function isString(str: any): str is string {
-    if (typeof str === 'string' || str instanceof String) {
-        return true;
-    }
-
-    return false;
+    return typeof str === 'string' || str instanceof String;
 }
 
-export function resolveVariables(
+/**
+ * Resolves VS Code variable placeholders in a string value.
+ *
+ * Specifically handles:
+ * - `${workspaceFolder}` - replaced with the workspace folder path
+ * - `${env.VAR}` or `${env:VAR}` - replaced with empty string
+ * - Unknown variables - left as-is in the original `${variable}` format
+ *
+ * @param value The string containing variable placeholders to resolve
+ * @param rootFolder Fallback folder path to use if no workspace folder is available
+ * @param folder The workspace folder context for variable resolution
+ * @returns The string with variables resolved, or undefined if input was undefined
+ */
+export function resolveWorkspaceVariables(
     value: string | undefined,
     rootFolder: string | Uri | undefined,
     folder: WorkspaceFolder | undefined,
 ): string | undefined {
-    if (value) {
-        const workspaceFolder = folder ? getWorkspaceFolder(folder.uri) : undefined;
-        const variablesObject: { [key: string]: any } = {};
-        variablesObject.workspaceFolder = workspaceFolder ? workspaceFolder.uri.fsPath : rootFolder;
-
-        const regexp = /\$\{(.*?)\}/g;
-        return value.replace(regexp, (match: string, name: string) => {
-            const newValue = variablesObject[name];
-            if (isString(newValue)) {
-                return newValue;
-            }
-            return match && (match.indexOf('env.') > 0 || match.indexOf('env:') > 0) ? '' : match;
-        });
+    if (!value) {
+        return value;
     }
-    return value;
+
+    // opt for folder with fallback to rootFolder
+    const workspaceFolder = folder ? getWorkspaceFolder(folder.uri) : undefined;
+    const workspaceFolderPath = workspaceFolder ? workspaceFolder.uri.fsPath : rootFolder;
+
+    // Replace all ${variable} patterns
+    return value.replace(/\$\{([^}]+)\}/g, (match: string, variableName: string) => {
+        // Handle workspaceFolder variable
+        if (variableName === 'workspaceFolder' && isString(workspaceFolderPath)) {
+            // Track usage of this potentially deprecated code path
+            sendTelemetryEvent(EventName.DEPRECATED_CODE_PATH_USAGE, undefined, {
+                codePath: 'workspaceFolder_substitution',
+            });
+            return workspaceFolderPath;
+        }
+
+        // Replace environment variables with empty string
+        if (variableName.startsWith('env.') || variableName.startsWith('env:')) {
+            // Track usage of this potentially deprecated code path
+            sendTelemetryEvent(EventName.DEPRECATED_CODE_PATH_USAGE, undefined, {
+                codePath: 'env_variable_substitution',
+            });
+            return '';
+        }
+
+        // Unknown variables are left unchanged
+        return match;
+    });
 }

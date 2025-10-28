@@ -691,4 +691,21 @@ export interface IEventNamePropertyMapping {
        "DEBUGGER_SHOW_PYTHON_INLINE_VALUES" : { "owner": "eleanorjboyd" }
      */
     [EventName.DEBUGGER_SHOW_PYTHON_INLINE_VALUES]: never | undefined;
+    /**
+     * Telemetry event sent when potentially deprecated code paths are executed.
+     */
+    /* __GDPR__
+       "deprecated_code_path_usage" : {
+          "codepath" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "owner": "eleanorjboyd" }
+       }
+     */
+    [EventName.DEPRECATED_CODE_PATH_USAGE]: {
+        /**
+         * Identifier for the specific deprecated code path that was executed.
+         * Examples: 'workspaceFolder_substitution', 'env_variable_substitution'
+         *
+         * @type {string}
+         */
+        codePath: string;
+    };
 }

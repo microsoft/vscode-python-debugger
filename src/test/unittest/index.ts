@@ -8,6 +8,7 @@ export function run(): Promise<void> {
     const mocha = new Mocha({
         ui: 'tdd',
         color: true,
+        grep: process.env.TEST_GREP, // Support filtering tests via environment variable
     });
 
     const testsRoot = path.resolve(__dirname);
