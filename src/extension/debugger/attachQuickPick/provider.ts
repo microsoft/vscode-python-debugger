@@ -11,6 +11,7 @@ import { PowerShellProcessParser } from './powerShellProcessParser';
 import { getEnvironmentVariables } from '../../common/python';
 import { plainExec } from '../../common/process/rawProcessApis';
 import { logProcess } from '../../common/process/logger';
+import { WmicProcessParser } from './wmicProcessParser';
 
 export class AttachProcessProvider implements IAttachProcessProvider {
     constructor() {}
@@ -71,12 +72,33 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         }
 
         const customEnvVars = await getEnvironmentVariables();
+        if (processCmd === PowerShellProcessParser.powerShellCommand) {
+            try {
+                const checkPowerShell = await plainExec(
+                    'where',
+                    ['powershell'],
+                    { throwOnStdErr: false },
+                    customEnvVars,
+                );
+                if (checkPowerShell.stdout.length === 0) {
+                    processCmd = WmicProcessParser.wmicCommand;
+                }
+            } catch {
+                // If 'where' fails, fall back to wmic (most likely powershell is not available).(Windows Xp or below？
+                console.log('PowerShell check failed, using WMIC fallback');
+                processCmd = WmicProcessParser.wmicCommand;
+            }
+        }
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
-        console.log(output);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
 
-        return osType === OSType.Windows
-            ? PowerShellProcessParser.parseProcesses(output.stdout)
-            : PsProcessParser.parseProcesses(output.stdout);
+        if (osType === OSType.Windows) {
+            if (processCmd === WmicProcessParser.wmicCommand) {
+                return WmicProcessParser.parseProcesses(output.stdout);
+            } else if (processCmd === PowerShellProcessParser.powerShellCommand) {
+                return PowerShellProcessParser.parseProcesses(output.stdout);
+            }
+        }
+        return PsProcessParser.parseProcesses(output.stdout);
     }
 }
