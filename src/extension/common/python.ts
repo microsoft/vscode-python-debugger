@@ -69,6 +69,7 @@ export async function getPythonEnvironmentExtensionAPI(): Promise<PythonEnvironm
 }
 
 export async function initializePython(disposables: Disposable[]): Promise<void> {
+    traceLog(`initializePython: usingEnvExt='${useEnvExtension()}'`);
     if (!useEnvExtension()) {
         await legacyInitializePython(disposables, onDidChangePythonInterpreterEvent);
     } else {
@@ -78,13 +79,16 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
                 disposables.push(
                     api.onDidChangeEnvironments(async () => {
                         // not sure if this is the right event....
-                        onDidChangePythonInterpreterEvent.fire(await getInterpreterDetails());
-                        traceLog('Python environments changed.');
+                        const details = await getInterpreterDetails();
+                        traceLog(`initializePython:onDidChangeEnvironments fired executable='${details.path?.[0]}'`);
+                        onDidChangePythonInterpreterEvent.fire(details);
+                        traceLog('Python environments changed event processed.');
                     }),
                 );
 
                 traceLog('Waiting for interpreter from python environments extension.');
                 onDidChangePythonInterpreterEvent.fire(await getInterpreterDetails());
+                traceLog('initializePython: Initial interpreter details fired (env extension path)');
             }
         } catch (error) {
             traceError('Error initializing python: ', error);
@@ -94,6 +98,7 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
 
 export async function runPythonExtensionCommand(command: string, ...rest: any[]) {
     await activateExtensions();
+    traceLog(`runPythonExtensionCommand: executing command='${command}' argsCount='${rest.length}'`);
     return await commands.executeCommand(command, ...rest);
 }
 
@@ -113,21 +118,33 @@ export async function getSettingsPythonPath(resource?: Uri): Promise<string[] | 
         let pyEnv = await api.getEnvironment(resource);
 
         if (!pyEnv) {
+            traceLog(`getSettingsPythonPath: No environment for resource='${resource?.fsPath}'`);
             return undefined;
         }
 
         // Resolve environment if execution info is not available
         if (!pyEnv.execInfo) {
             pyEnv = await api.resolveEnvironment(pyEnv.environmentPath);
+            traceLog(
+                `getSettingsPythonPath: Resolved environment execInfo for '${
+                    pyEnv?.environmentPath.fsPath || 'undefined'
+                }'`,
+            );
         }
 
         // Extract execution command from resolved environment
         const execInfo = pyEnv?.execInfo;
         if (!execInfo) {
+            traceLog('getSettingsPythonPath: Missing execInfo after resolution');
             return undefined;
         }
 
         const runConfig = execInfo.activatedRun ?? execInfo.run;
+        traceLog(
+            `getSettingsPythonPath: Using executable='${runConfig.executable}' args='${
+                runConfig.args?.join(' ') || ''
+            }'`,
+        );
         return runConfig.args ? [runConfig.executable, ...runConfig.args] : [runConfig.executable];
     }
 } // should I make this more async? rn it just becomes sync
@@ -157,10 +174,12 @@ export async function resolveEnvironment(
             : 'Unknown';
         const execUri = legacyResolvedEnv?.executable.uri;
         if (execUri === undefined) {
+            traceLog('resolveEnvironment: legacy path invalid (no executable uri)');
             // Should return undefined for invalid environment
             return undefined;
         }
         if (legacyResolvedEnv) {
+            traceLog(`resolveEnvironment: legacy resolved executable='${execUri.fsPath}' version='${pythonVersion}'`);
             const pythonEnv: PythonEnvironment = {
                 envId: {
                     id: execUri.fsPath,
@@ -187,11 +206,14 @@ export async function resolveEnvironment(
         // Handle different input types for the new API
         if (typeof env === 'string') {
             // Convert string path to Uri for the new API
+            traceLog(`resolveEnvironment: new API resolving from string='${env}'`);
             return api.resolveEnvironment(Uri.file(env));
         } else if (typeof env === 'object' && 'path' in env) {
             // EnvironmentPath has a uri property
+            traceLog(`resolveEnvironment: new API resolving from EnvironmentPath='${env.path}'`);
             return api.resolveEnvironment(Uri.file(env.path));
         } else {
+            traceLog('resolveEnvironment: new API unsupported env input');
             return undefined;
         }
     }
@@ -204,6 +226,7 @@ export async function getActiveEnvironmentPath(
     //TODO: fix this return type??
     if (!useEnvExtension()) {
         const envPath: EnvironmentPath = await legacyGetActiveEnvironmentPath(resource);
+        traceLog(`getActiveEnvironmentPath: legacy active path='${envPath.path}'`);
         return envPath;
     } else {
         const api = await getPythonEnvironmentExtensionAPI();
@@ -213,6 +236,9 @@ export async function getActiveEnvironmentPath(
             resource instanceof Uri ? resource : resource && 'uri' in resource ? resource.uri : undefined;
 
         const env = await api.getEnvironment(resourceUri);
+        traceLog(
+            `getActiveEnvironmentPath: new API envPath='${env?.environmentPath.fsPath}' resource='${resourceUri?.fsPath}'`,
+        );
         return env;
     }
 }
@@ -245,6 +271,7 @@ export async function getInterpreterDetails(resource?: Uri): Promise<IInterprete
             path: executablePath ? [executablePath] : undefined,
             resource,
         };
+        traceLog(`getInterpreterDetails: resource='${resource?.fsPath}' executable='${executablePath}'`);
         return a;
     }
 }

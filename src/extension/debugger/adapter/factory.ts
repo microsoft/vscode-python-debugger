@@ -38,6 +38,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         session: DebugSession,
         _executable: DebugAdapterExecutable | undefined,
     ): Promise<DebugAdapterDescriptor | undefined> {
+        traceLog(`createDebugAdapterDescriptor: request='${session.configuration.request}' name='${session.name}'`);
         const configuration = session.configuration as LaunchRequestArguments | AttachRequestArguments;
 
         // There are four distinct scenarios here:
@@ -67,9 +68,11 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             } else if (configuration.listen === undefined && configuration.processId === undefined) {
                 throw new Error('"request":"attach" requires either "connect", "listen", or "processId"');
             }
+            traceLog('createDebugAdapterDescriptor: attach scenario using spawned adapter');
         }
 
         const command = await this.getDebugAdapterPython(configuration, session.workspaceFolder);
+        traceLog(`createDebugAdapterDescriptor: python command parts='${command.join(' ')}'`);
         if (command.length !== 0) {
             if (configuration.request === 'attach' && configuration.processId !== undefined) {
                 sendTelemetryEvent(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS);
@@ -114,6 +117,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         configuration: LaunchRequestArguments | AttachRequestArguments,
         workspaceFolder?: WorkspaceFolder,
     ): Promise<string[]> {
+        traceVerbose('getDebugAdapterPython: Resolving interpreter for debug adapter');
         if (configuration.debugAdapterPython !== undefined) {
             return this.getExecutableCommand(await resolveEnvironment(configuration.debugAdapterPython));
         } else if (configuration.pythonPath) {
@@ -202,6 +206,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (major < 3 || (major <= 3 && minor < 9)) {
                 this.showDeprecatedPythonMessage();
             }
+            traceLog(`getExecutableCommand: executable='${executablePath}' version='${version}'`);
             return executablePath ? [executablePath] : [];
         }
         return [];

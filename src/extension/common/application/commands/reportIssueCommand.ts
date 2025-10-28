@@ -10,12 +10,14 @@ import { EXTENSION_ROOT_DIR } from '../../constants';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
 import { PythonEnvironment } from '../../../envExtApi';
+import { traceLog } from '../../log/logging';
 import { getActiveEnvironmentPath, resolveEnvironment } from '../../python';
 
 /**
  * Allows the user to report an issue related to the Python Debugger extension using our template.
  */
 export async function openReportIssue(): Promise<void> {
+    traceLog('openReportIssue: Starting report issue flow');
     const templatePath = path.join(EXTENSION_ROOT_DIR, 'resources', 'report_issue_template.md');
     const userDataTemplatePath = path.join(EXTENSION_ROOT_DIR, 'resources', 'report_issue_user_data_template.md');
     const template = await fs.readFile(templatePath, 'utf8');
@@ -30,6 +32,7 @@ export async function openReportIssue(): Promise<void> {
     }
     const virtualEnvKind = interpreter && interpreter.envId ? interpreter.envId.managerId : 'Unknown';
     const pythonVersion = interpreter?.version ?? 'unknown';
+    traceLog(`openReportIssue: Resolved pythonVersion='${pythonVersion}' envKind='${virtualEnvKind}'`);
 
     await executeCommand('workbench.action.openIssueReporter', {
         extensionId: 'ms-python.debugpy',
@@ -37,4 +40,5 @@ export async function openReportIssue(): Promise<void> {
         data: userTemplate.replace('{0}', pythonVersion).replace('{1}', virtualEnvKind),
     });
     sendTelemetryEvent(EventName.USE_REPORT_ISSUE_COMMAND, undefined, {});
+    traceLog('openReportIssue: Issue reporter command executed');
 }

@@ -99,12 +99,14 @@ export async function legacyInitializePython(
     onDidChangePythonInterpreterEvent: EventEmitter<LegacyIInterpreterDetails>,
 ): Promise<void> {
     try {
+        traceLog('legacyInitializePython: Starting initialization');
         const api = await legacyGetPythonExtensionEnviromentAPI();
 
         if (api) {
             disposables.push(
                 //  This event is triggered when the active environment setting changes.
                 api.environments.onDidChangeActiveEnvironmentPath((e: ActiveEnvironmentPathChangeEvent) => {
+                    traceLog(`legacyInitializePython: Active environment path changed to '${e.path}'`);
                     let resourceUri: Uri | undefined;
                     if (e.resource instanceof Uri) {
                         resourceUri = e.resource;
@@ -119,6 +121,7 @@ export async function legacyInitializePython(
 
             traceLog('Waiting for interpreter from python extension.');
             onDidChangePythonInterpreterEvent.fire(await legacyGetInterpreterDetails());
+            traceLog('legacyInitializePython: Initial interpreter details fired');
         }
     } catch (error) {
         traceError('Error initializing python: ', error);
@@ -134,7 +137,9 @@ export async function legacyInitializePython(
  */
 export async function legacyGetSettingsPythonPath(resource?: Uri): Promise<string[] | undefined> {
     const api = await legacyGetPythonExtensionAPI();
-    return api?.settings.getExecutionDetails(resource).execCommand;
+    const execCommand = api?.settings.getExecutionDetails(resource).execCommand;
+    traceLog(`legacyGetSettingsPythonPath: execCommand='${execCommand?.join(' ')}' resource='${resource?.fsPath}'`);
+    return execCommand;
 }
 
 /**
@@ -157,7 +162,10 @@ export async function legacyResolveEnvironment(
     env: Environment | EnvironmentPath | string,
 ): Promise<ResolvedEnvironment | undefined> {
     const api = await legacyGetPythonExtensionEnviromentAPI();
-    return api.environments.resolveEnvironment(env);
+    traceLog(`legacyResolveEnvironment: Resolving environment '${typeof env === 'string' ? env : (env as any).path}'`);
+    const resolved = api.environments.resolveEnvironment(env);
+    resolved.then((r) => traceLog(`legacyResolveEnvironment: Resolved executable='${r?.executable.uri?.fsPath}'`));
+    return resolved;
 }
 
 /**
@@ -168,7 +176,13 @@ export async function legacyResolveEnvironment(
  */
 export async function legacyGetActiveEnvironmentPath(resource?: Resource): Promise<EnvironmentPath> {
     const api = await legacyGetPythonExtensionEnviromentAPI();
-    return api.environments.getActiveEnvironmentPath(resource);
+    const active = api.environments.getActiveEnvironmentPath(resource);
+    traceLog(
+        `legacyGetActiveEnvironmentPath: activePath='${active.path}' resource='${
+            (resource as any)?.uri?.fsPath || (resource as Uri)?.fsPath || ''
+        }'`,
+    );
+    return active;
 }
 
 /**
@@ -180,8 +194,12 @@ export async function legacyGetInterpreterDetails(resource?: Uri): Promise<Legac
     const api = await legacyGetPythonExtensionEnviromentAPI();
     const environment = await api.environments.resolveEnvironment(api.environments.getActiveEnvironmentPath(resource));
     if (environment?.executable.uri) {
+        traceLog(
+            `legacyGetInterpreterDetails: executable='${environment.executable.uri.fsPath}' resource='${resource?.fsPath}'`,
+        );
         return { path: [environment?.executable.uri.fsPath], resource };
     }
+    traceLog('legacyGetInterpreterDetails: No executable found');
     return { path: undefined, resource };
 }
 
@@ -199,12 +217,14 @@ export async function legacyHasInterpreters(): Promise<boolean> {
     });
     const initialEnvs = api.environments.known;
     if (initialEnvs.length > 0) {
+        traceLog(`legacyHasInterpreters: Found ${initialEnvs.length} initial environments`);
         return true;
     }
     // Initiates a refresh of Python environments within the specified scope.
     await Promise.race([onAddedToCollection.promise, api?.environments.refreshEnvironments()]);
-
-    return api.environments.known.length > 0;
+    const has = api.environments.known.length > 0;
+    traceLog(`legacyHasInterpreters: After refresh count='${api.environments.known.length}' result='${has}'`);
+    return has;
 }
 
 /**
@@ -214,5 +234,7 @@ export async function legacyHasInterpreters(): Promise<boolean> {
  */
 export async function legacyGetInterpreters(): Promise<readonly Environment[]> {
     const api = await legacyGetPythonExtensionEnviromentAPI();
-    return api.environments.known || [];
+    const known = api.environments.known || [];
+    traceLog(`legacyGetInterpreters: returning ${known.length} environments`);
+    return known;
 }
