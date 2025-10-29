@@ -174,7 +174,7 @@ ProcessId=5912\r
             .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
             .resolves({ stdout: windowsOutput });
 
-        const attachItems = await provider._getInternalProcessEntries();
+        const attachItems = await provider._getInternalProcessEntries(WmicProcessParser.wmicCommand);
         sinon.assert.calledOnceWithExactly(
             plainExecStub,
             WmicProcessParser.wmicCommand.command,
@@ -353,7 +353,7 @@ ProcessId=5728\r
                 .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
                 .resolves({ stdout: windowsOutput });
 
-            const output = await provider.getAttachItems();
+            const output = await provider.getAttachItems(WmicProcessParser.wmicCommand);
 
             assert.deepEqual(output, expectedOutput);
         });
@@ -445,7 +445,7 @@ ProcessId=8026\r
                 .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
                 .resolves({ stdout: windowsOutput });
 
-            const output = await provider.getAttachItems();
+            const output = await provider.getAttachItems(WmicProcessParser.wmicCommand);
 
             assert.deepEqual(output, expectedOutput);
         });
