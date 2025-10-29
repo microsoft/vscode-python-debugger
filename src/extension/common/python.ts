@@ -15,6 +15,7 @@ import {
     legacyResolveEnvironment,
 } from './legacyPython';
 import { useEnvExtension } from './utilities';
+import { EnvironmentVariables } from './variables/types';
 
 /**
  * Details about a Python interpreter.
@@ -149,7 +150,7 @@ export async function getSettingsPythonPath(resource?: Uri): Promise<string[] | 
     }
 } // should I make this more async? rn it just becomes sync
 
-export async function getEnvironmentVariables(resource?: Resource) {
+export async function getEnvironmentVariables(resource?: Resource): Promise<EnvironmentVariables> {
     if (!useEnvExtension()) {
         return legacyGetEnvironmentVariables(resource);
     } else {

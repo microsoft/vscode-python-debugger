@@ -8,7 +8,6 @@ import * as sinon from 'sinon';
 import { Uri, Disposable, Extension, extensions } from 'vscode';
 import * as pythonApi from '../../../extension/common/python';
 import * as utilities from '../../../extension/common/utilities';
-import { EnvironmentPath } from '@vscode/python-extension';
 import { buildPythonEnvironment } from './helpers';
 
 suite('Python API Tests- useEnvironmentsExtension:true', () => {
@@ -244,33 +243,26 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
     suite('getActiveEnvironmentPath', () => {
         test('Should return active environment path', async () => {
-            const expectedPath: EnvironmentPath = {
-                id: 'test-env',
-                path: '/usr/bin/python3',
-            };
-            // OLD API: Using getEnvironment() instead of environments.getActiveEnvironmentPath
+            // Match production shape: getEnvironment() returns a PythonEnvironment-like object
+            const envObj = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            mockPythonEnvApi.getEnvironment.returns(expectedPath);
+            mockPythonEnvApi.getEnvironment.returns(envObj);
 
             const result = await pythonApi.getActiveEnvironmentPath();
 
-            expect(result).to.deep.equal(expectedPath);
+            expect((result as any).environmentPath.fsPath).to.equal('/usr/bin/python3');
+            expect((result as any).execInfo.run.executable).to.equal('/usr/bin/python3');
         });
 
         test('Should return active environment path for specific resource', async () => {
             const resource = Uri.file('/workspace/file.py');
-            const expectedPath: EnvironmentPath = {
-                id: 'test-env',
-                path: '/usr/bin/python3',
-            };
-            // OLD API: Using getEnvironment() instead of environments.getActiveEnvironmentPath
+            const envObj = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            mockPythonEnvApi.getEnvironment.returns(expectedPath);
+            mockPythonEnvApi.getEnvironment.returns(envObj);
 
             const result = await pythonApi.getActiveEnvironmentPath(resource);
 
-            expect(result).to.deep.equal(expectedPath);
-            // OLD API: Using getEnvironment() instead of environments.getActiveEnvironmentPath
+            expect((result as any).environmentPath.fsPath).to.equal('/usr/bin/python3');
             sinon.assert.calledWith(mockPythonEnvApi.getEnvironment, resource);
         });
     });
