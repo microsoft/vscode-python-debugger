@@ -17,20 +17,14 @@ import {
 import { useEnvExtension } from './utilities';
 import { EnvironmentVariables } from './variables/types';
 
-/**
- * Details about a Python interpreter.
- */
 export interface IInterpreterDetails {
-    /** Array of path components to the Python executable */
     path?: string[];
-    /** The workspace resource associated with this interpreter */
     resource?: Uri;
 }
 
 /** Event emitter for Python interpreter changes */
 const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>();
 
-/** Event that fires when the active Python interpreter changes */
 export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 
 async function activateExtensions() {
