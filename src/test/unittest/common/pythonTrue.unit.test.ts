@@ -6,9 +6,23 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Uri, Disposable, Extension, extensions } from 'vscode';
+import * as path from 'path';
 import * as pythonApi from '../../../extension/common/python';
 import * as utilities from '../../../extension/common/utilities';
 import { buildPythonEnvironment } from './helpers';
+
+// Platform-specific path constants using path.join so tests assert using native separators.
+// Leading root '/' preserved; on Windows this yields a leading backslash (e.g. '\\usr\\bin').
+const PYTHON_PATH = path.join('/', 'usr', 'bin', 'python3');
+const PYTHON_PATH_39 = path.join('/', 'usr', 'bin', 'python3.9');
+const PYTHON_PATH_WITH_SPACES = path.join('/', 'path with spaces', 'python3');
+const QUOTED_PYTHON_PATH = `"${PYTHON_PATH_WITH_SPACES}"`;
+const PYTHON_PATH_DIR = path.join('/', 'usr', 'bin');
+const PYTHON_LIB_PYTHON3_DIR = path.join('/', 'usr', 'lib', 'python3');
+const WORKSPACE_FILE = path.join('/', 'workspace', 'file.py');
+const WORKSPACE_PYTHON_DIR = path.join('/', 'workspace', 'python');
+const INVALID_PATH = path.join('/', 'invalid', 'path');
+const MOCK_PATH = path.join('/', 'mock', 'path');
 
 suite('Python API Tests- useEnvironmentsExtension:true', () => {
     let getExtensionStub: sinon.SinonStub;
@@ -26,8 +40,8 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         // Create mock Python extension
         mockPythonExtension = {
             id: 'ms-python.python',
-            extensionUri: Uri.file('/mock/path'),
-            extensionPath: '/mock/path',
+            extensionUri: Uri.file(MOCK_PATH),
+            extensionPath: MOCK_PATH,
             isActive: true,
             packageJSON: {},
             exports: undefined,
@@ -38,8 +52,8 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         // Create mock Python Envs extension
         mockEnvsExtension = {
             id: 'ms-python.vscode-python-envs',
-            extensionUri: Uri.file('/mock/path'),
-            extensionPath: '/mock/path',
+            extensionUri: Uri.file(MOCK_PATH),
+            extensionPath: MOCK_PATH,
             isActive: true,
             packageJSON: {},
             exports: undefined,
@@ -72,7 +86,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         test('Should initialize python and set up event listeners', async () => {
             const disposables: Disposable[] = [];
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            const mockPythonEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const mockPythonEnv = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             mockPythonEnvApi.getEnvironment.resolves(mockPythonEnv);
             mockPythonEnvApi.resolveEnvironment.resolves(mockPythonEnv);
             mockPythonEnvApi.onDidChangeEnvironments.returns({
@@ -100,7 +114,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const mockEventHandler = sinon.stub();
 
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            const mockPythonEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const mockPythonEnv = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             mockPythonEnvApi.getEnvironment.resolves(mockPythonEnv);
             mockPythonEnvApi.resolveEnvironment.resolves(mockPythonEnv);
 
@@ -115,9 +129,9 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
     suite('getSettingsPythonPath', () => {
         test('Should return execution details from Python extension API', async () => {
-            const expectedPath = ['/usr/bin/python3'];
+            const expectedPath = [PYTHON_PATH];
             // OLD API: Using getEnvironment() + resolveEnvironment() instead of settings.getExecutionDetails
-            const mockPythonEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const mockPythonEnv = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironment.resolves(mockPythonEnv);
             mockPythonEnvApi.resolveEnvironment.resolves(mockPythonEnv);
@@ -128,10 +142,10 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should return execution details for specific resource', async () => {
-            const resource = Uri.file('/workspace/file.py');
-            const expectedPath = ['/usr/bin/python3'];
+            const resource = Uri.file(WORKSPACE_FILE);
+            const expectedPath = [PYTHON_PATH];
             // OLD API: Using getEnvironment() + resolveEnvironment() instead of settings.getExecutionDetails
-            const mockPythonEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const mockPythonEnv = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironment.resolves(mockPythonEnv);
             mockPythonEnvApi.resolveEnvironment.resolves(mockPythonEnv);
@@ -157,7 +171,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
     suite('getEnvironmentVariables', () => {
         test('Should return environment variables from Python extension API', async () => {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            const expectedVars = { PATH: '/usr/bin', PYTHONPATH: '/usr/lib/python3' };
+            const expectedVars = { PATH: PYTHON_PATH_DIR, PYTHONPATH: PYTHON_LIB_PYTHON3_DIR };
             // OLD API: Using getEnvironmentVariables() instead of environments.getEnvironmentVariables
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironmentVariables.resolves(expectedVars);
@@ -170,9 +184,9 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should get environment variables for specific resource', async () => {
-            const resource = Uri.file('/workspace/file.py');
+            const resource = Uri.file(WORKSPACE_FILE);
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            const expectedVars = { PATH: '/usr/bin' };
+            const expectedVars = { PATH: PYTHON_PATH_DIR };
             // OLD API: Using getEnvironmentVariables() instead of environments.getEnvironmentVariables
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironmentVariables.resolves(expectedVars);
@@ -186,7 +200,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
         test('Should handle undefined resource and return workspace environment variables', async () => {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            const expectedVars = { PATH: '/usr/bin', PYTHONPATH: '/workspace/python' };
+            const expectedVars = { PATH: PYTHON_PATH_DIR, PYTHONPATH: WORKSPACE_PYTHON_DIR };
             // OLD API: Using getEnvironmentVariables() instead of environments.getEnvironmentVariables
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironmentVariables.resolves(expectedVars);
@@ -201,7 +215,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
     suite('resolveEnvironment', () => {
         test('Should resolve environment from path string', async () => {
-            const envPath = '/usr/bin/python3';
+            const envPath = PYTHON_PATH;
             // Use buildPythonEnvironment for realistic mock
             const expectedEnv = buildPythonEnvironment(envPath, '3.9.0');
 
@@ -218,7 +232,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
         test('Should resolve environment from Environment object', async () => {
             // Use buildPythonEnvironment for realistic mock
-            const expectedEnv = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const expectedEnv = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
 
             // OLD API: Using resolveEnvironment() instead of environments.resolveEnvironment
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
@@ -230,7 +244,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should return undefined for invalid environment', async () => {
-            const envPath = '/invalid/path';
+            const envPath = INVALID_PATH;
             // OLD API: Using resolveEnvironment() instead of environments.resolveEnvironment
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.resolveEnvironment.resolves(undefined);
@@ -244,32 +258,32 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
     suite('getActiveEnvironmentPath', () => {
         test('Should return active environment path', async () => {
             // Match production shape: getEnvironment() returns a PythonEnvironment-like object
-            const envObj = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const envObj = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironment.returns(envObj);
 
             const result = await pythonApi.getActiveEnvironmentPath();
 
-            expect((result as any).environmentPath.fsPath).to.equal('/usr/bin/python3');
-            expect((result as any).execInfo.run.executable).to.equal('/usr/bin/python3');
+            expect((result as any).environmentPath.fsPath).to.equal(PYTHON_PATH);
+            expect((result as any).execInfo.run.executable).to.equal(PYTHON_PATH);
         });
 
         test('Should return active environment path for specific resource', async () => {
-            const resource = Uri.file('/workspace/file.py');
-            const envObj = buildPythonEnvironment('/usr/bin/python3', '3.9.0');
+            const resource = Uri.file(WORKSPACE_FILE);
+            const envObj = buildPythonEnvironment(PYTHON_PATH, '3.9.0');
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
             mockPythonEnvApi.getEnvironment.returns(envObj);
 
             const result = await pythonApi.getActiveEnvironmentPath(resource);
 
-            expect((result as any).environmentPath.fsPath).to.equal('/usr/bin/python3');
+            expect((result as any).environmentPath.fsPath).to.equal(PYTHON_PATH);
             sinon.assert.calledWith(mockPythonEnvApi.getEnvironment, resource);
         });
     });
 
     suite('getInterpreterDetails', () => {
         test('Should return interpreter details without resource', async () => {
-            const pythonPath = '/usr/bin/python3';
+            const pythonPath = PYTHON_PATH;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using getEnvironment() and resolveEnvironment() instead of environments.*
@@ -285,8 +299,8 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should return interpreter details with resource', async () => {
-            const resource = Uri.file('/workspace/file.py');
-            const pythonPath = '/usr/bin/python3';
+            const resource = Uri.file(WORKSPACE_FILE);
+            const pythonPath = PYTHON_PATH;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using getEnvironment() and resolveEnvironment() instead of environments.*
@@ -303,7 +317,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
         test('Should not quote path with spaces', async () => {
             // this should be updated when we fix the quoting logic in getInterpreterDetails
-            const pythonPath = '/path with spaces/python3';
+            const pythonPath = PYTHON_PATH_WITH_SPACES;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using getEnvironment() and resolveEnvironment() instead of environments.*
@@ -317,7 +331,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         });
 
         test('Should not double-quote already quoted path', async () => {
-            const quotedPython = Uri.file('"/path with spaces/python3"');
+            const quotedPython = Uri.file(QUOTED_PYTHON_PATH);
             const quotedPythonPath = quotedPython.fsPath;
             const mockEnv = buildPythonEnvironment(quotedPythonPath, '3.9.0');
 
@@ -334,7 +348,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
         test('Should return undefined path when environment is not resolved', async () => {
             // OLD API: Using getEnvironment() and resolveEnvironment() instead of environments.*
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            mockPythonEnvApi.getEnvironment.returns({ environmentPath: Uri.file('/usr/bin/python3') });
+            mockPythonEnvApi.getEnvironment.returns({ environmentPath: Uri.file(PYTHON_PATH) });
             mockPythonEnvApi.resolveEnvironment.resolves(undefined);
 
             const result = await pythonApi.getInterpreterDetails();
@@ -353,7 +367,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
 
             // OLD API: Using getEnvironment() and resolveEnvironment() instead of environments.*
             (mockEnvsExtension as any).exports = mockPythonEnvApi;
-            mockPythonEnvApi.getEnvironment.returns({ environmentPath: Uri.file('/usr/bin/python3') });
+            mockPythonEnvApi.getEnvironment.returns({ environmentPath: Uri.file(PYTHON_PATH) });
             mockPythonEnvApi.resolveEnvironment.resolves(mockEnv);
 
             const result = await pythonApi.getInterpreterDetails();
@@ -367,7 +381,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const disposables: Disposable[] = [];
             let eventCallback: any;
             const mockEventHandler = sinon.stub();
-            const pythonPath = '/usr/bin/python3.9';
+            const pythonPath = PYTHON_PATH_39;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using onDidChangeEnvironments instead of onDidChangeActiveEnvironmentPath
@@ -398,7 +412,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const disposables: Disposable[] = [];
             let eventCallback: any;
             const mockEventHandler = sinon.stub();
-            const pythonPath = '/usr/bin/python3.9';
+            const pythonPath = PYTHON_PATH_39;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using onDidChangeEnvironments instead of onDidChangeActiveEnvironmentPath
@@ -427,7 +441,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const disposables: Disposable[] = [];
             let eventCallback: any;
             const mockEventHandler = sinon.stub();
-            const pythonPath = '/usr/bin/python3.9';
+            const pythonPath = PYTHON_PATH_39;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using onDidChangeEnvironments instead of onDidChangeActiveEnvironmentPath
@@ -456,7 +470,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const disposables: Disposable[] = [];
             let eventCallback: any;
             const mockEventHandler = sinon.stub();
-            const pythonPath = '/usr/bin/python3.9';
+            const pythonPath = PYTHON_PATH_39;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using onDidChangeEnvironments instead of onDidChangeActiveEnvironmentPath
@@ -485,7 +499,7 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const disposables: Disposable[] = [];
             let eventCallback: any;
             const mockEventHandler = sinon.stub();
-            const pythonPath = '/usr/bin/python3.9';
+            const pythonPath = PYTHON_PATH_39;
             const mockEnv = buildPythonEnvironment(pythonPath, '3.9.0');
 
             // OLD API: Using onDidChangeEnvironments instead of onDidChangeActiveEnvironmentPath
