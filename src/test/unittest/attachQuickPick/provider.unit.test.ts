@@ -752,5 +752,63 @@ ProcessId=8026\r
             );
             assert.deepEqual(output, expectedOutput);
         });
+
+        test('The Windows powershell Get-WmiObject process list command should be called when Get-CimInstance fails', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+            ];
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellWithoutCimCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems(PowerShellProcessParser.powerShellWithoutCimCommand);
+            sinon.assert.calledWithExactly(
+                plainExecStub.firstCall,
+                PowerShellProcessParser.powerShellWithoutCimCommand.command,
+                PowerShellProcessParser.powerShellWithoutCimCommand.args,
+                sinon.match.any,
+                sinon.match.any,
+            );
+            assert.deepEqual(output, expectedOutput);
+        });
     });
 });
