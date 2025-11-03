@@ -13,6 +13,7 @@ import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 import * as platform from '../../../extension/common/platform';
 import * as rawProcessApis from '../../../extension/common/process/rawProcessApis';
+import { PowerShellProcessParser } from '../../../extension/debugger/attachQuickPick/powerShellProcessParser';
 
 use(chaiAsPromised);
 
@@ -358,7 +359,7 @@ ProcessId=5728\r
             assert.deepEqual(output, expectedOutput);
         });
 
-        test('Python processes should be at the top of the list returned by getAttachItems', async () => {
+        test('Python processes should be at the top of the list returned by getAttachItems with wmic', async () => {
             const windowsOutput = `CommandLine=\r
 Name=System\r
 ProcessId=4\r
@@ -446,6 +447,112 @@ ProcessId=8026\r
                 .resolves({ stdout: windowsOutput });
 
             const output = await provider.getAttachItems(WmicProcessParser.wmicCommand);
+
+            assert.deepEqual(output, expectedOutput);
+        });
+        test('Python processes should be at the top of the list returned by getAttachItems with powershell', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 5728,
+                    commandLine: 'sihost.exe',
+                    name: 'sihost.exe',
+                },
+                {
+                    processId: 5912,
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 6028,
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    name: 'python.exe',
+                },
+                {
+                    processId: 8026,
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    name: 'python.exe',
+                },
+            ];
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'python.exe',
+                    description: '8026',
+                    detail: 'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    id: '8026',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                },
+                {
+                    label: 'python.exe',
+                    description: '6028',
+                    detail: 'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    id: '6028',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                },
+                {
+                    label: 'sihost.exe',
+                    description: '5728',
+                    detail: 'sihost.exe',
+                    id: '5728',
+                    processName: 'sihost.exe',
+                    commandLine: 'sihost.exe',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5912',
+                    detail: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    id: '5912',
+                    processName: 'svchost.exe',
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            //const notFoundPowerShellOutput = 'INFO: Could not find files for the given pattern(s).\r\n';
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems(PowerShellProcessParser.powerShellCommand);
 
             assert.deepEqual(output, expectedOutput);
         });
