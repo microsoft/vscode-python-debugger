@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+import * as fs from 'fs';
 import { cloneDeep } from 'lodash';
-import { CancellationToken, DebugConfiguration, QuickPickItem, WorkspaceFolder } from 'vscode';
+import { CancellationToken, DebugConfiguration, QuickPickItem, Uri, WorkspaceFolder } from 'vscode';
 import { DebugConfigStrings } from '../../common/utils/localize';
 import { IMultiStepInputFactory, InputStep, IQuickPickParameters, MultiStepInput } from '../../common/multiStepInput';
 import { AttachRequestArguments, DebugConfigurationArguments, LaunchRequestArguments } from '../../types';
@@ -17,6 +17,8 @@ import { buildPyramidLaunchConfiguration } from './providers/pyramidLaunch';
 import { buildRemoteAttachConfiguration } from './providers/remoteAttach';
 import { IDebugConfigurationResolver } from './types';
 import { buildFileWithArgsLaunchDebugConfiguration } from './providers/fileLaunchWithArgs';
+import { getInterpreterDetails } from '../../common/python';
+import { traceLog } from '../../common/log/logging';
 
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
     private cacheDebugConfig: DebugConfiguration | undefined = undefined;
@@ -90,6 +92,24 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         debugConfiguration: DebugConfiguration,
         token?: CancellationToken,
     ): Promise<DebugConfiguration | undefined> {
+        // now that ${file} is resolved, we can use it to get the interpreter for that file
+        if (debugConfiguration.program !== undefined) {
+            if (debugConfiguration.python === undefined) {
+                // If program is a valid file, get interpreter for that file
+                if (fs.existsSync(debugConfiguration.program) && fs.statSync(debugConfiguration.program).isFile()) {
+                    traceLog(
+                        `resolveDebugConfigurationWithSubstitutedVariables: resolving interpreter for program='${debugConfiguration.program}'`,
+                    );
+                    const interpreter = await getInterpreterDetails(Uri.file(debugConfiguration.program));
+                    if (interpreter?.path && interpreter.path.length > 0) {
+                        traceLog(
+                            `resolveDebugConfigurationWithSubstitutedVariables: setting debugConfiguration.python='${interpreter.path[0]}'`,
+                        );
+                        debugConfiguration.python = interpreter.path[0];
+                    }
+                }
+            }
+        }
         function resolve<T extends DebugConfiguration>(resolver: IDebugConfigurationResolver<T>) {
             return resolver.resolveDebugConfigurationWithSubstitutedVariables(folder, debugConfiguration as T, token);
         }

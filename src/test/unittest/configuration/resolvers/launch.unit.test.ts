@@ -123,16 +123,19 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             if (config === undefined || config === null) {
                 return config;
             }
-            const interpreterPath = await pythonApi.getActiveEnvironmentPath(
+            const activePythonEnv = await pythonApi.getActiveEnvironmentPath(
                 workspaceFolder ? workspaceFolder.uri : undefined,
             );
+            let interpreterPath = '';
+            if (activePythonEnv && 'environmentPath' in activePythonEnv) {
+                interpreterPath = activePythonEnv.environmentPath.fsPath;
+            } else if (activePythonEnv && 'path' in activePythonEnv) {
+                interpreterPath = activePythonEnv.path;
+            }
             for (const key of Object.keys(config)) {
                 const value = config[key];
                 if (typeof value === 'string') {
-                    config[key] = value.replace(
-                        '${command:python.interpreterPath}',
-                        interpreterPath ? interpreterPath.path : '',
-                    );
+                    config[key] = value.replace('${command:python.interpreterPath}', interpreterPath);
                 }
             }
 
