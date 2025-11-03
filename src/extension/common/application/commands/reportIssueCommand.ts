@@ -26,9 +26,9 @@ export async function openReportIssue(): Promise<void> {
     const interpreterPath = await getActiveEnvironmentPath();
     let interpreter: PythonEnvironment | undefined = undefined;
     if (interpreterPath && 'environmentPath' in interpreterPath) {
-        interpreter = interpreterPath ? await resolveEnvironment(interpreterPath.environmentPath.fsPath) : undefined;
+        interpreter = await resolveEnvironment(interpreterPath.environmentPath.fsPath);
     } else if (interpreterPath && 'path' in interpreterPath) {
-        interpreter = interpreterPath ? await resolveEnvironment(interpreterPath.path) : undefined;
+        interpreter = await resolveEnvironment(interpreterPath.path);
     }
     const virtualEnvKind = interpreter && interpreter.envId ? interpreter.envId.managerId : 'Unknown';
     const pythonVersion = interpreter?.version ?? 'unknown';

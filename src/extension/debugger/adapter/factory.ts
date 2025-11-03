@@ -199,7 +199,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             // Parse version string (e.g., "3.8.10" -> major: 3, minor: 8)
             const parseMajorMinor = (v: string) => {
                 const m = v.match(/^(\d+)(?:\.(\d+))?/);
-                return { major: m ? Number(m[1]) : 0, minor: m && m[2] ? Number(m[2]) : 0 };
+                return { major: m && m[1] ? Number(m[1]) : 0, minor: m && m[2] ? Number(m[2]) : 0 };
             };
             const { major, minor } = parseMajorMinor(version || '');
 

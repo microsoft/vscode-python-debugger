@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-('use strict');
-
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Uri, Disposable, Extension, commands, extensions } from 'vscode';

@@ -28,7 +28,7 @@ const onDidChangePythonInterpreterEvent = new EventEmitter<IInterpreterDetails>(
 export const onDidChangePythonInterpreter: Event<IInterpreterDetails> = onDidChangePythonInterpreterEvent.event;
 
 async function activateExtensions() {
-    traceWarn('Value during activateExtensions of useEnvExtension(): ', useEnvExtension());
+    traceLog('Value during activateExtensions of useEnvExtension(): ', useEnvExtension());
     await activatePythonExtension();
     await activateEnvsExtension();
 }
@@ -73,7 +73,6 @@ export async function initializePython(disposables: Disposable[]): Promise<void>
             if (api) {
                 disposables.push(
                     api.onDidChangeEnvironments(async () => {
-                        // not sure if this is the right event....
                         const details = await getInterpreterDetails();
                         traceLog(`initializePython:onDidChangeEnvironments fired executable='${details.path?.[0]}'`);
                         onDidChangePythonInterpreterEvent.fire(details);
@@ -217,8 +216,7 @@ export async function resolveEnvironment(
 export async function getActiveEnvironmentPath(
     resource?: Resource,
 ): Promise<PythonEnvironment | EnvironmentPath | undefined> {
-    // if I add environmentPath. or there needs to be some conversion between the two here
-    //TODO: fix this return type??
+
     if (!useEnvExtension()) {
         const envPath: EnvironmentPath = await legacyGetActiveEnvironmentPath(resource);
         traceLog(`getActiveEnvironmentPath: legacy active path='${envPath.path}'`);
