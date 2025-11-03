@@ -216,7 +216,6 @@ export async function resolveEnvironment(
 export async function getActiveEnvironmentPath(
     resource?: Resource,
 ): Promise<PythonEnvironment | EnvironmentPath | undefined> {
-
     if (!useEnvExtension()) {
         const envPath: EnvironmentPath = await legacyGetActiveEnvironmentPath(resource);
         traceLog(`getActiveEnvironmentPath: legacy active path='${envPath.path}'`);
