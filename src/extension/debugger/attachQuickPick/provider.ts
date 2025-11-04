@@ -94,7 +94,6 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         }
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
-        console.log(processCmd);
         if (processCmd === WmicProcessParser.wmicCommand) {
             return WmicProcessParser.parseProcesses(output.stdout);
         } else if (processCmd === PowerShellProcessParser.powerShellCommand ||
