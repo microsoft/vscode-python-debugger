@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { CancellationToken, Uri, WorkspaceFolder } from 'vscode';
+import { CancellationToken, Uri, WorkspaceFolder, workspace } from 'vscode';
 import { getOSType, OSType } from '../../../common/platform';
 import { getEnvFile } from '../../../common/settings';
 import { DebuggerTypeName } from '../../../constants';
@@ -13,6 +13,7 @@ import { BaseConfigurationResolver } from './base';
 import { getDebugEnvironmentVariables, getProgram } from './helper';
 import { getConfiguration } from '../../../common/vscodeapi';
 import { traceLog } from '../../../common/log/logging';
+import { debug } from 'console';
 
 export class LaunchConfigurationResolver extends BaseConfigurationResolver<LaunchRequestArguments> {
     public async resolveDebugConfiguration(
@@ -105,6 +106,13 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         if (debugConfiguration.console !== 'internalConsole' && !debugConfiguration.internalConsoleOptions) {
             debugConfiguration.internalConsoleOptions = 'neverOpen';
         }
+
+        // Compute the terminal quoting character.
+        if (!debugConfiguration.terminalQuoteCharacter || debugConfiguration.terminalQuoteCharacter.length !== 1) {
+            const quoteChar = this._computeTerminalQuoteCharacter();
+            debugConfiguration.terminalQuoteCharacter = quoteChar;
+        }
+
         if (!Array.isArray(debugConfiguration.debugOptions)) {
             debugConfiguration.debugOptions = [];
         }
@@ -181,5 +189,47 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
                 ? 'test'
                 : 'launch';
         LaunchConfigurationResolver.sendTelemetry(trigger, debugConfiguration);
+    }
+
+    private _computeTerminalQuoteCharacter(): string {
+        const platform = process.platform; // 'win32', 'linux', 'darwin'
+        const config = workspace.getConfiguration('terminal');
+
+        let defaultProfile: string | undefined;
+        let profiles: any;
+
+        if (platform === 'win32') {
+            defaultProfile = config.get<string>('integrated.defaultProfile.windows');
+            profiles = config.get<any>('integrated.profiles.windows');
+        } else if (platform === 'linux') {
+            defaultProfile = config.get<string>('integrated.defaultProfile.linux');
+            profiles = config.get<any>('integrated.profiles.linux');
+        } else if (platform === 'darwin') {
+            defaultProfile = config.get<string>('integrated.defaultProfile.osx');
+            profiles = config.get<any>('integrated.profiles.osx');
+        }
+
+        if (!defaultProfile || !profiles) {
+            if (platform === 'win32') {
+                return "'"; // Default is powershell
+            } else {
+                return '"'; // Default is bash/zsh
+            }
+        }
+
+        const profile = defaultProfile ? profiles[defaultProfile] : profiles[0];
+        const shellPath = profile?.path || '';
+
+        if (/powershell/i.test(shellPath)) {
+            return "'";
+        }
+        if (/cmd\.exe$/i.test(shellPath)) {
+            return '"';
+        }
+        if (/bash|zsh|fish/i.test(shellPath)) {
+            return '"';
+        }
+
+        return '"';
     }
 }
