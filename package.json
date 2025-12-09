@@ -256,6 +256,24 @@
                                 "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                                 "type": "boolean"
                             },
+                            "terminalQuoteCharacter": {
+                                "default": null,
+                                "description": "The quoting character to be used by the debugger when quoting terminal commands.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "\"",
+                                    "'",
+                                    "`"
+                                ],
+                                "enumDescriptions": [
+                                    "Double quote (\")",
+                                    "Single quote (')",
+                                    "Backtick (`)"
+                                ]
+                            },
                             "pathMappings": {
                                 "default": [],
                                 "items": {
@@ -451,6 +469,24 @@
                                 "default": false,
                                 "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                                 "type": "boolean"
+                            },
+                            "terminalQuoteCharacter": {
+                                "default": null,
+                                "description": "The quoting character to be used by the debugger when quoting terminal commands.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "\"",
+                                    "'",
+                                    "`"
+                                ],
+                                "enumDescriptions": [
+                                    "Double quote (\")",
+                                    "Single quote (')",
+                                    "Backtick (`)"
+                                ]
                             },
                             "module": {
                                 "default": "",
