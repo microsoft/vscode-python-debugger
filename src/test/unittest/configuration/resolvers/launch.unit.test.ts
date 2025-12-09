@@ -52,6 +52,10 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getDebugEnvironmentVariablesStub = sinon.stub(helper, 'getDebugEnvironmentVariables');
             getConfigurationStub = sinon.stub(vscodeapi, 'getConfiguration');
             getConfigurationStub.withArgs('debugpy', sinon.match.any).returns(createMoqConfiguration(true));
+            // Mock python configuration for useEnvExtension check
+            const pythonConfig = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+            pythonConfig.setup((p) => p.get<boolean>('useEnvironmentsExtension', false)).returns(() => false);
+            getConfigurationStub.withArgs('python').returns(pythonConfig.object);
         });
 
         teardown(() => {
@@ -1043,6 +1047,229 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             });
             test(`Must not contain Sub Process setting = true(${requestType})`, async () => {
                 await testSetting(requestType, { subProcess: true }, DebugOptions.SubProcess, true);
+            });
+        });
+
+        suite('terminalQuoteCharacter tests', () => {
+            let platformStub: sinon.SinonStub;
+
+            function setupTerminalProfile(
+                profile: string | undefined,
+                path: string = 'bash',
+                platform: NodeJS.Platform = 'linux',
+            ) {
+                const terminalConfig = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+
+                // Mock process.platform
+                if (platformStub) {
+                    platformStub.restore();
+                }
+                platformStub = sinon.stub(process, 'platform').value(platform);
+
+                if (platform === 'win32') {
+                    terminalConfig
+                        .setup((c) => c.get<string>('integrated.defaultProfile.windows'))
+                        .returns(() => profile);
+                    const profiles: any = {};
+                    if (profile) {
+                        profiles[profile] = { path };
+                    }
+                    terminalConfig.setup((c) => c.get<any>('integrated.profiles.windows')).returns(() => profiles);
+                } else if (platform === 'linux') {
+                    terminalConfig
+                        .setup((c) => c.get<string>('integrated.defaultProfile.linux'))
+                        .returns(() => profile);
+                    const profiles: any = {};
+                    if (profile) {
+                        profiles[profile] = { path };
+                    }
+                    terminalConfig.setup((c) => c.get<any>('integrated.profiles.linux')).returns(() => profiles);
+                } else if (platform === 'darwin') {
+                    terminalConfig.setup((c) => c.get<string>('integrated.defaultProfile.osx')).returns(() => profile);
+                    const profiles: any = {};
+                    if (profile) {
+                        profiles[profile] = { path };
+                    }
+                    terminalConfig.setup((c) => c.get<any>('integrated.profiles.osx')).returns(() => profiles);
+                }
+
+                getConfigurationStub.withArgs('terminal').returns(terminalConfig.object);
+            }
+
+            test('Default terminalQuoteCharacter is computed for bash shell', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Bash', '/bin/bash', 'linux');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('Default terminalQuoteCharacter is computed for zsh shell', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Zsh', '/bin/zsh', 'darwin');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('Default terminalQuoteCharacter is computed for fish shell', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Fish', '/usr/bin/fish', 'linux');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('Default terminalQuoteCharacter is computed for PowerShell', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile(
+                    'PowerShell',
+                    'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    'win32',
+                );
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', "'");
+            });
+
+            test('Default terminalQuoteCharacter is computed for cmd.exe', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Command Prompt', 'C:\\Windows\\System32\\cmd.exe', 'win32');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('Default terminalQuoteCharacter is double quote when terminal profile is not configured', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile(undefined, 'bash', 'linux');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('User-provided terminalQuoteCharacter is preserved when valid (single character)', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Bash', '/bin/bash', 'linux');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    terminalQuoteCharacter: "'",
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', "'");
+            });
+
+            test('Invalid terminalQuoteCharacter (empty string) triggers fallback to computed default', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('PowerShell', 'powershell.exe', 'win32');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    terminalQuoteCharacter: '',
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', "'");
+            });
+
+            test('Invalid terminalQuoteCharacter (multi-character) triggers fallback to computed default', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('Bash', '/bin/bash', 'linux');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                    terminalQuoteCharacter: '""',
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', '"');
+            });
+
+            test('terminalQuoteCharacter handles pwsh (PowerShell Core)', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile('PowerShell Core', '/usr/local/bin/pwsh', 'darwin');
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', "'");
+            });
+
+            test('terminalQuoteCharacter is case-insensitive for shell detection', async () => {
+                const pythonPath = `PythonPath_${new Date().toString()}`;
+                const workspaceFolder = createMoqWorkspaceFolder(__dirname);
+                const pythonFile = 'xyz.py';
+                setupIoc(pythonPath, workspaceFolder);
+                setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
+                setupTerminalProfile(
+                    'PowerShell',
+                    'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\POWERSHELL.EXE',
+                    'win32',
+                );
+
+                const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
+                    ...launch,
+                });
+
+                expect(debugConfig).to.have.property('terminalQuoteCharacter', "'");
             });
         });
     });

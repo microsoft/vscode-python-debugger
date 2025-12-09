@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { CancellationToken, Uri, WorkspaceFolder, workspace } from 'vscode';
+import { CancellationToken, Uri, WorkspaceFolder } from 'vscode';
 import { getOSType, OSType } from '../../../common/platform';
 import { getEnvFile } from '../../../common/settings';
 import { DebuggerTypeName } from '../../../constants';
@@ -13,7 +13,6 @@ import { BaseConfigurationResolver } from './base';
 import { getDebugEnvironmentVariables, getProgram } from './helper';
 import { getConfiguration } from '../../../common/vscodeapi';
 import { traceLog } from '../../../common/log/logging';
-import { debug } from 'console';
 
 export class LaunchConfigurationResolver extends BaseConfigurationResolver<LaunchRequestArguments> {
     public async resolveDebugConfiguration(
@@ -193,7 +192,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
 
     private _computeTerminalQuoteCharacter(): string {
         const platform = process.platform; // 'win32', 'linux', 'darwin'
-        const config = workspace.getConfiguration('terminal');
+        const config = getConfiguration('terminal');
 
         let defaultProfile: string | undefined;
         let profiles: any;
@@ -220,7 +219,7 @@ export class LaunchConfigurationResolver extends BaseConfigurationResolver<Launc
         const profile = defaultProfile ? profiles[defaultProfile] : profiles[0];
         const shellPath = profile?.path || '';
 
-        if (/powershell/i.test(shellPath)) {
+        if (/powershell|pwsh/i.test(shellPath)) {
             return "'";
         }
         if (/cmd\.exe$/i.test(shellPath)) {
