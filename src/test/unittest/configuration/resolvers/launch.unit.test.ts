@@ -56,6 +56,11 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const pythonConfig = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
             pythonConfig.setup((p) => p.get<boolean>('useEnvironmentsExtension', false)).returns(() => false);
             getConfigurationStub.withArgs('python').returns(pythonConfig.object);
+            // Mock terminal configuration with default values
+            const terminalConfig = TypeMoq.Mock.ofType<WorkspaceConfiguration>();
+            terminalConfig.setup((c) => c.get<string>(TypeMoq.It.isAnyString())).returns(() => undefined);
+            terminalConfig.setup((c) => c.get<any>(TypeMoq.It.isAnyString())).returns(() => undefined);
+            getConfigurationStub.withArgs('terminal').returns(terminalConfig.object);
         });
 
         teardown(() => {
