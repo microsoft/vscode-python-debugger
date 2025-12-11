@@ -114,7 +114,6 @@ extends:
                   signType: real
                   verifySignature: true
                   teamName: $(TeamName)
-                  preRelease: true
 
               - ${{ if eq(parameters.publishExtension, true) }}:
                   - template: build/templates/publish.yml@self
