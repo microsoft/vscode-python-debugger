@@ -154,7 +154,7 @@ def create_debugpy_json(session: nox.Session):
     for p, id in platforms:
         # we typically have the latest 3 versions of debugpy compiled bits
         downloads = []
-        for cp in ["cp310", "cp311", "cp312"]:
+        for cp in ["cp312", "cp313", "cp314"]:
             data = _get_debugpy_info("latest", id, cp)
             if not any(d["url"] == data["url"] for d in downloads):
                 downloads.append(data)
