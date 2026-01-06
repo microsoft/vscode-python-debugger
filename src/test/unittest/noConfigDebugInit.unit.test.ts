@@ -19,7 +19,7 @@ suite('setup for no-config debug scenario', function () {
     let context: TypeMoq.IMock<IExtensionContext>;
     let noConfigScriptsDir: string;
     let bundledDebugPath: string;
-    let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
+    let DEBUGPY_ADAPTER_ENDPOINTS = 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
     let workspaceUriStub: sinon.SinonStub;
 
@@ -193,10 +193,12 @@ suite('setup for no-config debug scenario', function () {
 
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
-        const expectedPattern = new RelativePattern(
-            path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'),
-            '**/*.txt',
-        );
+        const expectedPattern = sinon
+            .match.instanceOf(RelativePattern)
+            .and(
+                sinon.match.has('base', path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints')),
+            )
+            .and(sinon.match.has('pattern', sinon.match(/^endpoint-[0-9a-f]{16}\.txt$/)));
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
 
