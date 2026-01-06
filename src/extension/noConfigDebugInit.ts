@@ -8,6 +8,7 @@ import {
     DebugSessionOptions,
     Disposable,
     GlobalEnvironmentVariableCollection,
+    env,
     l10n,
     RelativePattern,
     workspace,
@@ -39,7 +40,7 @@ export async function registerNoConfigDebug(
     const collection = envVarCollection;
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
-    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
+    // folder path format: extPath/.noConfigDebugAdapterEndpoints/<stableWorkspaceHash>
     let workspaceString = workspace.workspaceFile?.fsPath;
     if (!workspaceString) {
         workspaceString = workspace.workspaceFolders?.map((e) => e.uri.fsPath).join(';');
@@ -49,21 +50,26 @@ export async function registerNoConfigDebug(
         return Promise.resolve(new Disposable(() => {}));
     }
 
-    // create a stable hash for the workspace folder, reduce terminal variable churn
+    // create a stable hash for the workspace folder and VS Code window, reduce terminal variable churn
     const hash = crypto.createHash('sha256');
     hash.update(workspaceString.toString());
+    hash.update(env.sessionId);
     const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
 
     const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
-    const tempFilePath = path.join(tempDirPath, `endpoint-${stableWorkspaceHash}.txt`);
+    const endpointFolderPath = path.join(tempDirPath, stableWorkspaceHash);
 
     // create the temp directory if it doesn't exist
-    if (!fs.existsSync(tempDirPath)) {
-        fs.mkdirSync(tempDirPath, { recursive: true });
+    if (!fs.existsSync(endpointFolderPath)) {
+        fs.mkdirSync(endpointFolderPath, { recursive: true });
     } else {
-        // remove endpoint file in the temp directory if it exists
-        if (fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
+        // clean out any existing endpoint files in the folder
+        const entries = fs.readdirSync(endpointFolderPath, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isFile()) {
+                const entryPath = path.join(endpointFolderPath, entry.name.toString());
+                fs.unlinkSync(entryPath);
+            }
         }
     }
     // clear the env var collection to remove any existing env vars
@@ -73,7 +79,7 @@ export async function registerNoConfigDebug(
     collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
 
     // Add env vars for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
-    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
+    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', endpointFolderPath);
 
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
@@ -93,7 +99,7 @@ export async function registerNoConfigDebug(
     );
 
     // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*.txt'));
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(endpointFolderPath, '**/*.txt'));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
         sendTelemetryEvent(EventName.DEBUG_SESSION_START, undefined, {
             trigger: 'noConfig' as TriggerType,

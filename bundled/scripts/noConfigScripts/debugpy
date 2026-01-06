@@ -1,4 +1,6 @@
 #! /bin/bash
 # Bash script
-export DEBUGPY_ADAPTER_ENDPOINTS=$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS
-python3 $BUNDLED_DEBUGPY_PATH --listen 0 --wait-for-client $@
+endpoint_dir="$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"
+endpoint_file="$(mktemp -p "$endpoint_dir" endpoint-XXXXXX.txt)"
+export DEBUGPY_ADAPTER_ENDPOINTS="$endpoint_file"
+python3 "$BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client "$@"
