@@ -49,7 +49,7 @@ suite('setup for no-config debug scenario', function () {
         workspaceUriStub.restore();
     });
 
-    test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
+    test('should add environment variables for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         envVarCollectionReplaceStub = sinon.stub();
         envVarCollectionAppendStub = sinon.stub();
