@@ -8,6 +8,7 @@ import json
 import os
 import pathlib
 import re
+import tempfile
 import urllib.request as url_lib
 import zipfile
 
@@ -59,21 +60,121 @@ def install_bundled_libs(session):
     )
     session.install("packaging")
 
-    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
-    debugpy_info = json.loads(debugpy_info_json_path.read_text(encoding="utf-8"))
-
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
+    download_debugpy_via_pip(session, target)
+
+
+def _infer_debugpy_version() -> str:
+    """Best-effort debugpy version selection.
+
+    Priority:
+    1) DEBUGPY_VERSION env var
+    2) Extract from debugpy_info.json (if present)
+    """
+
+    env_version = os.environ.get("DEBUGPY_VERSION")
+    if env_version:
+        return env_version
+
+    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
+    if not debugpy_info_json_path.exists():
+        raise FileNotFoundError(
+            "Missing debugpy version source. Set DEBUGPY_VERSION or add debugpy_info.json."
+        )
+
+    debugpy_info = json.loads(debugpy_info_json_path.read_text(encoding="utf-8"))
+    for platform_entries in debugpy_info.values():
+        for entry in platform_entries:
+            match = re.search(r"/debugpy-([^/]+?)-", entry.get("url", ""))
+            if match:
+                return match.group(1)
+
+    raise ValueError(
+        "Could not infer debugpy version from debugpy_info.json. Set DEBUGPY_VERSION."
+    )
+
+
+def download_debugpy_via_pip(session: nox.Session, target: str) -> None:
+    """Downloads debugpy wheels via pip and extracts them into bundled/libs.
+
+    This respects pip configuration (index URLs, proxies, certs) and avoids hard-coded
+    direct downloads from files.pythonhosted.org.
+    """
+
+    debugpy_version = _infer_debugpy_version()
+    libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
+    libs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Match prior behavior: bundle debugpy wheels for the target (or universal fallback).
+    # We download multiple wheels for multiple CPython versions, because the extension may
+    # be used with different interpreter versions.
+    #
+    # Format: (python_version, implementation, abi, platform)
     if "darwin" in target:
-        download_url(debugpy_info["macOS"])
-    elif "win32-ia32" == target:
-        download_url(debugpy_info["win32"])
-    elif "win32-x64" == target:
-        download_url(debugpy_info["win64"])
-    elif "linux-x64" == target:
-        download_url(debugpy_info["linux"])
+        wheel_requests = [
+            ("310", "cp", "cp310", "macosx_15_0_x86_64"),
+            ("311", "cp", "cp311", "macosx_15_0_universal2"),
+            ("312", "cp", "cp312", "macosx_15_0_universal2"),
+        ]
+    elif target == "win32-ia32":
+        wheel_requests = [
+            ("310", "cp", "cp310", "win32"),
+            ("311", "cp", "cp311", "win32"),
+            ("312", "cp", "cp312", "win32"),
+        ]
+    elif target == "win32-x64":
+        wheel_requests = [
+            ("310", "cp", "cp310", "win_amd64"),
+            ("311", "cp", "cp311", "win_amd64"),
+            ("312", "cp", "cp312", "win_amd64"),
+        ]
+    elif target == "linux-x64":
+        wheel_requests = [
+            ("310", "cp", "cp310", "manylinux_2_34_x86_64"),
+            ("311", "cp", "cp311", "manylinux_2_34_x86_64"),
+            ("312", "cp", "cp312", "manylinux_2_34_x86_64"),
+        ]
     else:
-        download_url(debugpy_info["any"])
+        # Universal fallback wheel (py2.py3-none-any).
+        wheel_requests = [("39", "cp", "none", "any")]
+
+    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_") as tmp_dir:
+        tmp_path = pathlib.Path(tmp_dir)
+        for py_ver, impl, abi, platform_tag in wheel_requests:
+            session.run(
+                "python",
+                "-m",
+                "pip",
+                "download",
+                f"debugpy=={debugpy_version}",
+                "--no-deps",
+                "--only-binary",
+                ":all:",
+                "--dest",
+                str(tmp_path),
+                "--python-version",
+                py_ver,
+                "--implementation",
+                impl,
+                "--abi",
+                abi,
+                "--platform",
+                platform_tag,
+            )
+
+        wheel_paths = sorted(tmp_path.glob("debugpy-*.whl"))
+        if not wheel_paths:
+            raise FileNotFoundError(
+                f"pip download produced no debugpy wheels for version {debugpy_version}."
+            )
+
+        for wheel_path in wheel_paths:
+            print("Download:", wheel_path.name)
+            with zipfile.ZipFile(wheel_path, "r") as wheel:
+                for zip_info in wheel.infolist():
+                    print("\t" + zip_info.filename)
+                    wheel.extract(zip_info.filename, libs_dir)
 
 
 def download_url(values):
