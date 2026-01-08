@@ -75,6 +75,8 @@ extends:
 
               - script: python -m nox --session install_bundled_libs
                 displayName: Install Python dependencies
+                env:
+                  USE_PIP_DOWNLOAD: 1
 
               - script: python ./build/update_ext_version.py --release --for-publishing
                 displayName: Update build number
