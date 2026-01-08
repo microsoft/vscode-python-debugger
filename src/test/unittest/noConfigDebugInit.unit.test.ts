@@ -73,7 +73,11 @@ suite('setup for no-config debug scenario', function () {
                 if (key === DEBUGPY_ADAPTER_ENDPOINTS) {
                     assert(
                         value ===
-                            path.join(context.object.extensionPath, '.noConfigDebugAdapterEndpoints', stableWorkspaceHash),
+                            path.join(
+                                context.object.extensionPath,
+                                '.noConfigDebugAdapterEndpoints',
+                                stableWorkspaceHash,
+                            ),
                     );
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
                     assert(value === bundledDebugPath);
@@ -284,13 +288,11 @@ suite('setup for no-config debug scenario', function () {
         const endpointFolderPath = path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints', stableWorkspaceHash);
         const fsExistsSyncStub = sinon.stub(fs, 'existsSync').callsFake((p) => p === endpointFolderPath);
         const fakeDirent = { isFile: () => true, name: Buffer.from('old.txt') } as unknown as fs.Dirent<Buffer>;
-        const fsReaddirSyncStub = sinon
-            .stub(fs, 'readdirSync')
-            .callsFake((dirPath: fs.PathLike, options?: any) => {
-                assert(dirPath === endpointFolderPath);
-                assert(options?.withFileTypes === true);
-                return [fakeDirent] as unknown as fs.Dirent<Buffer>[];
-            });
+        const fsReaddirSyncStub = sinon.stub(fs, 'readdirSync').callsFake((dirPath: fs.PathLike, options?: any) => {
+            assert(dirPath === endpointFolderPath);
+            assert(options?.withFileTypes === true);
+            return [fakeDirent] as unknown as fs.Dirent<Buffer>[];
+        });
         const fsUnlinkSyncStub = sinon.stub(fs, 'unlinkSync');
 
         // Act
