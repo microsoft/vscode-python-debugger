@@ -75,11 +75,7 @@ def install_bundled_libs(session):
     else:
         wheels = debugpy_info["any"]
 
-    # Use pip download when USE_PIP_DOWNLOAD is set (e.g., for Azure Artifacts feed)
-    if os.environ.get("USE_PIP_DOWNLOAD"):
-        download_debugpy_via_pip(session, wheels)
-    else:
-        download_url(wheels)
+    download_debugpy_via_pip(session, wheels)
 
 
 def _parse_wheel_info(url: str) -> dict:
