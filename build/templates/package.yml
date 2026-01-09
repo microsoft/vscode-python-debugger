@@ -87,3 +87,10 @@ jobs:
                 - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --target ${{ platform.vsceTarget }} --pre-release ${{ parameters.vscePackageArgs }}
                   displayName: 💾 Package pre-release extension
                   workingDirectory: ${{ parameters.workingDirectory }}
+
+        - task: ExtractFiles@1
+          inputs:
+            archiveFilePatterns: $(Build.BinariesDirectory)/*.vsix
+            destinationFolder: $(Build.ArtifactStagingDirectory)/drop
+            cleanDestinationFolder: false
+          displayName: 📦 Extract extension
