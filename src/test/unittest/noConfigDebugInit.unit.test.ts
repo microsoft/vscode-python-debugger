@@ -197,7 +197,7 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
         const expectedPattern = sinon.match
             .instanceOf(RelativePattern)
-            .and(sinon.match.has('base', noConfigEndpointDir))
+            .and(sinon.match.has('base', Uri.file(noConfigEndpointDir).fsPath))
             .and(sinon.match.has('pattern', sinon.match(/^endpoint-[0-9a-f]{16}\.txt$/)));
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
