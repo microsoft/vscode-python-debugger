@@ -103,6 +103,7 @@ extends:
             parameters:
               buildPlatforms: ${{ parameters.buildPlatforms }}
               buildSteps: ${{ parameters.buildSteps }}
+              isPreRelease: true
 
       - stage: Sign
         displayName: Sign Extension

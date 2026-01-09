@@ -15,6 +15,21 @@ parameters:
     default: []
     displayName: 'Build steps to execute'
 
+  - name: isPreRelease
+    type: boolean
+    default: false
+    displayName: 'Is this a pre-release build'
+
+  - name: vscePackageArgs
+    type: string
+    default: ''
+    displayName: 'Additional vsce package arguments'
+
+  - name: workingDirectory
+    type: string
+    default: '$(Build.SourcesDirectory)'
+    displayName: 'Working directory for packaging'
+
 jobs:
   - ${{ each platform in parameters.buildPlatforms }}:
     - job: Build_${{ replace(coalesce(platform.vsceTarget, 'universal'), '-', '_') }}
@@ -61,3 +76,14 @@ jobs:
 
         - ${{ each buildStep in parameters.buildSteps }}:
             - ${{ buildStep }}
+
+        - ${{ if eq(parameters.isPreRelease, true) }}:
+            - ${{ if eq(platform.vsceTarget, '') }}:
+                - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --pre-release ${{ parameters.vscePackageArgs }}
+                  displayName: 💾 Package pre-release extension
+                  workingDirectory: ${{ parameters.workingDirectory }}
+
+            - ${{ if ne(platform.vsceTarget, '') }}:
+                - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --target ${{ platform.vsceTarget }} --pre-release ${{ parameters.vscePackageArgs }}
+                  displayName: 💾 Package pre-release extension
+                  workingDirectory: ${{ parameters.workingDirectory }}
