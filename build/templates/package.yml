@@ -1,0 +1,61 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Template for building platform-specific VSIX packages
+# Sets VSCETARGET environment variable for noxfile.py to select correct debugpy wheels
+# Iterates over buildPlatforms to create a job per platform
+
+parameters:
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to build'
+
+  - name: buildSteps
+    type: stepList
+    default: []
+    displayName: 'Build steps to execute'
+
+jobs:
+  - ${{ each platform in parameters.buildPlatforms }}:
+    - job: Build_${{ replace(coalesce(platform.vsceTarget, 'universal'), '-', '_') }}
+      displayName: 'Build ${{ coalesce(platform.vsceTarget, ''universal'') }}'
+
+      ${{ if eq(platform.name, 'Linux') }}:
+        pool:
+          name: 1es-ubuntu-22.04-x64
+          os: linux
+
+      ${{ if eq(platform.name, 'MacOS') }}:
+        pool:
+          name: Azure Pipelines
+          image: macOS-15
+          os: macOS
+
+      ${{ if eq(platform.name, 'Windows') }}:
+        pool:
+          name: 1es-windows-2022-x64
+          os: windows
+
+      variables:
+        packageArch: ${{ coalesce(platform.packageArch, '') }}
+        vsceTarget: ${{ platform.vsceTarget }}
+        ${{ if eq(platform.name, 'MacOS') }}:
+          BUILDSECMON_OPT_IN: false
+
+      templateContext:
+        outputs:
+          - output: pipelineArtifact
+            displayName: 'Publish VSIX for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
+            targetPath: '$(Build.ArtifactStagingDirectory)'
+            artifactName: vsix-${{ coalesce(platform.vsceTarget, 'universal') }}
+
+      steps:
+        - template: build/templates/setup.yml@self
+
+        - bash: |
+            echo "##vso[task.setvariable variable=VSCETARGET]${{ platform.vsceTarget }}"
+            echo "Building for target: ${{ platform.vsceTarget }}"
+          displayName: 'Set VSCETARGET variable'
+
+        - ${{ each buildStep in parameters.buildSteps }}:
+            - ${{ buildStep }}
