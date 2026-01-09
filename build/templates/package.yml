@@ -63,7 +63,7 @@ jobs:
         outputs:
           - output: pipelineArtifact
             displayName: 'Publish VSIX for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
-            targetPath: '$(Build.ArtifactStagingDirectory)'
+            targetPath: '$(Build.ArtifactStagingDirectory)/drop'
             artifactName: vsix-${{ coalesce(platform.vsceTarget, 'universal') }}
 
       steps:
