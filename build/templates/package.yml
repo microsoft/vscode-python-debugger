@@ -115,9 +115,9 @@ jobs:
                   displayName: 💾 Package pre-release extension
                   workingDirectory: ${{ parameters.workingDirectory }}
 
-        - task: ExtractFiles@1
+        - task: CopyFiles@2
           inputs:
-            archiveFilePatterns: $(Build.BinariesDirectory)/*.vsix
-            destinationFolder: $(Build.ArtifactStagingDirectory)/drop
-            cleanDestinationFolder: false
-          displayName: 📦 Extract extension
+            sourceFolder: $(Build.BinariesDirectory)
+            contents: '*.vsix'
+            targetFolder: $(Build.ArtifactStagingDirectory)/drop
+          displayName: 📦 Copy VSIX to staging
