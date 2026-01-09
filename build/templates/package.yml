@@ -28,7 +28,7 @@ jobs:
 
       ${{ if eq(platform.name, 'MacOS') }}:
         pool:
-          name: AzurePipelines-EO
+          name: Azure Pipelines
           image: macos-latest
           os: macOS
 
