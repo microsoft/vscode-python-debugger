@@ -34,7 +34,7 @@ jobs:
 
       ${{ if eq(platform.name, 'Windows') }}:
         pool:
-          name: 1es-windows-2022-x64
+          name: AzurePipelines-EO
           os: windows
 
       variables:
