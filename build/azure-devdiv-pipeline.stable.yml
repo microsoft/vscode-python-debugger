@@ -72,7 +72,7 @@ parameters:
       - script: python ./build/update_ext_version.py --release --for-publishing
         displayName: Update build number
 
-      - script: npm run vsce-package
+      - script: npm run package
         displayName: Build extension
 
 extends:
@@ -98,6 +98,7 @@ extends:
             parameters:
               buildPlatforms: ${{ parameters.buildPlatforms }}
               buildSteps: ${{ parameters.buildSteps }}
+              isPreRelease: false
 
       - stage: Sign
         displayName: Sign Extension
@@ -126,7 +127,7 @@ extends:
 
               - template: build/templates/sign.yml@self
                 parameters:
-                  vsixName: $(VsixName)
+                  buildPlatforms: ${{ parameters.buildPlatforms }}
                   workingDirectory: $(Build.StagingDirectory)\drop
                   signType: real
                   verifySignature: true
