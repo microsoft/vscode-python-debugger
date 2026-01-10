@@ -132,7 +132,7 @@ extends:
 
               - template: build/templates/sign.yml@self
                 parameters:
-                  vsixName: $(VsixName)
+                  buildPlatforms: ${{ parameters.buildPlatforms }}
                   workingDirectory: $(Build.StagingDirectory)\drop
                   signType: real
                   verifySignature: true
