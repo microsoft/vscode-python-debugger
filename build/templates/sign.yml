@@ -62,6 +62,15 @@ steps:
       restoreDirectory: '$(Build.SourcesDirectory)/packages'
       nugetConfigPath: '$(Build.SourcesDirectory)/build/NuGet.config'
 
+  # Setup Node.js and npm authentication
+  - template: setup.yml@self
+
+  - task: Npm@1
+    displayName: 'npm ci (install vsce)'
+    inputs:
+      command: ci
+      workingDir: '$(Build.SourcesDirectory)'
+
   # ✅ Enable MicroBuildSigningPlugin for PME enforcement (once for all platforms)
   - task: MicroBuildSigningPlugin@4
     displayName: Enable MicroBuild Signing
@@ -139,7 +148,7 @@ steps:
           Write-Host "📝 Generating manifest:"
           Write-Host "   Input:  $($vsix.FullName)"
           Write-Host "   Output: $manifestPath"
-          npx vsce generate-manifest -i "$($vsix.FullName)" -o "$manifestPath"
+          & "$(Build.SourcesDirectory)/node_modules/.bin/vsce" generate-manifest -i "$($vsix.FullName)" -o "$manifestPath"
           if (Test-Path $manifestPath) {
             Write-Host "✅ Manifest created: $(Get-Item $manifestPath | Select-Object -ExpandProperty Length) bytes"
           } else {
@@ -295,7 +304,7 @@ steps:
               if (!(Test-Path $signaturePath)) { Write-Host "❌ Missing signature"; exit 1 }
               
               Write-Host "🔄 Running vsce verify-signature..."
-              npx @vscode/vsce verify-signature --packagePath "$($vsix.FullName)" --manifestPath "$manifestPath" --signaturePath "$signaturePath"
+              & "$(Build.SourcesDirectory)/node_modules/.bin/vsce" verify-signature --packagePath "$($vsix.FullName)" --manifestPath "$manifestPath" --signaturePath "$signaturePath"
               
               if ($LASTEXITCODE -ne 0) {
                 Write-Host "❌ vsce verify-signature failed with exit code $LASTEXITCODE"
