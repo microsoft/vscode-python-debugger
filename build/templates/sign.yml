@@ -128,58 +128,22 @@ steps:
       displayName: '📁 Setup folder for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
 
     - powershell: |
-        Write-Host "========================================"
-        Write-Host "📝 Generating manifest for: ${{ coalesce(platform.vsceTarget, 'universal') }}"
-        Write-Host "========================================"
-        
         $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
-        Write-Host "📂 Platform folder: $platformFolder"
-        
-        $vsixFiles = Get-ChildItem "$platformFolder/*.vsix" -ErrorAction SilentlyContinue
-        if ($null -eq $vsixFiles -or $vsixFiles.Count -eq 0) {
-          Write-Host "❌ No VSIX files found in platform folder"
-          Get-ChildItem $platformFolder | ForEach-Object { Write-Host "  - $($_.Name)" }
+        $vsixFile = Get-ChildItem "$platformFolder/*.vsix" | Select-Object -First 1
+        if ($null -eq $vsixFile) {
+          Write-Host "##vso[task.logissue type=error]No VSIX file found in $platformFolder"
           exit 1
         }
-        
-        # Check vsce installation
-        $vscePath = "$(Build.SourcesDirectory)/node_modules/.bin/vsce.cmd"
-        Write-Host "🔍 Looking for vsce at: $vscePath"
-        if (Test-Path $vscePath) {
-          Write-Host "✅ vsce found"
-        } else {
-          Write-Host "❌ vsce not found at $vscePath"
-          Write-Host "📂 Contents of node_modules/.bin:"
-          Get-ChildItem "$(Build.SourcesDirectory)/node_modules/.bin" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  - $($_.Name)" }
-          exit 1
-        }
-        
-        Write-Host "✅ Found $($vsixFiles.Count) VSIX file(s)"
-        foreach ($vsix in $vsixFiles) {
-          $manifestPath = "$platformFolder/$($vsix.BaseName).manifest"
-          Write-Host "📝 Generating manifest:"
-          Write-Host "   Input:  $($vsix.FullName)"
-          Write-Host "   Output: $manifestPath"
-          
-          Write-Host "🔄 Running vsce generate-manifest..."
-          $output = & $vscePath generate-manifest -i "$($vsix.FullName)" -o "$manifestPath" 2>&1
-          $exitCode = $LASTEXITCODE
-          Write-Host "   Output: $output"
-          Write-Host "   Exit code: $exitCode"
-          
-          if ($exitCode -ne 0) {
-            Write-Host "❌ vsce generate-manifest failed with exit code $exitCode"
-            exit $exitCode
-          }
-          
-          if (Test-Path $manifestPath) {
-            Write-Host "✅ Manifest created: $(Get-Item $manifestPath | Select-Object -ExpandProperty Length) bytes"
-          } else {
-            Write-Host "❌ Failed to create manifest file"
-            exit 1
-          }
-        }
-        Write-Host "========================================"
+        $vsixPath = $vsixFile.FullName
+        # Use fixed name extension.manifest as expected by sign.proj
+        $manifestPath = "$platformFolder/extension.manifest"
+        Write-Host "##vso[task.setvariable variable=VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$vsixPath"
+        Write-Host "##vso[task.setvariable variable=MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$manifestPath"
+        Write-Host "VSIX: $vsixPath"
+        Write-Host "Manifest: $manifestPath"
+      displayName: '🔍 Find VSIX for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
+
+    - script: npx vsce generate-manifest -i "$(VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" -o "$(MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})"
       displayName: '📝 Generate manifest for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
 
     - powershell: |
@@ -202,16 +166,16 @@ steps:
         }
         
         $vsixCount = (Get-ChildItem "$platformFolder/*.vsix").Count
-        $manifestCount = (Get-ChildItem "$platformFolder/*.manifest" -ErrorAction SilentlyContinue).Count
+        $manifestPath = "$platformFolder/extension.manifest"
         Write-Host ""
-        Write-Host "📊 Summary: $vsixCount VSIX, $manifestCount manifest(s)"
+        Write-Host "📊 Summary: $vsixCount VSIX, manifest exists: $(Test-Path $manifestPath)"
         
         if ($vsixCount -eq 0) { 
           Write-Host "❌ No VSIX files found"
           exit 1 
         }
-        if ($manifestCount -eq 0) { 
-          Write-Host "❌ No manifest files found"
+        if (!(Test-Path $manifestPath)) { 
+          Write-Host "❌ extension.manifest not found"
           exit 1 
         }
         Write-Host "✅ Ready for signing"
@@ -250,16 +214,14 @@ steps:
           Write-Host "  $icon $($_.Name) ($($_.Length) bytes)"
         }
         
-        $vsixCount = (Get-ChildItem "$platformFolder/*.vsix").Count
-        $manifestCount = (Get-ChildItem "$platformFolder/*.manifest" -ErrorAction SilentlyContinue).Count
-        $p7sCount = (Get-ChildItem "$platformFolder/*.p7s" -ErrorAction SilentlyContinue).Count
+        $signaturePath = "$platformFolder/extension.signature.p7s"
         Write-Host ""
-        Write-Host "📊 Summary: $vsixCount VSIX, $manifestCount manifest(s), $p7sCount signature(s)"
+        Write-Host "📊 Signature exists: $(Test-Path $signaturePath)"
         
-        if ($p7sCount -gt 0) {
-          Write-Host "✅ Signature files found"
+        if (Test-Path $signaturePath) {
+          Write-Host "✅ extension.signature.p7s found"
         } else {
-          Write-Host "⚠️ No signature files found after signing"
+          Write-Host "⚠️ extension.signature.p7s not found after signing"
         }
         Write-Host "========================================"
       displayName: '🔍 Post-sign inspection for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
@@ -270,73 +232,40 @@ steps:
         Write-Host "========================================"
         
         $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
-        $vsixFiles = Get-ChildItem "$platformFolder/*.vsix"
+        $manifestPath = "$platformFolder/extension.manifest"
+        $signaturePath = "$platformFolder/extension.signature.p7s"
         
-        foreach ($vsix in $vsixFiles) {
-          Write-Host "📦 Validating: $($vsix.Name)"
-          $manifestPath = "$platformFolder/$($vsix.BaseName).manifest"
-          $signaturePath = "$platformFolder/$($vsix.BaseName).signature.p7s"
-          
-          Write-Host "   Manifest:  $manifestPath"
-          Write-Host "   Signature: $signaturePath"
-          
-          if (!(Test-Path $manifestPath)) { 
-            Write-Host "❌ Manifest missing"
-            exit 1 
-          }
-          if (!(Test-Path $signaturePath)) { 
-            Write-Host "❌ Signature missing"
-            exit 1 
-          }
-          
-          $manifestHash = (Get-FileHash -Algorithm SHA256 $manifestPath).Hash
-          $signatureHash = (Get-FileHash -Algorithm SHA256 $signaturePath).Hash
-          Write-Host "   Manifest SHA256:  $manifestHash"
-          Write-Host "   Signature SHA256: $signatureHash"
-          
-          if ($manifestHash -eq $signatureHash) {
-            Write-Host "❌ Signature file is identical to manifest (placeholder detected)"
-            exit 1
-          } else {
-            Write-Host "✅ Hashes differ - signature is valid"
-          }
+        Write-Host "   Manifest:  $manifestPath"
+        Write-Host "   Signature: $signaturePath"
+        
+        if (!(Test-Path $manifestPath)) { 
+          Write-Host "❌ Manifest missing"
+          exit 1 
         }
+        if (!(Test-Path $signaturePath)) { 
+          Write-Host "❌ Signature missing"
+          exit 1 
+        }
+        
+        $manifestHash = (Get-FileHash -Algorithm SHA256 $manifestPath).Hash
+        $signatureHash = (Get-FileHash -Algorithm SHA256 $signaturePath).Hash
+        Write-Host "   Manifest SHA256:  $manifestHash"
+        Write-Host "   Signature SHA256: $signatureHash"
+        
+        if ($manifestHash -eq $signatureHash) {
+          Write-Host "❌ Signature file is identical to manifest (placeholder detected)"
+          exit 1
+        } else {
+          Write-Host "✅ Hashes differ - signature is valid"
+        }
+        
+        # Set signature path variable for verify step
+        Write-Host "##vso[task.setvariable variable=SIGNATURE_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$signaturePath"
         Write-Host "========================================"
       displayName: '✅ Validate signature for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
 
     - ${{ if eq(parameters.verifySignature, true) }}:
-        - powershell: |
-            Write-Host "========================================"
-            Write-Host "🔐 Verifying signature for: ${{ coalesce(platform.vsceTarget, 'universal') }}"
-            Write-Host "========================================"
-            
-            $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
-            $vsixFiles = Get-ChildItem "$platformFolder/*.vsix"
-            
-            foreach ($vsix in $vsixFiles) {
-              Write-Host "📦 Verifying: $($vsix.Name)"
-              $manifestPath = "$platformFolder/$($vsix.BaseName).manifest"
-              $signaturePath = "$platformFolder/$($vsix.BaseName).signature.p7s"
-              
-              Write-Host "   Package:   $($vsix.FullName)"
-              Write-Host "   Manifest:  $manifestPath"
-              Write-Host "   Signature: $signaturePath"
-              
-              if (!(Test-Path $vsix.FullName)) { Write-Host "❌ Missing VSIX"; exit 1 }
-              if (!(Test-Path $manifestPath)) { Write-Host "❌ Missing manifest"; exit 1 }
-              if (!(Test-Path $signaturePath)) { Write-Host "❌ Missing signature"; exit 1 }
-              
-              Write-Host "🔄 Running vsce verify-signature..."
-              & "$(Build.SourcesDirectory)/node_modules/.bin/vsce" verify-signature --packagePath "$($vsix.FullName)" --manifestPath "$manifestPath" --signaturePath "$signaturePath"
-              
-              if ($LASTEXITCODE -ne 0) {
-                Write-Host "❌ vsce verify-signature failed with exit code $LASTEXITCODE"
-                exit $LASTEXITCODE
-              } else {
-                Write-Host "✅ Signature verification succeeded"
-              }
-            }
-            Write-Host "========================================"
+        - script: npx vsce verify-signature --packagePath "$(VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" --manifestPath "$(MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" --signaturePath "$(SIGNATURE_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})"
           displayName: '🔐 Verify signature for ${{ coalesce(platform.vsceTarget, ''universal'') }}'
 
   # Final summary of all signed artifacts
@@ -352,11 +281,11 @@ steps:
         Write-Host ""
         Write-Host "📁 Platform: $($folder.Name)"
         $vsixFiles = Get-ChildItem "$($folder.FullName)/*.vsix" -ErrorAction SilentlyContinue
-        $p7sFiles = Get-ChildItem "$($folder.FullName)/*.p7s" -ErrorAction SilentlyContinue
+        $signaturePath = "$($folder.FullName)/extension.signature.p7s"
         
         if ($vsixFiles) {
           foreach ($vsix in $vsixFiles) {
-            $hasSig = Test-Path "$($folder.FullName)/$($vsix.BaseName).signature.p7s"
+            $hasSig = Test-Path $signaturePath
             $status = if ($hasSig) { "✅ Signed" } else { "❌ Not signed" }
             Write-Host "   📦 $($vsix.Name) - $status"
           }
