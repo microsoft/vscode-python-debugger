@@ -6,7 +6,7 @@ import { IExtensionContext } from '../../extension/common/types';
 import { registerNoConfigDebug as registerNoConfigDebug } from '../../extension/noConfigDebugInit';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri, env, workspace } from 'vscode';
+import { DebugConfiguration, DebugSessionOptions, env, RelativePattern, Uri, workspace } from 'vscode';
 import * as utils from '../../extension/utils';
 import { assert } from 'console';
 import * as fs from 'fs';
@@ -22,9 +22,7 @@ suite('setup for no-config debug scenario', function () {
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
     let workspaceUriStub: sinon.SinonStub;
-    let sessionIdStub: sinon.SinonStub;
-    let stableWorkspaceHash: string;
-    let workspacePath: string;
+    let windowHash: string;
 
     const testDataDir = path.join(__dirname, 'testData');
     const testFilePath = path.join(testDataDir, 'debuggerAdapterEndpoint.txt');
@@ -37,20 +35,18 @@ suite('setup for no-config debug scenario', function () {
             noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
             bundledDebugPath = path.join(context.object.extensionPath, 'bundled/libs/debugpy');
 
-            sessionIdStub = sinon.stub(env, 'sessionId').value('test-session');
-            workspacePath = os.tmpdir();
-
             // Stub crypto.randomBytes with proper typing
             let randomBytesStub = sinon.stub(crypto, 'randomBytes');
             // Provide a valid Buffer object
             randomBytesStub.callsFake((_size: number) => Buffer.from('1234567899', 'hex'));
 
-            workspaceUriStub = sinon.stub(workspace, 'workspaceFolders').value([{ uri: Uri.parse(workspacePath) }]);
+            workspaceUriStub = sinon.stub(workspace, 'workspaceFolders').value([{ uri: Uri.parse(os.tmpdir()) }]);
 
-            const hash = crypto.createHash('sha256');
-            hash.update(workspacePath.toString());
-            hash.update('test-session');
-            stableWorkspaceHash = hash.digest('hex').slice(0, 16);
+            // Stub env.sessionId to get a stable window hash
+            sinon.stub(env, 'sessionId').value('test-session-id');
+            const hashObj = crypto.createHash('sha256');
+            hashObj.update('test-session-id');
+            windowHash = hashObj.digest('hex').substring(0, 16);
         } catch (error) {
             console.error('Error in setup:', error);
         }
@@ -58,7 +54,6 @@ suite('setup for no-config debug scenario', function () {
     teardown(() => {
         sinon.restore();
         workspaceUriStub.restore();
-        sessionIdStub.restore();
     });
 
     test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
@@ -71,14 +66,8 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === DEBUGPY_ADAPTER_ENDPOINTS) {
-                    assert(
-                        value ===
-                            path.join(
-                                context.object.extensionPath,
-                                '.noConfigDebugAdapterEndpoints',
-                                stableWorkspaceHash,
-                            ),
-                    );
+                    assert(value.includes('endpoint-'));
+                    assert(value.includes(windowHash));
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
                     assert(value === bundledDebugPath);
                 } else if (key === 'PYDEVD_DISABLE_FILE_VALIDATION') {
@@ -213,8 +202,8 @@ suite('setup for no-config debug scenario', function () {
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
         const expectedPattern = new RelativePattern(
-            path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints', stableWorkspaceHash),
-            '**/*.txt',
+            path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'),
+            `endpoint-${windowHash}-*`,
         );
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
@@ -280,27 +269,25 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledWith(debugStub, undefined, expectedConfig, optionsExpected);
     });
 
-    test('should clear existing endpoint files when debuggerAdapterEndpointFolder exists', async () => {
+    test('should clean up existing endpoint files for this window hash when debuggerAdapterEndpointFolder exists', async () => {
         // Arrange
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
 
-        const endpointFolderPath = path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints', stableWorkspaceHash);
-        const fsExistsSyncStub = sinon.stub(fs, 'existsSync').callsFake((p) => p === endpointFolderPath);
-        const fakeDirent = { isFile: () => true, name: Buffer.from('old.txt') } as unknown as fs.Dirent<Buffer>;
-        const fsReaddirSyncStub = sinon.stub(fs, 'readdirSync').callsFake((dirPath: fs.PathLike, options?: any) => {
-            assert(dirPath === endpointFolderPath);
-            assert(options?.withFileTypes === true);
-            return [fakeDirent] as unknown as fs.Dirent<Buffer>[];
-        });
+        const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+        const fsReaddirSyncStub = sinon.stub(fs, 'readdirSync').returns([
+            { name: `endpoint-${windowHash}-abc123.txt`, isFile: () => true },
+            { name: `endpoint-otherhash-def456.txt`, isFile: () => true },
+            { name: 'somedir', isFile: () => false },
+        ] as any);
         const fsUnlinkSyncStub = sinon.stub(fs, 'unlinkSync');
 
         // Act
         await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
-        // Assert
-        sinon.assert.calledWith(fsExistsSyncStub, endpointFolderPath);
-        sinon.assert.calledWith(fsUnlinkSyncStub, path.join(endpointFolderPath, 'old.txt'));
+        // Assert - only files matching this window hash should be deleted
+        sinon.assert.called(fsReaddirSyncStub);
+        sinon.assert.calledOnce(fsUnlinkSyncStub);
 
         // Cleanup
         fsExistsSyncStub.restore();

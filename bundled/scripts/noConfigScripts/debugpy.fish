@@ -1,5 +1,4 @@
 # Fish script
-set endpoint_dir $VSCODE_DEBUGPY_ADAPTER_ENDPOINTS
-set endpoint_file (mktemp -p $endpoint_dir endpoint-XXXXXX.txt)
-set -x DEBUGPY_ADAPTER_ENDPOINTS $endpoint_file
+# VSCODE_DEBUGPY_ADAPTER_ENDPOINTS is a prefix; mktemp creates the file atomically to prevent races
+set -x DEBUGPY_ADAPTER_ENDPOINTS (mktemp "$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"XXXXXX.txt)
 python3 $BUNDLED_DEBUGPY_PATH --listen 0 --wait-for-client $argv
