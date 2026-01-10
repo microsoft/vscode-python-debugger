@@ -11,7 +11,6 @@ import {
     env,
     l10n,
     RelativePattern,
-    workspace,
 } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
 import { traceError, traceVerbose } from './common/log/logging';
@@ -40,24 +39,12 @@ export async function registerNoConfigDebug(
     const collection = envVarCollection;
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
-    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
-    let workspaceString = workspace.workspaceFile?.fsPath;
-    if (!workspaceString) {
-        workspaceString = workspace.workspaceFolders?.map((e) => e.uri.fsPath).join(';');
-    }
-    if (!workspaceString) {
-        traceError('No workspace folder found');
-        return Promise.resolve(new Disposable(() => {}));
-    }
-
-    // Create unique hash based on workspace and VS Code session ID
-    const hash = crypto.createHash('sha256');
-    hash.update(workspaceString.toString());
-    hash.update(env.sessionId);
-    const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
+    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-<sessionId>.txt
+    // sessionId is unique per VS Code window, ensuring isolation between windows
 
     const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
-    const endpointFilename = `endpoint-${stableWorkspaceHash}.txt`;
+    const sessionIdHash = crypto.createHash('sha256').update(env.sessionId).digest('hex').slice(0, 16);
+    const endpointFilename = `endpoint-${sessionIdHash}.txt`;
     const tempFilePath = path.join(tempDirPath, endpointFilename);
 
     // create the temp directory if it doesn't exist

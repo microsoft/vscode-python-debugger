@@ -6,7 +6,7 @@ import { IExtensionContext } from '../../extension/common/types';
 import { registerNoConfigDebug as registerNoConfigDebug } from '../../extension/noConfigDebugInit';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri, workspace } from 'vscode';
+import { DebugConfiguration, DebugSessionOptions, env, RelativePattern, Uri } from 'vscode';
 import * as utils from '../../extension/utils';
 import { assert } from 'console';
 import * as fs from 'fs';
@@ -19,10 +19,10 @@ suite('setup for no-config debug scenario', function () {
     let context: TypeMoq.IMock<IExtensionContext>;
     let noConfigScriptsDir: string;
     let bundledDebugPath: string;
-    let noConfigEndpointDir: string;
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
-    let workspaceUriStub: sinon.SinonStub;
+    const testSessionId = 'test-session-id-1234';
+    const hashedSessionId = crypto.createHash('sha256').update(testSessionId).digest('hex').slice(0, 16);
 
     const testDataDir = path.join(__dirname, 'testData');
     const testFilePath = path.join(testDataDir, 'debuggerAdapterEndpoint.txt');
@@ -34,21 +34,20 @@ suite('setup for no-config debug scenario', function () {
             context.setup((c) => c.subscriptions).returns(() => []);
             noConfigScriptsDir = path.join(context.object.extensionPath, 'bundled/scripts/noConfigScripts');
             bundledDebugPath = path.join(context.object.extensionPath, 'bundled/libs/debugpy');
-            noConfigEndpointDir = path.join(context.object.extensionPath, '.noConfigDebugAdapterEndpoints');
 
             // Stub crypto.randomBytes with proper typing
             let randomBytesStub = sinon.stub(crypto, 'randomBytes');
             // Provide a valid Buffer object
             randomBytesStub.callsFake((_size: number) => Buffer.from('1234567899', 'hex'));
 
-            workspaceUriStub = sinon.stub(workspace, 'workspaceFolders').value([{ uri: Uri.parse(os.tmpdir()) }]);
+            // Stub env.sessionId to return a consistent value for tests
+            sinon.stub(env, 'sessionId').value(testSessionId);
         } catch (error) {
             console.error('Error in setup:', error);
         }
     });
     teardown(() => {
         sinon.restore();
-        workspaceUriStub.restore();
     });
 
     test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
@@ -195,10 +194,10 @@ suite('setup for no-config debug scenario', function () {
 
         // Assert
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
-        const expectedPattern = sinon.match
-            .instanceOf(RelativePattern)
-            .and(sinon.match.has('base', Uri.file(noConfigEndpointDir).fsPath))
-            .and(sinon.match.has('pattern', sinon.match(/^endpoint-[0-9a-f]{16}\.txt$/)));
+        const expectedPattern = new RelativePattern(
+            path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'),
+            `endpoint-${hashedSessionId}.txt`,
+        );
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });
 
