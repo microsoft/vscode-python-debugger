@@ -1,32 +1,35 @@
-# Template (steps): PublishMarketplace for autopep8 extension
-# Expects working directory already populated (or artifact previously downloaded) with: autopep8.vsix, extension.manifest, extension.signature.p7s
-# Provides optional prerelease publishing via parameter.
+# Template (steps): PublishMarketplace for VS Code extension
+# Publishes platform-specific VSIX packages to the VS Code Marketplace.
+# Iterates over buildPlatforms to publish each platform's signed artifacts.
 #
 # Usage (example inside a stage job):
 # steps:
 # - template: build/templates/publish.yml@self
 #   parameters:
-#     azureSubscription: Autopep8PublishServiceConnection
-#     artifactName: drop
-#     vsixName: autopep8.vsix
+#     azureSubscription: PublishServiceConnectionWithManagedIdentity
+#     buildPlatforms:
+#       - name: Linux
+#         vsceTarget: ''
+#       - name: Linux
+#         vsceTarget: linux-arm64
 #     manifestName: extension.manifest
 #     signatureName: extension.signature.p7s
-#     publishFolder: vscode-autopep8
+#     publishFolder: drop
 #     preRelease: true
-#     noVerify: true
 #
 # Notes:
 # - Azure DevOps Marketplace resource GUID (499b84ac-1321-427f-aa17-267ca6975798) is hardcoded in publish script.
 # - This uses Managed Identity via AzureCLI@2 to acquire an AAD token and passes it as a PAT.
 # - Requires extension artifacts already signed (signature file present).
 # - Node & vsce expected to be prepared by parent pipeline; omit local installation here.
+# - Artifacts are expected at: $(Build.ArtifactStagingDirectory)/publishFolder/{platform}/
 
 parameters:
   - name: azureSubscription
     type: string
-  - name: vsixName
-    type: string
-    default: autopep8.vsix
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to publish'
   - name: manifestName
     type: string
     default: extension.manifest
@@ -35,7 +38,7 @@ parameters:
     default: extension.signature.p7s
   - name: publishFolder
     type: string
-    default: vscode-autopep8
+    default: drop
   - name: preRelease
     type: boolean
     default: false
@@ -43,7 +46,7 @@ parameters:
 steps:
   # Node & vsce expected to be prepared by parent pipeline; omit local installation.
 
-  # Assumes files already present at $(Build.ArtifactStagingDirectory)/publishFolder
+  # Assumes files already present at $(Build.ArtifactStagingDirectory)/publishFolder/{platform}/
 
   # Step 1: Acquire token only (store secret variable MarketplaceAADToken)
   - task: AzureCLI@2
@@ -61,52 +64,68 @@ steps:
         Write-Host "##vso[task.setvariable variable=MarketplaceAADToken;isSecret=true]$aadToken"
         Write-Host "Token stored in secret variable MarketplaceAADToken"
 
-  # Step 2: Validate artifacts & publish
-  - task: PowerShell@2
-    displayName: Publish extension (vsce)
-    inputs:
-      targetType: inline
-      script: |
-        $aadToken = "$(MarketplaceAADToken)"
-        if (-not $aadToken) { Write-Error 'MarketplaceAADToken is empty (token acquisition failed).'; exit 1 }
+  # Step 2: Publish each platform
+  - ${{ each platform in parameters.buildPlatforms }}:
+    - task: PowerShell@2
+      displayName: 'Publish extension (${{ coalesce(platform.vsceTarget, ''universal'') }})'
+      inputs:
+        targetType: inline
+        script: |
+          $aadToken = "$(MarketplaceAADToken)"
+          if (-not $aadToken) { Write-Error 'MarketplaceAADToken is empty (token acquisition failed).'; exit 1 }
 
-        $root = "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}"
-        $vsixPath = Join-Path $root "${{ parameters.vsixName }}"
-        $manifestPath = Join-Path $root "${{ parameters.manifestName }}"
-        $signaturePath = Join-Path $root "${{ parameters.signatureName }}"
+          $platformFolder = "${{ coalesce(platform.vsceTarget, 'universal') }}"
+          $root = "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/$platformFolder"
 
-        Write-Host "VSIX Path: $vsixPath"
-        Write-Host "Manifest Path: $manifestPath"
-        Write-Host "Signature Path: $signaturePath"
+          Write-Host "Publishing platform: $platformFolder"
+          Write-Host "Artifact folder: $root"
 
-        if (-not (Test-Path $vsixPath)) { Write-Error "VSIX file not found: $vsixPath"; exit 1 }
-        if (-not (Test-Path $manifestPath)) { Write-Error "Manifest file not found: $manifestPath"; exit 1 }
-        if (-not (Test-Path $signaturePath)) { Write-Error "Signature file not found: $signaturePath"; exit 1 }
+          if (-not (Test-Path $root)) { Write-Error "Platform folder not found: $root"; exit 1 }
 
-        Write-Host "Listing publish folder contents: $root"
-        Get-ChildItem -Recurse $root | Select-Object FullName,Length | Format-Table -AutoSize
+          # Find VSIX file dynamically
+          $vsixFile = Get-ChildItem -Path $root -Filter "*.vsix" | Select-Object -First 1
+          if (-not $vsixFile) { Write-Error "No VSIX file found in: $root"; exit 1 }
 
-        if ('${{ parameters.preRelease }}' -eq 'True') {
-          Write-Host 'Publishing as pre-release'
-          Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
-          npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
-        } else {
-          Write-Host 'Publishing as stable release'
-          Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
-          npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
-        }
+          $vsixPath = $vsixFile.FullName
+          $manifestPath = Join-Path $root "${{ parameters.manifestName }}"
+          $signaturePath = Join-Path $root "${{ parameters.signatureName }}"
 
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "vsce publish failed with exit code $LASTEXITCODE"
-          exit $LASTEXITCODE
-        }
-        Write-Host 'Publish step completed (publish command currently disabled).'
+          Write-Host "VSIX Path: $vsixPath"
+          Write-Host "Manifest Path: $manifestPath"
+          Write-Host "Signature Path: $signaturePath"
 
+          if (-not (Test-Path $manifestPath)) { Write-Error "Manifest file not found: $manifestPath"; exit 1 }
+          if (-not (Test-Path $signaturePath)) { Write-Error "Signature file not found: $signaturePath"; exit 1 }
+
+          Write-Host "Listing platform folder contents:"
+          Get-ChildItem $root | Select-Object Name,Length | Format-Table -AutoSize
+
+          if ('${{ parameters.preRelease }}' -eq 'True') {
+            Write-Host 'Publishing as pre-release'
+            Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
+            #npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
+          } else {
+            Write-Host 'Publishing as stable release'
+            Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
+            #npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
+          }
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "vsce publish failed for $platformFolder with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          Write-Host "Successfully published $platformFolder"
+
+  # Step 3: Post-publish summary
   - task: PowerShell@2
     displayName: Post-publish summary
     inputs:
       targetType: inline
       script: |
-        Write-Host 'Published extension artifacts:'
-        Get-ChildItem "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}" -File | Select-Object Name,Length | Format-Table -AutoSize
-        Write-Host "Pre-release parameter: ${{ parameters.preRelease }}"
+        Write-Host 'Published extension artifacts by platform:'
+        $root = "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}"
+        Get-ChildItem $root -Directory | ForEach-Object {
+          Write-Host "`nPlatform: $($_.Name)"
+          Get-ChildItem $_.FullName -File | Select-Object Name,Length | Format-Table -AutoSize
+        }
+        Write-Host "`nPre-release parameter: ${{ parameters.preRelease }}"

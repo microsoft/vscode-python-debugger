@@ -137,7 +137,7 @@ extends:
                   - template: build/templates/publish.yml@self
                     parameters:
                       azureSubscription: PylancePublishPipelineSecureConnectionWithManagedIdentity
-                      vsixName: $(VsixName)
+                      buildPlatforms: ${{ parameters.buildPlatforms }}
                       manifestName: extension.manifest
                       signatureName: extension.signature.p7s
                       publishFolder: drop
