@@ -131,14 +131,14 @@ jobs:
       # Download platform-specific artifacts to Pipeline.Workspace (where sign.yml expects them)
       - ${{ each platform in parameters.buildPlatforms }}:
         - ${{ if eq(platform.vsceTarget, '') }}:
-          - task: 1ES.DownloadPipelineArtifact@1
+          - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: vsix-universal
               targetPath: $(Pipeline.Workspace)/vsix-universal
             displayName: 🚛 Download extension (universal)
 
         - ${{ if ne(platform.vsceTarget, '') }}:
-          - task: 1ES.DownloadPipelineArtifact@1
+          - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: vsix-${{ platform.vsceTarget }}
               targetPath: $(Pipeline.Workspace)/vsix-${{ platform.vsceTarget }}
@@ -238,7 +238,7 @@ jobs:
         name: VSEngSS-MicroBuild2022-1ES
         os: windows
       steps:
-        - task: 1ES.DownloadPipelineArtifact@1
+        - task: DownloadPipelineArtifact@2
           inputs:
             artifactName: extension
             targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
