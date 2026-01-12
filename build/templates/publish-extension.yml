@@ -154,30 +154,23 @@ jobs:
 
       # Get version from package.json for GitHub release tagging
       - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
-          - task: PowerShell@2
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: ${{ parameters.workingDirectory }}/*/*.vsix
+              destinationFolder: $(Build.ArtifactStagingDirectory)
+              cleanDestinationFolder: true
+              overwriteExistingFiles: true
+            displayName: 📦 Extract VSIX package
+
+          - script: |
+              EXTENSION_DIR=$(find "." -mindepth 1 -maxdepth 1 -type d -name "extension*" | head -n 1)
+              PUBLISHER=$(node -p "require(\"$EXTENSION_DIR/package.json\").publisher")
+              VERSION=$(node -p "require(\"$EXTENSION_DIR/package.json\").version")
+              echo "##vso[task.setvariable variable=publisher;isOutput=true]$PUBLISHER"
+              echo "##vso[task.setvariable variable=version;isOutput=true]$VERSION"
             name: GetVersion
             displayName: 📋 Get Publisher & Version
-            inputs:
-              targetType: inline
-              workingDirectory: ${{ parameters.workingDirectory }}
-              script: |
-                # Find the first extension platform folder containing package.json
-                $extensionDir = Get-ChildItem -Directory | Where-Object { Test-Path "$($_.FullName)/package.json" } | Select-Object -First 1
-                if (-not $extensionDir) {
-                  Write-Error "No extension directory with package.json found"
-                  exit 1
-                }
-                Write-Host "Extension directory: $($extensionDir.FullName)"
-                
-                # Read publisher and version from package.json using Node.js
-                $packageJsonPath = "$($extensionDir.FullName)/package.json"
-                $publisher = node -p "require('$($packageJsonPath.Replace('\', '/'))').publisher"
-                $version = node -p "require('$($packageJsonPath.Replace('\', '/'))').version"
-                
-                Write-Host "Publisher: $publisher"
-                Write-Host "Version: $version"
-                Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$publisher"
-                Write-Host "##vso[task.setvariable variable=version;isOutput=true]$version"
+            workingDirectory: $(Build.ArtifactStagingDirectory)
 
           - template: createGitHubRelease.yml
             parameters:
