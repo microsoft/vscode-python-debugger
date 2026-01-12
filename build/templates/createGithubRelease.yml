@@ -1,0 +1,27 @@
+parameters:
+  - name: isPreRelease
+    type: boolean
+  - name: ghReleaseAddChangeLog
+    type: boolean
+  - name: tagName
+    type: string
+
+steps:
+  - task: GitHubRelease@1
+    inputs:
+      gitHubConnection: 'Github-Pylance' # The name of the GitHub service connection
+      repositoryName: $(Build.Repository.Name)
+      action: edit # Creates a new release if one does not exist (https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/GitHubReleaseV1/main.ts#85)
+      addChangelog: ${{ parameters.ghReleaseAddChangeLog }}
+      changeLogType: issueBased
+      changeLogLabels : '[{ "label" : "feature-request", "displayName" : "Feature Requests", "state" : "closed" }, { "label" : "bug", "displayName" : "Bugs", "state" : "closed" }]'
+      tagSource: userSpecifiedTag
+      tag: ${{ parameters.tagName }}
+      title: ${{ parameters.tagName }}
+      isPreRelease: ${{ parameters.isPreRelease }}
+      ${{ if eq(parameters.isPreRelease, true) }}:
+        changeLogCompareToRelease: lastNonDraftRelease
+      ${{ else }}:
+        changeLogCompareToRelease: lastFullRelease
+    displayName: 🐙 Github release
+    continueOnError: true

@@ -1,0 +1,254 @@
+# Template (jobs): Sign and Publish Extension
+# Encapsulates Sign, optional manual validation, and Publish jobs with MicroBuild signing.
+# This template defines multiple jobs with templateContext for MicroBuild signing.
+#
+# Usage (example inside a stage):
+# jobs:
+#   - template: build/templates/publish-extension.yml@self
+#     parameters:
+#       buildPlatforms: ${{ parameters.buildPlatforms }}
+#       publishExtension: ${{ parameters.publishExtension }}
+#       preRelease: false
+#       teamName: $(TeamName)
+#       ghCreateRelease: true
+#       ghCreateTag: true
+#       waitForValidation: true
+#
+# Notes:
+# - Requires MicroBuild pool (VSEngSS-MicroBuild2022-1ES) for signing.
+# - Downloads platform-specific artifacts from previous stage.
+# - Publishes signed artifacts as 'extension' pipeline artifact with SBOM.
+# - Optionally creates a GitHub release and waits for manual validation before marketplace publishing.
+
+parameters:
+  # Build platforms
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to sign and publish'
+
+  # Signing parameters
+  - name: signType
+    type: string
+    default: real
+    displayName: 'MicroBuild sign type (real or test)'
+  - name: verifySignature
+    type: boolean
+    default: true
+    displayName: 'Verify signature after signing'
+  - name: teamName
+    type: string
+    default: VSCode-python-debugger
+    displayName: 'Team name for signing'
+
+  # Publishing parameters
+  - name: publishExtension
+    type: boolean
+    default: false
+    displayName: 'Publish extension to marketplace'
+  - name: preRelease
+    type: boolean
+    default: false
+    displayName: 'Publish as pre-release'
+  - name: azureSubscription
+    type: string
+    default: PylancePublishPipelineSecureConnectionWithManagedIdentity
+    displayName: 'Azure subscription for marketplace auth'
+
+  # GitHub Release parameters
+  - name: ghCreateTag
+    type: boolean
+    default: false
+    displayName: 'Create GitHub tag'
+  - name: ghCreateRelease
+    type: boolean
+    default: false
+    displayName: 'Create GitHub release'
+  - name: ghReleaseAddChangeLog
+    type: boolean
+    default: true
+    displayName: 'Add changelog to GitHub release'
+  - name: ghTagPrefix
+    type: string
+    default: 'v'
+    displayName: 'Prefix for GitHub tag (e.g., v for v2025.1.0)'
+
+  # Manual validation parameters
+  - name: waitForValidation
+    type: boolean
+    default: true
+    displayName: 'Wait for manual validation before publishing'
+  - name: validationNotifyUsers
+    type: string
+    default: ''
+    displayName: 'Users to notify for manual validation (comma-separated emails)'
+  - name: validationInstructions
+    type: string
+    default: 'Please test the latest draft release then approve to publish to marketplace.'
+    displayName: 'Instructions for manual validation'
+  - name: validationTimeoutInMinutes
+    type: number
+    default: 1440
+    displayName: 'Timeout for manual validation in minutes (default: 1 day)'
+
+  # Paths
+  - name: workingDirectory
+    type: string
+    default: '$(Build.StagingDirectory)\extension'
+    displayName: 'Working directory for signing artifacts'
+  - name: publishFolder
+    type: string
+    default: extension
+    displayName: 'Folder containing signed artifacts for publishing'
+  - name: manifestName
+    type: string
+    default: extension.manifest
+    displayName: 'Manifest filename'
+  - name: signatureName
+    type: string
+    default: extension.signature.p7s
+    displayName: 'Signature filename'
+
+jobs:
+  # Job 1: Sign extension and create GitHub release
+  - job: Sign
+    displayName: Sign Extension
+    pool:
+      name: VSEngSS-MicroBuild2022-1ES
+      os: windows
+    templateContext:
+      mb:
+        signing:
+          enabled: true
+          signType: ${{ parameters.signType }}
+          signWithProd: true
+      outputs:
+        - output: pipelineArtifact
+          displayName: 'Publish Extension Artifact'
+          targetPath: '${{ parameters.workingDirectory }}'
+          artifactName: extension
+          sbomEnabled: true
+    steps:
+      # Download platform-specific artifacts to Pipeline.Workspace (where sign.yml expects them)
+      - ${{ each platform in parameters.buildPlatforms }}:
+        - ${{ if eq(platform.vsceTarget, '') }}:
+          - task: 1ES.DownloadPipelineArtifact@1
+            inputs:
+              artifactName: vsix-universal
+              targetPath: $(Pipeline.Workspace)/vsix-universal
+            displayName: 🚛 Download extension (universal)
+
+        - ${{ if ne(platform.vsceTarget, '') }}:
+          - task: 1ES.DownloadPipelineArtifact@1
+            inputs:
+              artifactName: vsix-${{ platform.vsceTarget }}
+              targetPath: $(Pipeline.Workspace)/vsix-${{ platform.vsceTarget }}
+            displayName: 🚛 Download extension (${{ platform.vsceTarget }})
+
+      - template: sign.yml
+        parameters:
+          buildPlatforms: ${{ parameters.buildPlatforms }}
+          workingDirectory: ${{ parameters.workingDirectory }}
+          signType: ${{ parameters.signType }}
+          verifySignature: ${{ parameters.verifySignature }}
+          teamName: ${{ parameters.teamName }}
+
+      # Get version from package.json for GitHub release tagging
+      - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
+          - task: PowerShell@2
+            name: GetVersion
+            displayName: 📋 Get Publisher & Version
+            inputs:
+              targetType: inline
+              script: |
+                # Look in the workingDirectory where signed artifacts are stored
+                $workDir = "${{ parameters.workingDirectory }}"
+                Write-Host "Looking for package.json in: $workDir"
+                
+                # Find any platform subfolder that has a VSIX (e.g., universal, linux-arm64)
+                $platformDirs = Get-ChildItem -Path $workDir -Directory -ErrorAction SilentlyContinue
+                if (-not $platformDirs) {
+                  Write-Error "No platform directories found in $workDir"
+                  exit 1
+                }
+                
+                # Use the first platform folder to extract version from VSIX filename
+                $firstPlatform = $platformDirs | Select-Object -First 1
+                $vsixFile = Get-ChildItem -Path $firstPlatform.FullName -Filter "*.vsix" | Select-Object -First 1
+                if (-not $vsixFile) {
+                  Write-Error "No VSIX file found in $($firstPlatform.FullName)"
+                  exit 1
+                }
+                
+                # Extract version from VSIX filename (e.g., ms-python.debugpy.2025.1.0.universal.vsix)
+                $vsixName = $vsixFile.BaseName
+                Write-Host "VSIX filename: $vsixName"
+                
+                # Pattern: publisher.name.version.platform
+                $parts = $vsixName -split '\.'
+                if ($parts.Length -ge 4) {
+                  $publisher = $parts[0]
+                  # Version is typically in format YYYY.M.patch or major.minor.patch
+                  # Find the version part (starts with digit, contains dots)
+                  $versionParts = @()
+                  for ($i = 2; $i -lt $parts.Length - 1; $i++) {
+                    if ($parts[$i] -match '^\d') {
+                      $versionParts += $parts[$i]
+                    }
+                  }
+                  $version = $versionParts -join '.'
+                } else {
+                  Write-Error "Cannot parse version from VSIX filename: $vsixName"
+                  exit 1
+                }
+                
+                Write-Host "Publisher: $publisher"
+                Write-Host "Version: $version"
+                Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$publisher"
+                Write-Host "##vso[task.setvariable variable=version;isOutput=true]$version"
+
+          - template: createGitHubRelease.yml
+            parameters:
+              isPreRelease: ${{ parameters.preRelease }}
+              ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
+              tagName: ${{ parameters.ghTagPrefix }}$(GetVersion.version)
+
+  # Job 2: Wait for manual validation (optional)
+  - ${{ if and(eq(parameters.waitForValidation, true), eq(parameters.publishExtension, true)) }}:
+    - job: WaitForValidation
+      displayName: Wait for manual validation
+      dependsOn: Sign
+      pool: server
+      steps:
+        - task: ManualValidation@0
+          timeoutInMinutes: ${{ parameters.validationTimeoutInMinutes }}
+          inputs:
+            notifyUsers: '${{ parameters.validationNotifyUsers }}'
+            instructions: '${{ parameters.validationInstructions }}'
+            onTimeout: 'reject'
+
+  # Job 3: Publish to marketplace
+  - ${{ if eq(parameters.publishExtension, true) }}:
+    - job: Publish
+      displayName: Publish to Marketplace
+      ${{ if eq(parameters.waitForValidation, true) }}:
+        dependsOn: WaitForValidation
+      ${{ else }}:
+        dependsOn: Sign
+      pool:
+        name: VSEngSS-MicroBuild2022-1ES
+        os: windows
+      steps:
+        - task: 1ES.DownloadPipelineArtifact@1
+          inputs:
+            artifactName: extension
+            targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
+          displayName: 🚛 Download signed extension
+
+        - template: publish.yml
+          parameters:
+            azureSubscription: ${{ parameters.azureSubscription }}
+            buildPlatforms: ${{ parameters.buildPlatforms }}
+            manifestName: ${{ parameters.manifestName }}
+            signatureName: ${{ parameters.signatureName }}
+            publishFolder: ${{ parameters.publishFolder }}
+            preRelease: ${{ parameters.preRelease }}

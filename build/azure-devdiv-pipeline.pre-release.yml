@@ -105,45 +105,13 @@ extends:
               buildSteps: ${{ parameters.buildSteps }}
               isPreRelease: true
 
-      - stage: Sign
-        displayName: Sign Extension
+      - stage: Publish
+        displayName: Publish Extension
         dependsOn: Build
         jobs:
-          - job: Sign
-            displayName: Sign Job
-            pool:
-              name: VSEngSS-MicroBuild2022-1ES
-              os: windows
-            templateContext:
-              mb:
-                signing:
-                  enabled: true
-                  signType: real
-                  signWithProd: true
-              outputs:
-                - output: pipelineArtifact
-                  displayName: 'Publish Drop Artifact'
-                  targetPath: '$(Build.StagingDirectory)\drop'
-                  artifactName: drop
-                  sbomEnabled: true
-            steps:
-              - download: current
-                displayName: Download all build artifacts
-
-              - template: build/templates/sign.yml@self
-                parameters:
-                  buildPlatforms: ${{ parameters.buildPlatforms }}
-                  workingDirectory: $(Build.StagingDirectory)\drop
-                  signType: real
-                  verifySignature: true
-                  teamName: $(TeamName)
-
-              - ${{ if eq(parameters.publishExtension, true) }}:
-                  - template: build/templates/publish.yml@self
-                    parameters:
-                      azureSubscription: PylancePublishPipelineSecureConnectionWithManagedIdentity
-                      buildPlatforms: ${{ parameters.buildPlatforms }}
-                      manifestName: extension.manifest
-                      signatureName: extension.signature.p7s
-                      publishFolder: drop
-                      preRelease: true
+          - template: build/templates/publish-extension.yml@self
+            parameters:
+              buildPlatforms: ${{ parameters.buildPlatforms }}
+              publishExtension: ${{ parameters.publishExtension }}
+              preRelease: true
+              teamName: $(TeamName)

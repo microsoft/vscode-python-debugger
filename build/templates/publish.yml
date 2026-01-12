@@ -14,7 +14,7 @@
 #         vsceTarget: linux-arm64
 #     manifestName: extension.manifest
 #     signatureName: extension.signature.p7s
-#     publishFolder: drop
+#     publishFolder: extension
 #     preRelease: true
 #
 # Notes:
@@ -38,7 +38,7 @@ parameters:
     default: extension.signature.p7s
   - name: publishFolder
     type: string
-    default: drop
+    default: extension
   - name: preRelease
     type: boolean
     default: false
