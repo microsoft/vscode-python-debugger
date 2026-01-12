@@ -153,7 +153,7 @@ jobs:
           teamName: ${{ parameters.teamName }}
 
       # Get version from package.json for GitHub release tagging
-      - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
+      - ${{ if and(eq(parameters.publishExtension, true), eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
           - task: ExtractFiles@1
             inputs:
               archiveFilePatterns: ${{ parameters.workingDirectory }}/*/*.vsix
