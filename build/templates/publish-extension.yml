@@ -111,7 +111,7 @@ parameters:
 jobs:
   # Job 1: Sign extension and create GitHub release
   - job: Sign
-    displayName: Sign Extension
+    displayName: Sign Extension and Create GitHub Release
     pool:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
@@ -159,47 +159,20 @@ jobs:
             displayName: 📋 Get Publisher & Version
             inputs:
               targetType: inline
+              workingDirectory: ${{ parameters.workingDirectory }}
               script: |
-                # Look in the workingDirectory where signed artifacts are stored
-                $workDir = "${{ parameters.workingDirectory }}"
-                Write-Host "Looking for package.json in: $workDir"
-                
-                # Find any platform subfolder that has a VSIX (e.g., universal, linux-arm64)
-                $platformDirs = Get-ChildItem -Path $workDir -Directory -ErrorAction SilentlyContinue
-                if (-not $platformDirs) {
-                  Write-Error "No platform directories found in $workDir"
+                # Find the first extension platform folder containing package.json
+                $extensionDir = Get-ChildItem -Directory | Where-Object { Test-Path "$($_.FullName)/package.json" } | Select-Object -First 1
+                if (-not $extensionDir) {
+                  Write-Error "No extension directory with package.json found"
                   exit 1
                 }
+                Write-Host "Extension directory: $($extensionDir.FullName)"
                 
-                # Use the first platform folder to extract version from VSIX filename
-                $firstPlatform = $platformDirs | Select-Object -First 1
-                $vsixFile = Get-ChildItem -Path $firstPlatform.FullName -Filter "*.vsix" | Select-Object -First 1
-                if (-not $vsixFile) {
-                  Write-Error "No VSIX file found in $($firstPlatform.FullName)"
-                  exit 1
-                }
-                
-                # Extract version from VSIX filename (e.g., ms-python.debugpy.2025.1.0.universal.vsix)
-                $vsixName = $vsixFile.BaseName
-                Write-Host "VSIX filename: $vsixName"
-                
-                # Pattern: publisher.name.version.platform
-                $parts = $vsixName -split '\.'
-                if ($parts.Length -ge 4) {
-                  $publisher = $parts[0]
-                  # Version is typically in format YYYY.M.patch or major.minor.patch
-                  # Find the version part (starts with digit, contains dots)
-                  $versionParts = @()
-                  for ($i = 2; $i -lt $parts.Length - 1; $i++) {
-                    if ($parts[$i] -match '^\d') {
-                      $versionParts += $parts[$i]
-                    }
-                  }
-                  $version = $versionParts -join '.'
-                } else {
-                  Write-Error "Cannot parse version from VSIX filename: $vsixName"
-                  exit 1
-                }
+                # Read publisher and version from package.json using Node.js
+                $packageJsonPath = "$($extensionDir.FullName)/package.json"
+                $publisher = node -p "require('$($packageJsonPath.Replace('\', '/'))').publisher"
+                $version = node -p "require('$($packageJsonPath.Replace('\', '/'))').version"
                 
                 Write-Host "Publisher: $publisher"
                 Write-Host "Version: $version"
