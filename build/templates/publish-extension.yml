@@ -110,8 +110,8 @@ parameters:
 
 jobs:
   # Job 1: Sign extension and create GitHub release
-  - job: Sign_and_GitHubRelease
-    displayName: Sign Extension and Create GitHub Release
+  - job: Sign
+    displayName: Sign Extension
     pool:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
@@ -144,36 +144,7 @@ jobs:
             inputs:
               artifactName: vsix-${{ platform.vsceTarget }}
               targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
-            displayName: 🚛 Download extension (${{ platform.vsceTarget }})
-
-      # Extract VSIX to read publisher/version for GitHub release tagging.
-      # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
-      # is reserved for final artifact staging.
-      - task: ExtractFiles@1
-        inputs:
-          archiveFilePatterns: $(Build.BinariesDirectory)/vsix-*/*.vsix
-          destinationFolder: $(Agent.TempDirectory)/vsix-extracted
-          cleanDestinationFolder: true
-          overwriteExistingFiles: true
-        displayName: 📦 Extract VSIX package
-
-      - pwsh: |
-          $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
-          if (-not $extensionDir) {
-            throw "Could not find extracted extension folder under: $PWD"
-          }
-
-          $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
-          if (-not (Test-Path $packageJsonPath)) {
-            throw "Could not find package.json at: $packageJsonPath"
-          }
-
-          $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
-          Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
-          Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
-        name: SetPublisherAndVersion
-        displayName: 📋 Get Publisher & Version
-        workingDirectory: $(Agent.TempDirectory)/vsix-extracted
+            displayName: 🚛 Download extension (${{ platform.vsceTarget }})      
 
       - template: sign.yml
         parameters:
@@ -183,29 +154,60 @@ jobs:
           verifySignature: ${{ parameters.verifySignature }}
           teamName: ${{ parameters.teamName }}
 
-      # Get version from package.json for GitHub release tagging
-      - ${{ if and(eq(parameters.publishExtension, true), eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
-          - template: createGitHubRelease.yml
-            parameters:
-              isPreRelease: ${{ parameters.preRelease }}
-              ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
-              tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
-
-
   # Job 2: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
     - job: Publish
-      displayName: Publish to Marketplace
-      dependsOn: Sign_and_GitHubRelease
+      displayName: Publish to Marketplace and GitHub
+      dependsOn: Sign
       pool:
         name: VSEngSS-MicroBuild2022-1ES
         os: windows
+      templateContext:
+        type: releaseJob # This makes a job a release job
+        isProduction: true # Indicates a production release
       steps:
         - task: DownloadPipelineArtifact@2
           inputs:
             artifactName: extension
             targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
           displayName: 🚛 Download signed extension
+
+        # Extract VSIX to read publisher/version for GitHub release tagging.
+        # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
+        # is reserved for final artifact staging.
+        - task: ExtractFiles@1
+          inputs:
+            archiveFilePatterns: $(Build.BinariesDirectory)/vsix-*/*.vsix
+            destinationFolder: $(Agent.TempDirectory)/vsix-extracted
+            cleanDestinationFolder: true
+            overwriteExistingFiles: true
+          displayName: 📦 Extract VSIX package
+
+        - pwsh: |
+            $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
+            if (-not $extensionDir) {
+              throw "Could not find extracted extension folder under: $PWD"
+            }
+
+            $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
+            if (-not (Test-Path $packageJsonPath)) {
+              throw "Could not find package.json at: $packageJsonPath"
+            }
+
+            $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+            Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
+            Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
+          name: SetPublisherAndVersion
+          displayName: 📋 Get Publisher & Version
+          workingDirectory: $(Agent.TempDirectory)/vsix-extracted
+
+        # Get version from package.json for GitHub release tagging
+        - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
+          - template: createGitHubRelease.yml
+            parameters:
+              isPreRelease: ${{ parameters.preRelease }}
+              ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
+              tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
 
         - template: publish.yml
           parameters:
