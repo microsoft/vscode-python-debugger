@@ -158,8 +158,9 @@ jobs:
       displayName: Publish to Marketplace and GitHub
       dependsOn: Sign
       pool:
-        name: VSEngSS-MicroBuild2022-1ES
-        os: windows
+          name: AzurePipelines-EO
+          image: 1ESPT-Windows2022
+          os: windows
       templateContext:
         type: releaseJob # This makes a job a release job
         isProduction: true # Indicates a production release
