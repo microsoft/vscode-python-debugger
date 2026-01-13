@@ -7,6 +7,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import tempfile
 import urllib.request as url_lib
 import zipfile
@@ -84,8 +85,6 @@ def _parse_wheel_info(url: str) -> dict:
     Example URL: .../debugpy-1.8.19-cp311-cp311-win_amd64.whl
     Returns: {"version": "1.8.19", "py_ver": "311", "abi": "cp311", "platform": "win_amd64"}
     """
-    import re
-
     filename = url.rsplit("/", 1)[-1]
     # Wheel filename format: {name}-{version}-{python}-{abi}-{platform}.whl
     match = re.match(r"debugpy-([^-]+)-cp(\d+)-([^-]+)-(.+)\.whl", filename)
