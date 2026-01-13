@@ -110,7 +110,7 @@ parameters:
 
 jobs:
   # Job 1: Sign extension and create GitHub release
-  - job: Sign
+  - job: Sign and GitHubRelease
     displayName: Sign Extension and Create GitHub Release
     pool:
       name: VSEngSS-MicroBuild2022-1ES
@@ -169,7 +169,7 @@ jobs:
           $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
           Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
           Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
-        name: GetVersion
+        name: SetPublisherAndVersion
         displayName: 📋 Get Publisher & Version
         workingDirectory: $(Agent.TempDirectory)/vsix-extracted
 
@@ -187,30 +187,14 @@ jobs:
             parameters:
               isPreRelease: ${{ parameters.preRelease }}
               ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
-              tagName: ${{ parameters.ghTagPrefix }}$(GetVersion.version)
+              tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
 
-  # Job 2: Wait for manual validation (optional)
-  - ${{ if and(eq(parameters.waitForValidation, true), eq(parameters.publishExtension, true)) }}:
-    - job: WaitForValidation
-      displayName: Wait for manual validation
-      dependsOn: Sign
-      pool: server
-      steps:
-        - task: ManualValidation@0
-          timeoutInMinutes: ${{ parameters.validationTimeoutInMinutes }}
-          inputs:
-            notifyUsers: '${{ parameters.validationNotifyUsers }}'
-            instructions: '${{ parameters.validationInstructions }}'
-            onTimeout: 'reject'
 
   # Job 3: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
     - job: Publish
       displayName: Publish to Marketplace
-      ${{ if eq(parameters.waitForValidation, true) }}:
-        dependsOn: WaitForValidation
-      ${{ else }}:
-        dependsOn: Sign
+      dependsOn: Sign
       pool:
         name: VSEngSS-MicroBuild2022-1ES
         os: windows
