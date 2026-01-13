@@ -175,7 +175,7 @@ jobs:
         # is reserved for final artifact staging.
         - task: ExtractFiles@1
           inputs:
-            archiveFilePatterns: $(Build.BinariesDirectory)/vsix-*/*.vsix
+            archiveFilePatterns: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/**/*.vsix
             destinationFolder: $(Agent.TempDirectory)/vsix-extracted
             cleanDestinationFolder: true
             overwriteExistingFiles: true
