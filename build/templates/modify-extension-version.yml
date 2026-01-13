@@ -1,0 +1,42 @@
+parameters:
+  - name: workingDirectory
+    type: string
+
+steps:
+  # Updates extension version in package.json using the Azure DevOps build number.
+  #
+  # Build number format: YYYYMMDD.R (e.g., 20260112.3)
+  #   - YYYYMMDD: date segment
+  #   - R: revision number (1, 2, 3... for builds on the same day)
+  #
+  # Resulting version: {major}.{minor}.{YYYYMMDDRR}
+  #   - The revision is zero-padded to 2 digits (e.g., 03)
+  #   - Example: 2025.19.2026011203
+  #
+  # This keeps versions unique and monotonically increasing across builds.
+  - pwsh: |
+      $packagejsonPath = './package.json'
+
+      $json = Get-Content $packagejsonPath | ConvertFrom-Json -Depth 100
+
+      $newProps = @{ }
+
+      $stableVersion = $json.version -split '\.'
+      $major = $stableVersion[0]
+      $minor = $stableVersion[1]
+
+      # Build number format: YYYYMMDD.R (e.g., 20260112.3)
+      $buildNumber = '$(Build.BuildNumber)'
+      $dateSegment, $revisionSegment = $buildNumber -split '\.'
+      
+      # Combine date + zero-padded revision to form the patch version
+      # e.g., 20260112 + 03 = 2026011203
+      $patch = $dateSegment + ($revisionSegment.PadLeft(2, '0'))
+      $newProps.version = "$major.$minor.$patch"
+
+      Write-Host "Updating version FROM: $($json.version) TO: $($newProps.version)"
+
+      $prereleasePackageJson = $json | Add-Member -NotePropertyMembers $newProps -PassThru -Force
+      $prereleasePackageJson | ConvertTo-Json -Depth 100 | Set-Content $packagejsonPath
+    displayName: Update the extension version in package.json
+    workingDirectory: ${{ parameters.workingDirectory }}

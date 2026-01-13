@@ -104,6 +104,7 @@ extends:
               buildPlatforms: ${{ parameters.buildPlatforms }}
               buildSteps: ${{ parameters.buildSteps }}
               isPreRelease: true
+              standardizedVersioning: true
 
       - stage: Publish
         displayName: Publish Extension

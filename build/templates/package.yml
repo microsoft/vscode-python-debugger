@@ -20,6 +20,11 @@ parameters:
     default: false
     displayName: 'Is this a pre-release build'
 
+  - name: standardizedVersioning
+    type: boolean
+    default: false
+    displayName: 'Use standardized versioning (YYYYMMDDRR format)'
+
   - name: vscePackageArgs
     type: string
     default: ''
@@ -68,6 +73,11 @@ jobs:
 
       steps:
         - template: setup.yml@self
+
+        - ${{ if and(eq(parameters.isPreRelease, 'true'), eq(parameters.standardizedVersioning, 'true')) }}:
+            - template: modify-extension-version.yml@self
+              parameters:
+                workingDirectory: ${{ parameters.workingDirectory }}
 
         - bash: |
             echo "##vso[task.setvariable variable=VSCETARGET]${{ platform.vsceTarget }}"
