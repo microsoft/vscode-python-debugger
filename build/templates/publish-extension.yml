@@ -130,19 +130,19 @@ jobs:
     steps:
       # Download platform-specific artifacts to Build.BinariesDirectory
       - ${{ each platform in parameters.buildPlatforms }}:
-        - ${{ if eq(platform.vsceTarget, '') }}:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifactName: vsix-universal
-              targetPath: $(Build.BinariesDirectory)/vsix-universal
-            displayName: 🚛 Download extension (universal)
+          - ${{ if eq(platform.vsceTarget, '') }}:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  artifactName: vsix-universal
+                  targetPath: $(Build.BinariesDirectory)/vsix-universal
+                displayName: 🚛 Download extension (universal)
 
-        - ${{ if ne(platform.vsceTarget, '') }}:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifactName: vsix-${{ platform.vsceTarget }}
-              targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
-            displayName: 🚛 Download extension (${{ platform.vsceTarget }})      
+          - ${{ if ne(platform.vsceTarget, '') }}:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  artifactName: vsix-${{ platform.vsceTarget }}
+                  targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
+                displayName: 🚛 Download extension (${{ platform.vsceTarget }})
 
       - template: sign.yml
         parameters:
@@ -154,65 +154,65 @@ jobs:
 
   # Job 2: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
-    - job: Publish
-      displayName: Publish to Marketplace and GitHub
-      dependsOn: Sign
-      pool:
-        name: AzurePipelines-EO
-        image: 1ESPT-Windows2022
-        os: windows
-      templateContext:
-        type: releaseJob # This makes a job a release job
-        isProduction: true # Indicates a production release
-      steps:
-        - task: 1ES.DownloadPipelineArtifact@1
-          inputs:
-            artifactName: extension
-            targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
-          displayName: 🚛 Download signed extension
+      - job: Publish
+        displayName: Publish to Marketplace and GitHub
+        dependsOn: Sign
+        pool:
+          name: AzurePipelines-EO
+          image: 1ESPT-Windows2022
+          os: windows
+        templateContext:
+          type: releaseJob # This makes a job a release job
+          isProduction: true # Indicates a production release
+        steps:
+          - task: 1ES.DownloadPipelineArtifact@1
+            inputs:
+              artifactName: extension
+              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
+            displayName: 🚛 Download signed extension
 
-        # Extract VSIX to read publisher/version for GitHub release tagging.
-        # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
-        # is reserved for final artifact staging.
-        - task: ExtractFiles@1
-          inputs:
-            archiveFilePatterns: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/**/*.vsix
-            destinationFolder: $(Agent.TempDirectory)/vsix-extracted
-            cleanDestinationFolder: true
-            overwriteExistingFiles: true
-          displayName: 📦 Extract VSIX package
+          # Extract VSIX to read publisher/version for GitHub release tagging.
+          # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
+          # is reserved for final artifact staging.
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/**/*.vsix
+              destinationFolder: $(Agent.TempDirectory)/vsix-extracted
+              cleanDestinationFolder: true
+              overwriteExistingFiles: true
+            displayName: 📦 Extract VSIX package
 
-        - pwsh: |
-            $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
-            if (-not $extensionDir) {
-              throw "Could not find extracted extension folder under: $PWD"
-            }
+          - pwsh: |
+              $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
+              if (-not $extensionDir) {
+                throw "Could not find extracted extension folder under: $PWD"
+              }
 
-            $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
-            if (-not (Test-Path $packageJsonPath)) {
-              throw "Could not find package.json at: $packageJsonPath"
-            }
+              $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
+              if (-not (Test-Path $packageJsonPath)) {
+                throw "Could not find package.json at: $packageJsonPath"
+              }
 
-            $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
-            Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
-            Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
-          name: SetPublisherAndVersion
-          displayName: 📋 Get Publisher & Version
-          workingDirectory: $(Agent.TempDirectory)/vsix-extracted
+              $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+              Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
+              Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
+            name: SetPublisherAndVersion
+            displayName: 📋 Get Publisher & Version
+            workingDirectory: $(Agent.TempDirectory)/vsix-extracted
 
-        # Get version from package.json for GitHub release tagging
-        - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
-          - template: createGitHubRelease.yml
+          # Get version from package.json for GitHub release tagging
+          - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
+              - template: createGitHubRelease.yml
+                parameters:
+                  isPreRelease: ${{ parameters.preRelease }}
+                  ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
+                  tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
+
+          - template: publish.yml
             parameters:
-              isPreRelease: ${{ parameters.preRelease }}
-              ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
-              tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
-
-        - template: publish.yml
-          parameters:
-            azureSubscription: ${{ parameters.azureSubscription }}
-            buildPlatforms: ${{ parameters.buildPlatforms }}
-            manifestName: ${{ parameters.manifestName }}
-            signatureName: ${{ parameters.signatureName }}
-            publishFolder: ${{ parameters.publishFolder }}
-            preRelease: ${{ parameters.preRelease }}
+              azureSubscription: ${{ parameters.azureSubscription }}
+              buildPlatforms: ${{ parameters.buildPlatforms }}
+              manifestName: ${{ parameters.manifestName }}
+              signatureName: ${{ parameters.signatureName }}
+              publishFolder: ${{ parameters.publishFolder }}
+              preRelease: ${{ parameters.preRelease }}

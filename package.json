@@ -642,8 +642,8 @@
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
-        "format-fix": "prettier --write 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
+        "format-check": "prettier --check \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
+        "format-fix": "prettier --write \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
         "test": "node ./out/test/runTest.js"    },
     "devDependencies": {
         "@types/chai": "^4.1.2",

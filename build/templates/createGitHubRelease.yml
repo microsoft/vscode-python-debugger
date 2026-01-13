@@ -14,7 +14,7 @@ steps:
       action: edit # Creates a new release if one does not exist (https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/GitHubReleaseV1/main.ts#85)
       addChangelog: ${{ parameters.ghReleaseAddChangeLog }}
       changeLogType: issueBased
-      changeLogLabels : '[{ "label" : "feature-request", "displayName" : "Feature Requests", "state" : "closed" }, { "label" : "bug", "displayName" : "Bugs", "state" : "closed" }]'
+      changeLogLabels: '[{ "label" : "feature-request", "displayName" : "Feature Requests", "state" : "closed" }, { "label" : "bug", "displayName" : "Bugs", "state" : "closed" }]'
       tagSource: userSpecifiedTag
       tag: ${{ parameters.tagName }}
       title: ${{ parameters.tagName }}

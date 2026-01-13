@@ -66,55 +66,55 @@ steps:
 
   # Step 2: Publish each platform
   - ${{ each platform in parameters.buildPlatforms }}:
-    - task: PowerShell@2
-      displayName: 'Publish extension (${{ coalesce(platform.vsceTarget, ''universal'') }})'
-      inputs:
-        targetType: inline
-        script: |
-          $aadToken = "$(MarketplaceAADToken)"
-          if (-not $aadToken) { Write-Error 'MarketplaceAADToken is empty (token acquisition failed).'; exit 1 }
+      - task: PowerShell@2
+        displayName: "Publish extension (${{ coalesce(platform.vsceTarget, 'universal') }})"
+        inputs:
+          targetType: inline
+          script: |
+            $aadToken = "$(MarketplaceAADToken)"
+            if (-not $aadToken) { Write-Error 'MarketplaceAADToken is empty (token acquisition failed).'; exit 1 }
 
-          $platformFolder = "${{ coalesce(platform.vsceTarget, 'universal') }}"
-          $root = "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/$platformFolder"
+            $platformFolder = "${{ coalesce(platform.vsceTarget, 'universal') }}"
+            $root = "$(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/$platformFolder"
 
-          Write-Host "Publishing platform: $platformFolder"
-          Write-Host "Artifact folder: $root"
+            Write-Host "Publishing platform: $platformFolder"
+            Write-Host "Artifact folder: $root"
 
-          if (-not (Test-Path $root)) { Write-Error "Platform folder not found: $root"; exit 1 }
+            if (-not (Test-Path $root)) { Write-Error "Platform folder not found: $root"; exit 1 }
 
-          # Find VSIX file dynamically
-          $vsixFile = Get-ChildItem -Path $root -Filter "*.vsix" | Select-Object -First 1
-          if (-not $vsixFile) { Write-Error "No VSIX file found in: $root"; exit 1 }
+            # Find VSIX file dynamically
+            $vsixFile = Get-ChildItem -Path $root -Filter "*.vsix" | Select-Object -First 1
+            if (-not $vsixFile) { Write-Error "No VSIX file found in: $root"; exit 1 }
 
-          $vsixPath = $vsixFile.FullName
-          $manifestPath = Join-Path $root "${{ parameters.manifestName }}"
-          $signaturePath = Join-Path $root "${{ parameters.signatureName }}"
+            $vsixPath = $vsixFile.FullName
+            $manifestPath = Join-Path $root "${{ parameters.manifestName }}"
+            $signaturePath = Join-Path $root "${{ parameters.signatureName }}"
 
-          Write-Host "VSIX Path: $vsixPath"
-          Write-Host "Manifest Path: $manifestPath"
-          Write-Host "Signature Path: $signaturePath"
+            Write-Host "VSIX Path: $vsixPath"
+            Write-Host "Manifest Path: $manifestPath"
+            Write-Host "Signature Path: $signaturePath"
 
-          if (-not (Test-Path $manifestPath)) { Write-Error "Manifest file not found: $manifestPath"; exit 1 }
-          if (-not (Test-Path $signaturePath)) { Write-Error "Signature file not found: $signaturePath"; exit 1 }
+            if (-not (Test-Path $manifestPath)) { Write-Error "Manifest file not found: $manifestPath"; exit 1 }
+            if (-not (Test-Path $signaturePath)) { Write-Error "Signature file not found: $signaturePath"; exit 1 }
 
-          Write-Host "Listing platform folder contents:"
-          Get-ChildItem $root | Select-Object Name,Length | Format-Table -AutoSize
+            Write-Host "Listing platform folder contents:"
+            Get-ChildItem $root | Select-Object Name,Length | Format-Table -AutoSize
 
-          if ('${{ parameters.preRelease }}' -eq 'True') {
-            Write-Host 'Publishing as pre-release'
-            Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
-            npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
-          } else {
-            Write-Host 'Publishing as stable release'
-            Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
-            npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
-          }
+            if ('${{ parameters.preRelease }}' -eq 'True') {
+              Write-Host 'Publishing as pre-release'
+              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
+              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
+            } else {
+              Write-Host 'Publishing as stable release'
+              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
+              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
+            }
 
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "vsce publish failed for $platformFolder with exit code $LASTEXITCODE"
-            exit $LASTEXITCODE
-          }
-          Write-Host "Successfully published $platformFolder"
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "vsce publish failed for $platformFolder with exit code $LASTEXITCODE"
+              exit $LASTEXITCODE
+            }
+            Write-Host "Successfully published $platformFolder"
 
   # Step 3: Post-publish summary
   - task: PowerShell@2

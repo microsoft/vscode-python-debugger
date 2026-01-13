@@ -28,7 +28,7 @@ steps:
       # Build number format: YYYYMMDD.R (e.g., 20260112.3)
       $buildNumber = '$(Build.BuildNumber)'
       $dateSegment, $revisionSegment = $buildNumber -split '\.'
-      
+
       # Combine date + zero-padded revision to form the patch version
       # e.g., 20260112 + 03 = 2026011203
       $patch = $dateSegment + ($revisionSegment.PadLeft(2, '0'))
