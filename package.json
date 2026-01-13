@@ -644,8 +644,9 @@
         "lint": "eslint src --ext ts",
         "format-check": "prettier --check \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
         "format-fix": "prettier --write \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
-        "test": "node ./out/test/runTest.js"    },
-        "vsce-package": "npx @vscode/vsce package -o python-debugger.vsix",
+        "test": "node ./out/test/runTest.js",
+        "vsce-package": "npx @vscode/vsce package -o python-debugger.vsix"
+    },
     "devDependencies": {
         "@types/chai": "^4.1.2",
         "@types/chai-as-promised": "^7.1.0",
