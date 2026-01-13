@@ -98,7 +98,12 @@ def _parse_wheel_info(url: str) -> dict:
     # Fallback for py2.py3-none-any wheels
     match = re.match(r"debugpy-([^-]+)-py\d\.py\d-none-any\.whl", filename)
     if match:
-        return {"version": match.group(1), "py_ver": None, "abi": "none", "platform": "any"}
+        return {
+            "version": match.group(1),
+            "py_ver": None,
+            "abi": "none",
+            "platform": "any",
+        }
     raise ValueError(f"Could not parse wheel filename: {filename}")
 
 
@@ -120,11 +125,16 @@ def download_debugpy_via_pip(session: nox.Session, wheels: list) -> None:
 
         for info in parsed:
             args = [
-                "python", "-m", "pip", "download",
+                "python",
+                "-m",
+                "pip",
+                "download",
                 f"debugpy=={version}",
                 "--no-deps",
-                "--only-binary", ":all:",
-                "--dest", str(tmp_path),
+                "--only-binary",
+                ":all:",
+                "--dest",
+                str(tmp_path),
             ]
             if info["py_ver"]:
                 # Platform-specific wheel
