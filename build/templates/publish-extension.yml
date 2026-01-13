@@ -128,21 +128,50 @@ jobs:
           artifactName: extension
           sbomEnabled: true
     steps:
-      # Download platform-specific artifacts to Pipeline.Workspace (where sign.yml expects them)
+      # Download platform-specific artifacts to Build.BinariesDirectory
       - ${{ each platform in parameters.buildPlatforms }}:
         - ${{ if eq(platform.vsceTarget, '') }}:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: vsix-universal
-              targetPath: $(Pipeline.Workspace)/vsix-universal
+              targetPath: $(Build.BinariesDirectory)/vsix-universal
             displayName: 🚛 Download extension (universal)
 
         - ${{ if ne(platform.vsceTarget, '') }}:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: vsix-${{ platform.vsceTarget }}
-              targetPath: $(Pipeline.Workspace)/vsix-${{ platform.vsceTarget }}
+              targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
             displayName: 🚛 Download extension (${{ platform.vsceTarget }})
+
+      # Extract VSIX to read publisher/version for GitHub release tagging.
+      # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
+      # is reserved for final artifact staging.
+      - task: ExtractFiles@1
+        inputs:
+          archiveFilePatterns: $(Build.BinariesDirectory)/vsix-*/*.vsix
+          destinationFolder: $(Agent.TempDirectory)/vsix-extracted
+          cleanDestinationFolder: true
+          overwriteExistingFiles: true
+        displayName: 📦 Extract VSIX package
+
+      - pwsh: |
+          $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
+          if (-not $extensionDir) {
+            throw "Could not find extracted extension folder under: $PWD"
+          }
+
+          $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
+          if (-not (Test-Path $packageJsonPath)) {
+            throw "Could not find package.json at: $packageJsonPath"
+          }
+
+          $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+          Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
+          Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
+        name: GetVersion
+        displayName: 📋 Get Publisher & Version
+        workingDirectory: $(Agent.TempDirectory)/vsix-extracted
 
       - template: sign.yml
         parameters:
@@ -154,24 +183,6 @@ jobs:
 
       # Get version from package.json for GitHub release tagging
       - ${{ if and(eq(parameters.publishExtension, true), eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
-          - task: ExtractFiles@1
-            inputs:
-              archiveFilePatterns: ${{ parameters.workingDirectory }}/*/*.vsix
-              destinationFolder: $(Build.ArtifactStagingDirectory)
-              cleanDestinationFolder: true
-              overwriteExistingFiles: true
-            displayName: 📦 Extract VSIX package
-
-          - script: |
-              EXTENSION_DIR=$(find "." -mindepth 1 -maxdepth 1 -type d -name "extension*" | head -n 1)
-              PUBLISHER=$(node -p "require(\"$EXTENSION_DIR/package.json\").publisher")
-              VERSION=$(node -p "require(\"$EXTENSION_DIR/package.json\").version")
-              echo "##vso[task.setvariable variable=publisher;isOutput=true]$PUBLISHER"
-              echo "##vso[task.setvariable variable=version;isOutput=true]$VERSION"
-            name: GetVersion
-            displayName: 📋 Get Publisher & Version
-            workingDirectory: $(Build.ArtifactStagingDirectory)
-
           - template: createGitHubRelease.yml
             parameters:
               isPreRelease: ${{ parameters.preRelease }}

@@ -38,14 +38,25 @@ steps:
       Write-Host ""
       Write-Host "📂 Key Paths:"
       Write-Host "  Pipeline.Workspace: $(Pipeline.Workspace)"
+      Write-Host "  Build.BinariesDirectory: $(Build.BinariesDirectory)"
       Write-Host "  Build.SourcesDirectory: $(Build.SourcesDirectory)"
       Write-Host "  Build.StagingDirectory: $(Build.StagingDirectory)"
       Write-Host "  Build.ArtifactStagingDirectory: $(Build.ArtifactStagingDirectory)"
       Write-Host ""
+      Write-Host "📦 Available artifacts in Build.BinariesDirectory:"
+      if (Test-Path "$(Build.BinariesDirectory)") {
+        Get-ChildItem "$(Build.BinariesDirectory)" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "  - $($_.Name)"
+          Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      $($_.Name) ($($_.Length) bytes)" }
+        }
+      }
+
       Write-Host "📦 Available artifacts in Pipeline.Workspace:"
-      Get-ChildItem "$(Pipeline.Workspace)" -Directory | ForEach-Object {
-        Write-Host "  - $($_.Name)"
-        Get-ChildItem $_.FullName -File | ForEach-Object { Write-Host "      $($_.Name) ($($_.Length) bytes)" }
+      if (Test-Path "$(Pipeline.Workspace)") {
+        Get-ChildItem "$(Pipeline.Workspace)" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "  - $($_.Name)"
+          Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      $($_.Name) ($($_.Length) bytes)" }
+        }
       }
       Write-Host "========================================"
     displayName: '🔍 Log parameters and environment'
@@ -96,9 +107,12 @@ steps:
         New-Item -ItemType Directory -Path $platformFolder -Force | Out-Null
         
         $artifactName = "vsix-${{ coalesce(platform.vsceTarget, 'universal') }}"
-        $artifactPath = "$(Pipeline.Workspace)/$artifactName"
+        $artifactPath = "$(Build.BinariesDirectory)/$artifactName"
+        if (-not (Test-Path $artifactPath)) {
+          $artifactPath = "$(Pipeline.Workspace)/$artifactName"
+        }
         Write-Host "🔍 Looking for artifact at: $artifactPath"
-        
+
         if (Test-Path $artifactPath) {
           Write-Host "✅ Artifact folder found"
           Write-Host "📄 Files in artifact folder:"
