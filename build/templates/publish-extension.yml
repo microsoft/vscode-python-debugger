@@ -110,7 +110,7 @@ parameters:
 
 jobs:
   # Job 1: Sign extension and create GitHub release
-  - job: Sign and GitHubRelease
+  - job: Sign_and_GitHubRelease
     displayName: Sign Extension and Create GitHub Release
     pool:
       name: VSEngSS-MicroBuild2022-1ES
@@ -190,11 +190,11 @@ jobs:
               tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
 
 
-  # Job 3: Publish to marketplace
+  # Job 2: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
     - job: Publish
       displayName: Publish to Marketplace
-      dependsOn: Sign
+      dependsOn: Sign_and_GitHubRelease
       pool:
         name: VSEngSS-MicroBuild2022-1ES
         os: windows
