@@ -116,8 +116,6 @@ jobs:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     templateContext:
-      type: releaseJob # This makes a job a release job
-      isProduction: true # Indicates a production release
       mb:
         signing:
           enabled: true
