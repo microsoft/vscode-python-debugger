@@ -131,14 +131,14 @@ jobs:
       # Download platform-specific artifacts to Build.BinariesDirectory
       - ${{ each platform in parameters.buildPlatforms }}:
         - ${{ if eq(platform.vsceTarget, '') }}:
-          - task: DownloadPipelineArtifact@2
+          - task: 1ES.DownloadPipelineArtifact@1
             inputs:
               artifactName: vsix-universal
               targetPath: $(Build.BinariesDirectory)/vsix-universal
             displayName: 🚛 Download extension (universal)
 
         - ${{ if ne(platform.vsceTarget, '') }}:
-          - task: DownloadPipelineArtifact@2
+          - task: 1ES.DownloadPipelineArtifact@1
             inputs:
               artifactName: vsix-${{ platform.vsceTarget }}
               targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
@@ -164,7 +164,7 @@ jobs:
         type: releaseJob # This makes a job a release job
         isProduction: true # Indicates a production release
       steps:
-        - task: DownloadPipelineArtifact@2
+        - task: 1ES.DownloadPipelineArtifact@1
           inputs:
             artifactName: extension
             targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
