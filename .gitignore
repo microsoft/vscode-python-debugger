@@ -9,3 +9,8 @@ bundled/libs/
 **/__pycache__
 **/.pytest_cache
 **/.vs
+
+# Generated files (sources live in pre-built/)
+l10n/bundle.l10n.*.json
+package.nls.*.json
+telemetry.json
