@@ -75,6 +75,9 @@ parameters:
       - script: python ./build/update_ext_version.py --release --for-publishing
         displayName: Update build number
 
+      - pwsh: Copy-Item -Path "pre-built/*" -Destination "." -Recurse -Force
+        displayName: Copy pre-built files
+
       - script: npm run package
         displayName: Build extension
 
