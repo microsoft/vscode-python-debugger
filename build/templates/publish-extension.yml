@@ -165,9 +165,6 @@ jobs:
           type: releaseJob # This makes a job a release job
           isProduction: true # Indicates a production release
         steps:
-          - checkout: self
-            fetchDepth: 1
-            fetchTags: false
 
           - template: setup.yml
             parameters:
