@@ -74,7 +74,7 @@ jobs:
         steps:
           - template: setup.yml@self
 
-          - ${{ if and(eq(parameters.isPreRelease, 'true'), eq(parameters.standardizedVersioning, 'true')) }}:
+          - ${{ if and(eq(parameters.isPreRelease, true), eq(parameters.standardizedVersioning, true)) }}:
               - template: modify-extension-version.yml@self
                 parameters:
                   workingDirectory: ${{ parameters.workingDirectory }}
