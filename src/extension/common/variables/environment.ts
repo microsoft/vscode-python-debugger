@@ -104,7 +104,6 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
     
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
-        const prevChar = i > 0 ? content[i - 1] : '';
         
         // Track if we've seen an '=' sign (indicating we're in the value part)
         if (char === '=' && !inQuotes) {
@@ -113,16 +112,29 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
             continue;
         }
         
-        // Handle quote characters
-        if ((char === '"' || char === "'") && afterEquals && prevChar !== '\\') {
-            if (!inQuotes) {
-                // Starting a quoted section
-                inQuotes = true;
-                quoteChar = char;
-            } else if (char === quoteChar) {
-                // Ending a quoted section
-                inQuotes = false;
-                quoteChar = '';
+        // Handle quote characters - need to check for proper escaping
+        if ((char === '"' || char === "'") && afterEquals) {
+            // Count consecutive backslashes before this quote
+            let numBackslashes = 0;
+            let j = i - 1;
+            while (j >= 0 && content[j] === '\\') {
+                numBackslashes++;
+                j--;
+            }
+            
+            // Quote is escaped if there's an odd number of backslashes before it
+            const isEscaped = numBackslashes % 2 === 1;
+            
+            if (!isEscaped) {
+                if (!inQuotes) {
+                    // Starting a quoted section
+                    inQuotes = true;
+                    quoteChar = char;
+                } else if (char === quoteChar) {
+                    // Ending a quoted section
+                    inQuotes = false;
+                    quoteChar = '';
+                }
             }
             currentLine += char;
             continue;
