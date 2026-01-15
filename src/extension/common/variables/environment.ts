@@ -94,16 +94,68 @@ export function appendPaths(
 export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVariables): EnvironmentVariables {
     const globalVars = baseVars ? baseVars : {};
     const vars: EnvironmentVariables = {};
-    lines
-        .toString()
-        .split('\n')
-        .forEach((line, _idx) => {
-            const [name, value] = parseEnvLine(line);
-            if (name === '') {
-                return;
+    const content = lines.toString();
+    
+    // State machine to handle multiline quoted values
+    let currentLine = '';
+    let inQuotes = false;
+    let quoteChar = '';
+    let afterEquals = false;
+    
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        const prevChar = i > 0 ? content[i - 1] : '';
+        
+        // Track if we've seen an '=' sign (indicating we're in the value part)
+        if (char === '=' && !inQuotes) {
+            afterEquals = true;
+            currentLine += char;
+            continue;
+        }
+        
+        // Handle quote characters
+        if ((char === '"' || char === "'") && afterEquals && prevChar !== '\\') {
+            if (!inQuotes) {
+                // Starting a quoted section
+                inQuotes = true;
+                quoteChar = char;
+            } else if (char === quoteChar) {
+                // Ending a quoted section
+                inQuotes = false;
+                quoteChar = '';
             }
+            currentLine += char;
+            continue;
+        }
+        
+        // Handle newlines
+        if (char === '\n') {
+            if (inQuotes) {
+                // We're inside quotes, preserve the newline
+                currentLine += char;
+            } else {
+                // We're not in quotes, this is the end of a line
+                const [name, value] = parseEnvLine(currentLine);
+                if (name !== '') {
+                    vars[name] = substituteEnvVars(value, vars, globalVars);
+                }
+                // Reset for next line
+                currentLine = '';
+                afterEquals = false;
+            }
+        } else {
+            currentLine += char;
+        }
+    }
+    
+    // Handle the last line if there's no trailing newline
+    if (currentLine.trim() !== '') {
+        const [name, value] = parseEnvLine(currentLine);
+        if (name !== '') {
             vars[name] = substituteEnvVars(value, vars, globalVars);
-        });
+        }
+    }
+    
     return vars;
 }
 
@@ -112,7 +164,8 @@ function parseEnvLine(line: string): [string, string] {
     //   https://github.com/motdotla/dotenv/blob/master/lib/main.js#L32
     // We don't use dotenv here because it loses ordering, which is
     // significant for substitution.
-    const match = line.match(/^\s*(_*[a-zA-Z]\w*)\s*=\s*(.*?)?\s*$/);
+    // Modified to handle multiline values by using 's' flag to make . match newlines
+    const match = line.match(/^\s*(_*[a-zA-Z]\w*)\s*=\s*(.*?)?\s*$/s);
     if (!match) {
         return ['', ''];
     }
