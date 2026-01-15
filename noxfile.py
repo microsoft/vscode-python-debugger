@@ -8,6 +8,7 @@ import json
 import os
 import pathlib
 import re
+import tempfile
 import urllib.request as url_lib
 import zipfile
 
@@ -65,15 +66,98 @@ def install_bundled_libs(session):
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
     if "darwin" in target:
-        download_url(debugpy_info["macOS"])
+        wheels = debugpy_info["macOS"]
     elif "win32-ia32" == target:
-        download_url(debugpy_info["win32"])
+        wheels = debugpy_info.get("win32", debugpy_info["any"])
     elif "win32-x64" == target:
-        download_url(debugpy_info["win64"])
+        wheels = debugpy_info["win64"]
     elif "linux-x64" == target:
-        download_url(debugpy_info["linux"])
+        wheels = debugpy_info["linux"]
     else:
-        download_url(debugpy_info["any"])
+        wheels = debugpy_info["any"]
+
+    download_debugpy_via_pip(session, wheels)
+
+
+def _parse_wheel_info(url: str) -> dict:
+    """Parse version and platform info from a wheel URL.
+
+    Example URL: .../debugpy-1.8.19-cp311-cp311-win_amd64.whl
+    Returns: {"version": "1.8.19", "py_ver": "311", "abi": "cp311", "platform": "win_amd64"}
+    """
+    filename = url.rsplit("/", 1)[-1]
+    # Wheel filename format: {name}-{version}-{python}-{abi}-{platform}.whl
+    match = re.match(r"debugpy-([^-]+)-cp(\d+)-([^-]+)-(.+)\.whl", filename)
+    if match:
+        return {
+            "version": match.group(1),
+            "py_ver": match.group(2),
+            "abi": match.group(3),
+            "platform": match.group(4),
+        }
+    # Fallback for py2.py3-none-any wheels
+    match = re.match(r"debugpy-([^-]+)-py\d\.py\d-none-any\.whl", filename)
+    if match:
+        return {
+            "version": match.group(1),
+            "py_ver": None,
+            "abi": "none",
+            "platform": "any",
+        }
+    raise ValueError(f"Could not parse wheel filename: {filename}")
+
+
+def download_debugpy_via_pip(session: nox.Session, wheels: list) -> None:
+    """Downloads debugpy wheels via pip and extracts them into bundled/libs.
+
+    Uses pip to download by package name, allowing pip to use configured
+    index URLs (e.g., Azure Artifacts feed) instead of direct PyPI URLs.
+    """
+    libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
+    libs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Parse version and platform info from wheel URLs
+    parsed = [_parse_wheel_info(w["url"]) for w in wheels]
+    version = parsed[0]["version"]
+
+    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_") as tmp_dir:
+        tmp_path = pathlib.Path(tmp_dir)
+
+        for info in parsed:
+            args = [
+                "python",
+                "-m",
+                "pip",
+                "download",
+                f"debugpy=={version}",
+                "--no-deps",
+                "--only-binary",
+                ":all:",
+                "--dest",
+                str(tmp_path),
+            ]
+            if info["py_ver"]:
+                # Platform-specific wheel
+                args.extend(["--python-version", info["py_ver"]])
+                args.extend(["--implementation", "cp"])
+                args.extend(["--abi", info["abi"]])
+                args.extend(["--platform", info["platform"]])
+            # For none-any wheels, no platform args needed
+
+            session.run(*args)
+
+        wheel_paths = sorted(tmp_path.glob("debugpy-*.whl"))
+        if not wheel_paths:
+            raise FileNotFoundError(
+                f"pip download produced no debugpy wheels for version {version}."
+            )
+
+        for wheel_path in wheel_paths:
+            print("Downloaded:", wheel_path.name)
+            with zipfile.ZipFile(wheel_path, "r") as wheel:
+                for zip_info in wheel.infolist():
+                    print("\t" + zip_info.filename)
+                    wheel.extract(zip_info.filename, libs_dir)
 
 
 def download_url(values):

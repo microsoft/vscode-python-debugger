@@ -24,12 +24,12 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "./out/test/**/*.unit.test.js",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/unittest/index",
-                //"--grep", "<suite name>",
-                "--timeout=300000"
+                "--extensionTestsPath=${workspaceFolder}/out/test/unittest/index"
             ],
+            // "env": {
+            //     "TEST_GREP": "Python API Tests"
+            // },
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "preLaunchTask": "tasks: watch-tests"
         }

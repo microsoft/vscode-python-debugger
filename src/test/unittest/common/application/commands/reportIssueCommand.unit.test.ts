@@ -14,7 +14,7 @@ import * as vscodeapi from '../../../../../extension/common/vscodeapi';
 import * as pythonApi from '../../../../../extension/common/python';
 import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../../../constants';
 import { openReportIssue } from '../../../../../extension/common/application/commands/reportIssueCommand';
-import { PythonEnvironment } from '../../../../../extension/debugger/adapter/types';
+import { PythonEnvironment } from '../../../../../extension/envExtApi';
 
 suite('Report Issue Command', () => {
     let executeCommandStub: sinon.SinonStub;
@@ -23,21 +23,21 @@ suite('Report Issue Command', () => {
     setup(async () => {
         executeCommandStub = sinon.stub(vscodeapi, 'executeCommand');
         resolveEnvironmentStub = sinon.stub(pythonApi, 'resolveEnvironment');
+        // Ensure useEnvironmentsExtension is false for these tests
+        (pythonApi as any).useEnvironmentsExtension = false;
         const interpreter = {
-            environment: {
-                type: 'Venv',
+            envId: {
+                id: '/path/to/interpreter',
+                managerId: 'Venv',
             },
-            version: {
-                major: 3,
-                minor: 9,
-                micro: 0,
-            },
+            version: '3.9.0',
         } as unknown as PythonEnvironment;
         resolveEnvironmentStub.resolves(interpreter);
     });
 
     teardown(() => {
         sinon.restore();
+        (pythonApi as any).useEnvironmentsExtension = undefined;
     });
 
     test('Test if issue body is filled correctly when including all the settings', async () => {

@@ -1,0 +1,133 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Template for building platform-specific VSIX packages
+# Sets VSCETARGET environment variable for noxfile.py to select correct debugpy wheels
+# Iterates over buildPlatforms to create a job per platform
+
+parameters:
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to build'
+
+  - name: buildSteps
+    type: stepList
+    default: []
+    displayName: 'Build steps to execute'
+
+  - name: isPreRelease
+    type: boolean
+    default: false
+    displayName: 'Is this a pre-release build'
+
+  - name: standardizedVersioning
+    type: boolean
+    default: false
+    displayName: 'Use standardized versioning (YYYYMMDDRR format)'
+
+  - name: vscePackageArgs
+    type: string
+    default: ''
+    displayName: 'Additional vsce package arguments'
+
+  - name: workingDirectory
+    type: string
+    default: '$(Build.SourcesDirectory)'
+    displayName: 'Working directory for packaging'
+
+jobs:
+  - ${{ each platform in parameters.buildPlatforms }}:
+      - job: Build_${{ replace(coalesce(platform.vsceTarget, 'universal'), '-', '_') }}
+        displayName: "Build ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+        ${{ if eq(platform.name, 'Linux') }}:
+          pool:
+            name: AzurePipelines-EO
+            image: 1ESPT-Ubuntu22.04
+            os: linux
+
+        ${{ if eq(platform.name, 'MacOS') }}:
+          pool:
+            name: Azure Pipelines
+            image: macos-latest
+            os: macOS
+
+        ${{ if eq(platform.name, 'Windows') }}:
+          pool:
+            name: AzurePipelines-EO
+            image: 1ESPT-Windows2022
+            os: windows
+
+        variables:
+          packageArch: ${{ coalesce(platform.packageArch, '') }}
+          vsceTarget: ${{ platform.vsceTarget }}
+          ${{ if eq(platform.name, 'MacOS') }}:
+            BUILDSECMON_OPT_IN: false
+
+        templateContext:
+          outputs:
+            - output: pipelineArtifact
+              displayName: "Publish VSIX for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+              targetPath: '$(Build.ArtifactStagingDirectory)/drop'
+              artifactName: vsix-${{ coalesce(platform.vsceTarget, 'universal') }}
+
+        steps:
+          - template: setup.yml@self
+
+          - ${{ if and(eq(parameters.isPreRelease, true), eq(parameters.standardizedVersioning, true)) }}:
+              - template: modify-extension-version.yml@self
+                parameters:
+                  workingDirectory: ${{ parameters.workingDirectory }}
+
+          - bash: |
+              echo "##vso[task.setvariable variable=VSCETARGET]${{ platform.vsceTarget }}"
+              echo "Building for target: ${{ platform.vsceTarget }}"
+            displayName: 'Set VSCETARGET variable'
+
+          - ${{ each buildStep in parameters.buildSteps }}:
+              - ${{ buildStep }}
+
+          - ${{ if eq(platform.vsceTarget, '') }}:
+              - bash: |
+                  VSIX=$(node -p "require(\"./package.json\").publisher + \".\" + require(\"./package.json\").name + \".\" + require(\"./package.json\").version + \".universal.vsix\"")
+                  echo "##vso[task.setvariable variable=VSIX;isOutput=true]$VSIX"
+                name: SetExtensionName
+                displayName: 🗄 Set VSIX file name
+                workingDirectory: ${{ parameters.workingDirectory }}
+
+          - ${{ if ne(platform.vsceTarget, '') }}:
+              - bash: |
+                  VSIX=$(node -p "require(\"./package.json\").publisher + \".\" + require(\"./package.json\").name + \".\" + require(\"./package.json\").version + \".\" + \"${{ platform.vsceTarget }}\" + \".vsix\"")
+                  echo "##vso[task.setvariable variable=VSIX;isOutput=true]$VSIX"
+                name: SetExtensionName
+                displayName: 🗄 Set VSIX file name
+                workingDirectory: ${{ parameters.workingDirectory }}
+
+          - ${{ if eq(parameters.isPreRelease, false) }}:
+              - ${{ if eq(platform.vsceTarget, '') }}:
+                  - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) ${{ parameters.vscePackageArgs }}
+                    displayName: 💾 Package extension
+                    workingDirectory: ${{ parameters.workingDirectory }}
+
+              - ${{ if ne(platform.vsceTarget, '') }}:
+                  - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --target ${{ platform.vsceTarget }} ${{ parameters.vscePackageArgs }}
+                    displayName: 💾 Package extension
+                    workingDirectory: ${{ parameters.workingDirectory }}
+
+          - ${{ if eq(parameters.isPreRelease, true) }}:
+              - ${{ if eq(platform.vsceTarget, '') }}:
+                  - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --pre-release ${{ parameters.vscePackageArgs }}
+                    displayName: 💾 Package pre-release extension
+                    workingDirectory: ${{ parameters.workingDirectory }}
+
+              - ${{ if ne(platform.vsceTarget, '') }}:
+                  - script: npx @vscode/vsce@latest package -o $(Build.BinariesDirectory)/$(SetExtensionName.VSIX) --target ${{ platform.vsceTarget }} --pre-release ${{ parameters.vscePackageArgs }}
+                    displayName: 💾 Package pre-release extension
+                    workingDirectory: ${{ parameters.workingDirectory }}
+
+          - task: CopyFiles@2
+            inputs:
+              sourceFolder: $(Build.BinariesDirectory)
+              contents: '*.vsix'
+              targetFolder: $(Build.ArtifactStagingDirectory)/drop
+            displayName: 📦 Copy VSIX to staging

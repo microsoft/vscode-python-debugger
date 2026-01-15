@@ -2,7 +2,7 @@
     "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using debugpy.",
-    "version": "2025.9.0-dev",
+    "version": "2025.19.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
@@ -277,6 +277,24 @@
                                 "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                                 "type": "boolean"
                             },
+                            "terminalQuoteCharacter": {
+                                "default": null,
+                                "description": "The quoting character to be used by the debugger when quoting terminal commands.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "\"",
+                                    "'",
+                                    "`"
+                                ],
+                                "enumDescriptions": [
+                                    "Double quote (\")",
+                                    "Single quote (')",
+                                    "Backtick (`)"
+                                ]
+                            },
                             "pathMappings": {
                                 "default": [],
                                 "items": {
@@ -473,6 +491,24 @@
                                 "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
                                 "type": "boolean"
                             },
+                            "terminalQuoteCharacter": {
+                                "default": null,
+                                "description": "The quoting character to be used by the debugger when quoting terminal commands.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "\"",
+                                    "'",
+                                    "`"
+                                ],
+                                "enumDescriptions": [
+                                    "Double quote (\")",
+                                    "Single quote (')",
+                                    "Backtick (`)"
+                                ]
+                            },
                             "module": {
                                 "default": "",
                                 "description": "Name of the module to be debugged.",
@@ -627,26 +663,26 @@
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
-        "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
-        "format-fix": "prettier --write 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
+        "format-check": "prettier --check \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
+        "format-fix": "prettier --write \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
         "test": "node ./out/test/runTest.js",
         "vsce-package": "npx @vscode/vsce package -o python-debugger.vsix"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.4",
-        "@types/chai-as-promised": "^7.1.8",
+        "@types/chai": "^4.1.2",
+        "@types/chai-as-promised": "^7.1.0",
         "@types/fs-extra": "^11.0.4",
         "@types/glob": "^7.2.0",
-        "@types/lodash": "^4.14.191",
-        "@types/mocha": "^10.0.7",
-        "@types/node": "18.x",
-        "@types/semver": "^7.3.13",
+        "@types/lodash": "^4.14.104",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "^22.5.0",
+        "@types/semver": "^5.5.0",
         "@types/sinon": "^10.0.13",
         "@types/vscode": "^1.87.0",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
         "@vscode/test-electron": "^2.3.9",
-        "@vscode/vsce": "^2.24.0",
+        "@vscode/vsce": "^3.7.1-1",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
         "eslint": "^8.50.0",
@@ -659,17 +695,17 @@
         "ts-mockito": "^2.6.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.4",
-        "webpack": "^5.87.0",
-        "webpack-cli": "^5.1.4"
+        "webpack": "^5.76.0",
+        "webpack-cli": "^4.9.2"
     },
     "dependencies": {
         "@vscode/debugadapter": "^1.65.0",
         "@vscode/debugprotocol": "^1.65.0",
-        "@vscode/extension-telemetry": "^0.8.5",
-        "@vscode/python-extension": "^1.0.5",
+        "@vscode/extension-telemetry": "^0.8.4",
+        "@vscode/python-extension": "^1.0.6",
         "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
-        "jsonc-parser": "^3.2.0",
+        "jsonc-parser": "^3.0.0",
         "lodash": "^4.17.21",
         "vscode-languageclient": "^8.0.2"
     }

@@ -1,0 +1,124 @@
+# Run on a schedule
+trigger: none
+pr: none
+
+schedules:
+  - cron: '0 10 * * 1-5' # 10AM UTC (2AM PDT) MON-FRI (VS Code Pre-release builds at 9PM PDT)
+    displayName: Nightly Pre-Release Schedule
+    always: false # only run if there are source code changes
+    branches:
+      include:
+        - main
+
+resources:
+  repositories:
+    - repository: MicroBuildTemplate
+      type: git
+      name: 1ESPipelineTemplates/MicroBuildTemplate
+      ref: refs/tags/release
+variables:
+  - name: TeamName
+    value: VSCode-python-debugger
+  - name: VsixName
+    value: python-debugger.vsix
+  - name: AZURE_ARTIFACTS_FEED
+    value: 'https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/Pylance_PublicPackages/npm/registry/'
+parameters:
+  - name: publishExtension
+    displayName: 🚀 Publish Extension
+    type: boolean
+    default: false
+
+  - name: buildPlatforms
+    type: object
+    default:
+      - name: Linux
+        vsceTarget: ''
+      - name: Linux
+        packageArch: arm64
+        vsceTarget: linux-arm64
+      - name: Linux
+        packageArch: arm
+        vsceTarget: linux-armhf
+      - name: Linux
+        packageArch: x64
+        vsceTarget: linux-x64
+      - name: MacOS
+        packageArch: arm64
+        vsceTarget: darwin-arm64
+      - name: MacOS
+        packageArch: x64
+        vsceTarget: darwin-x64
+      - name: Windows
+        packageArch: arm
+        vsceTarget: win32-arm64
+      - name: Windows
+        packageArch: x64
+        vsceTarget: win32-x64
+
+  - name: buildSteps
+    type: stepList
+    default:
+      - script: npm ci
+        displayName: Install NPM dependencies
+
+      - script: python -m pip install -U pip
+        displayName: Upgrade pip
+
+      - script: python -m pip install wheel
+        displayName: Install wheel
+
+      - script: python -m pip install nox
+        displayName: Install nox
+
+      - script: python -m nox --session install_bundled_libs
+        displayName: Install Python dependencies
+
+      - script: python ./build/update_ext_version.py --for-publishing
+        displayName: Update build number
+
+      - pwsh: Copy-Item -Path "pre-built/*" -Destination "." -Recurse -Force
+        displayName: Copy pre-built files
+
+      - script: npm run package
+        displayName: Build extension
+
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    sdl:
+      sourceAnalysisPool: VSEngSS-MicroBuild2022-1ES
+      codeSignValidation:
+        enabled: true
+      sbom:
+        enabled: false # Disable global SBOM generation; we'll enable selectively per artifact output
+    pool:
+      name: AzurePipelines-EO
+      os: windows
+
+    customBuildTags:
+      - ES365AIMigrationTooling
+    stages:
+      - stage: Build
+        displayName: Build & Package Extension
+        jobs:
+          - template: build/templates/package.yml@self
+            parameters:
+              buildPlatforms: ${{ parameters.buildPlatforms }}
+              buildSteps: ${{ parameters.buildSteps }}
+              isPreRelease: true
+              standardizedVersioning: true
+
+      - stage: Publish
+        displayName: Publish Extension
+        dependsOn: Build
+        jobs:
+          - template: build/templates/publish-extension.yml@self
+            parameters:
+              buildPlatforms: ${{ parameters.buildPlatforms }}
+              publishExtension: ${{ parameters.publishExtension }}
+              preRelease: true
+              teamName: $(TeamName)
+              ghCreateTag: true
+              ghCreateRelease: true
+              ghReleaseAddChangeLog: true

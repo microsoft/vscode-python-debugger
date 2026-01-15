@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { ConfigurationChangeEvent, ConfigurationTarget, Uri, WorkspaceConfiguration, WorkspaceFolder } from 'vscode';
-import { getInterpreterDetails } from './python';
 import { getConfiguration, getWorkspaceFolder, getWorkspaceFolders } from './vscodeapi';
 import { isUnitTestExecution } from './constants';
 import { VersionInfo } from '@vscode/python-extension';
+import { getInterpreterDetails } from './python';
 
 export interface ISettings {
     workspace: string;

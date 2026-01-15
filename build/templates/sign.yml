@@ -1,0 +1,312 @@
+# Template: Sign and validate VS Code extension artifacts
+# Usage Example:
+# - template: build/templates/sign.yml@self
+#   parameters:
+#     buildPlatforms: ${{ parameters.buildPlatforms }}
+#     workingDirectory: $(Build.StagingDirectory)
+#     signType: real
+#
+# Each platform gets its own subfolder to avoid filename collisions
+# since all signed VSIX files are named the same (e.g., ms-python.debugpy.vsix)
+
+parameters:
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to sign'
+  - name: workingDirectory
+    type: string
+    default: '$(Build.StagingDirectory)'
+  - name: signType
+    type: string
+    default: real
+  - name: verifySignature
+    type: boolean
+    default: true
+  - name: teamName
+    type: string
+    default: VSCode-python-debugger
+
+steps:
+  - powershell: |
+      Write-Host "========================================"
+      Write-Host "🔧 Sign Template Parameters"
+      Write-Host "========================================"
+      Write-Host "Working Directory: ${{ parameters.workingDirectory }}"
+      Write-Host "Sign Type: ${{ parameters.signType }}"
+      Write-Host "Verify Signature: ${{ parameters.verifySignature }}"
+      Write-Host "Team Name: ${{ parameters.teamName }}"
+      Write-Host ""
+      Write-Host "📂 Key Paths:"
+      Write-Host "  Pipeline.Workspace: $(Pipeline.Workspace)"
+      Write-Host "  Build.BinariesDirectory: $(Build.BinariesDirectory)"
+      Write-Host "  Build.SourcesDirectory: $(Build.SourcesDirectory)"
+      Write-Host "  Build.StagingDirectory: $(Build.StagingDirectory)"
+      Write-Host "  Build.ArtifactStagingDirectory: $(Build.ArtifactStagingDirectory)"
+      Write-Host ""
+      Write-Host "📦 Available artifacts in Build.BinariesDirectory:"
+      if (Test-Path "$(Build.BinariesDirectory)") {
+        Get-ChildItem "$(Build.BinariesDirectory)" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "  - $($_.Name)"
+          Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      $($_.Name) ($($_.Length) bytes)" }
+        }
+      }
+
+      Write-Host "📦 Available artifacts in Pipeline.Workspace:"
+      if (Test-Path "$(Pipeline.Workspace)") {
+        Get-ChildItem "$(Pipeline.Workspace)" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+          Write-Host "  - $($_.Name)"
+          Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "      $($_.Name) ($($_.Length) bytes)" }
+        }
+      }
+      Write-Host "========================================"
+    displayName: '🔍 Log parameters and environment'
+
+  - task: NuGetToolInstaller@1
+    displayName: Install NuGet
+
+  - task: NuGetCommand@2
+    displayName: Restore signing packages
+    inputs:
+      command: restore
+      feedsToUse: config
+      restoreSolution: '$(Build.SourcesDirectory)/packages.config'
+      restoreDirectory: '$(Build.SourcesDirectory)/packages'
+      nugetConfigPath: '$(Build.SourcesDirectory)/build/NuGet.config'
+
+  # Setup Node.js and npm authentication
+  - template: setup.yml@self
+
+  - task: Npm@1
+    displayName: 'npm ci (install vsce)'
+    inputs:
+      command: ci
+      workingDir: '$(Build.SourcesDirectory)'
+
+  # ✅ Enable MicroBuildSigningPlugin for PME enforcement (once for all platforms)
+  - task: MicroBuildSigningPlugin@4
+    displayName: Enable MicroBuild Signing
+    inputs:
+      signType: ${{ parameters.signType }}
+      zipSources: false
+      feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+      ConnectedServiceName: 'MicroBuild Signing Task (DevDiv)'
+      ConnectedPMEServiceName: 6cc74545-d7b9-4050-9dfa-ebefcc8961ea
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      TeamName: ${{ parameters.teamName }}
+
+  # Process each platform in its own subfolder
+  - ${{ each platform in parameters.buildPlatforms }}:
+      - powershell: |
+          Write-Host "========================================"
+          Write-Host "📦 Setting up platform: ${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "========================================"
+
+          $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "📁 Creating platform folder: $platformFolder"
+          New-Item -ItemType Directory -Path $platformFolder -Force | Out-Null
+
+          $artifactName = "vsix-${{ coalesce(platform.vsceTarget, 'universal') }}"
+          $artifactPath = "$(Build.BinariesDirectory)/$artifactName"
+          if (-not (Test-Path $artifactPath)) {
+            $artifactPath = "$(Pipeline.Workspace)/$artifactName"
+          }
+          Write-Host "🔍 Looking for artifact at: $artifactPath"
+
+          if (Test-Path $artifactPath) {
+            Write-Host "✅ Artifact folder found"
+            Write-Host "📄 Files in artifact folder:"
+            Get-ChildItem "$artifactPath" | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
+            
+            $vsixFiles = Get-ChildItem "$artifactPath/*.vsix"
+            Write-Host "📦 Found $($vsixFiles.Count) VSIX file(s) to copy"
+            
+            foreach ($vsix in $vsixFiles) {
+              Write-Host "  Copying: $($vsix.Name) -> $platformFolder"
+              Copy-Item $vsix.FullName -Destination $platformFolder -Force
+            }
+            Write-Host "✅ Copied VSIX for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+            
+            # List what's in the platform folder
+            Write-Host ""
+            Write-Host "📂 Contents of platform folder:"
+            Get-ChildItem $platformFolder | ForEach-Object { Write-Host "  - $($_.Name) ($($_.Length) bytes)" }
+          } else {
+            Write-Host "❌ Artifact folder not found: $artifactPath"
+            Write-Host "📂 Contents of Pipeline.Workspace:"
+            Get-ChildItem "$(Pipeline.Workspace)" | ForEach-Object { Write-Host "  - $($_.Name)" }
+            Write-Error "Artifact folder not found: $artifactPath"
+            exit 1
+          }
+          Write-Host "========================================"
+        displayName: "📁 Setup folder for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - powershell: |
+          $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
+          $vsixFile = Get-ChildItem "$platformFolder/*.vsix" | Select-Object -First 1
+          if ($null -eq $vsixFile) {
+            Write-Host "##vso[task.logissue type=error]No VSIX file found in $platformFolder"
+            exit 1
+          }
+          $vsixPath = $vsixFile.FullName
+          # Use fixed name extension.manifest as expected by sign.proj
+          $manifestPath = "$platformFolder/extension.manifest"
+          Write-Host "##vso[task.setvariable variable=VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$vsixPath"
+          Write-Host "##vso[task.setvariable variable=MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$manifestPath"
+          Write-Host "VSIX: $vsixPath"
+          Write-Host "Manifest: $manifestPath"
+        displayName: "🔍 Find VSIX for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - script: npx vsce generate-manifest -i "$(VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" -o "$(MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})"
+        displayName: "📝 Generate manifest for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - powershell: |
+          Write-Host "========================================"
+          Write-Host "🔍 Pre-sign inspection for: ${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "========================================"
+
+          $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "📂 Platform folder: $platformFolder"
+          Write-Host ""
+          Write-Host "📄 Files:"
+          Get-ChildItem $platformFolder | ForEach-Object {
+            $icon = switch -Wildcard ($_.Extension) {
+              ".vsix" { "📦" }
+              ".manifest" { "📝" }
+              ".p7s" { "🔐" }
+              default { "📄" }
+            }
+            Write-Host "  $icon $($_.Name) ($($_.Length) bytes)"
+          }
+
+          $vsixCount = (Get-ChildItem "$platformFolder/*.vsix").Count
+          $manifestPath = "$platformFolder/extension.manifest"
+          Write-Host ""
+          Write-Host "📊 Summary: $vsixCount VSIX, manifest exists: $(Test-Path $manifestPath)"
+
+          if ($vsixCount -eq 0) { 
+            Write-Host "❌ No VSIX files found"
+            exit 1 
+          }
+          if (!(Test-Path $manifestPath)) { 
+            Write-Host "❌ extension.manifest not found"
+            exit 1 
+          }
+          Write-Host "✅ Ready for signing"
+          Write-Host "========================================"
+        displayName: "🔍 Pre-sign inspection for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - task: MSBuild@1
+        displayName: "🔏 Sign ${{ coalesce(platform.vsceTarget, 'universal') }}"
+        inputs:
+          solution: '$(Build.SourcesDirectory)/build/sign.proj'
+          msbuildArguments: >
+            /verbosity:detailed
+            /bl:"${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}/signing.binlog"
+            /p:SignType=${{ parameters.signType }}
+            /p:BaseOutputDirectory=${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}
+            /p:OutDir=${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}
+            /p:IntermediateOutputPath=${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}/intermediate
+
+      - powershell: |
+          Write-Host "========================================"
+          Write-Host "🔍 Post-sign inspection for: ${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "========================================"
+
+          $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "📂 Platform folder: $platformFolder"
+          Write-Host ""
+          Write-Host "📄 Files after signing:"
+          Get-ChildItem $platformFolder -File | ForEach-Object {
+            $icon = switch -Wildcard ($_.Extension) {
+              ".vsix" { "📦" }
+              ".manifest" { "📝" }
+              ".p7s" { "🔐" }
+              ".binlog" { "📋" }
+              default { "📄" }
+            }
+            Write-Host "  $icon $($_.Name) ($($_.Length) bytes)"
+          }
+
+          $signaturePath = "$platformFolder/extension.signature.p7s"
+          Write-Host ""
+          Write-Host "📊 Signature exists: $(Test-Path $signaturePath)"
+
+          if (Test-Path $signaturePath) {
+            Write-Host "✅ extension.signature.p7s found"
+          } else {
+            Write-Host "⚠️ extension.signature.p7s not found after signing"
+          }
+          Write-Host "========================================"
+        displayName: "🔍 Post-sign inspection for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - powershell: |
+          Write-Host "========================================"
+          Write-Host "✅ Validating signature for: ${{ coalesce(platform.vsceTarget, 'universal') }}"
+          Write-Host "========================================"
+
+          $platformFolder = "${{ parameters.workingDirectory }}/${{ coalesce(platform.vsceTarget, 'universal') }}"
+          $manifestPath = "$platformFolder/extension.manifest"
+          $signaturePath = "$platformFolder/extension.signature.p7s"
+
+          Write-Host "   Manifest:  $manifestPath"
+          Write-Host "   Signature: $signaturePath"
+
+          if (!(Test-Path $manifestPath)) { 
+            Write-Host "❌ Manifest missing"
+            exit 1 
+          }
+          if (!(Test-Path $signaturePath)) { 
+            Write-Host "❌ Signature missing"
+            exit 1 
+          }
+
+          $manifestHash = (Get-FileHash -Algorithm SHA256 $manifestPath).Hash
+          $signatureHash = (Get-FileHash -Algorithm SHA256 $signaturePath).Hash
+          Write-Host "   Manifest SHA256:  $manifestHash"
+          Write-Host "   Signature SHA256: $signatureHash"
+
+          if ($manifestHash -eq $signatureHash) {
+            Write-Host "❌ Signature file is identical to manifest (placeholder detected)"
+            exit 1
+          } else {
+            Write-Host "✅ Hashes differ - signature is valid"
+          }
+
+          # Set signature path variable for verify step
+          Write-Host "##vso[task.setvariable variable=SIGNATURE_PATH_${{ coalesce(platform.vsceTarget, 'universal') }}]$signaturePath"
+          Write-Host "========================================"
+        displayName: "✅ Validate signature for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+      - ${{ if eq(parameters.verifySignature, true) }}:
+          - script: npx vsce verify-signature --packagePath "$(VSIX_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" --manifestPath "$(MANIFEST_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})" --signaturePath "$(SIGNATURE_PATH_${{ coalesce(platform.vsceTarget, 'universal') }})"
+            displayName: "🔐 Verify signature for ${{ coalesce(platform.vsceTarget, 'universal') }}"
+
+  # Final summary of all signed artifacts
+  - powershell: |
+      Write-Host "========================================"
+      Write-Host "📊 Final Summary - All Signed Platforms"
+      Write-Host "========================================"
+
+      $baseDir = "${{ parameters.workingDirectory }}"
+      $platformFolders = Get-ChildItem $baseDir -Directory
+
+      foreach ($folder in $platformFolders) {
+        Write-Host ""
+        Write-Host "📁 Platform: $($folder.Name)"
+        $vsixFiles = Get-ChildItem "$($folder.FullName)/*.vsix" -ErrorAction SilentlyContinue
+        $signaturePath = "$($folder.FullName)/extension.signature.p7s"
+        
+        if ($vsixFiles) {
+          foreach ($vsix in $vsixFiles) {
+            $hasSig = Test-Path $signaturePath
+            $status = if ($hasSig) { "✅ Signed" } else { "❌ Not signed" }
+            Write-Host "   📦 $($vsix.Name) - $status"
+          }
+        } else {
+          Write-Host "   ⚠️ No VSIX files found"
+        }
+      }
+      Write-Host ""
+      Write-Host "========================================"
+    displayName: '📊 Final summary'

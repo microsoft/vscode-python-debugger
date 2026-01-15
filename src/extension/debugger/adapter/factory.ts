@@ -19,12 +19,12 @@ import { executeCommand, showErrorMessage } from '../../common/vscodeapi';
 import { traceLog, traceVerbose } from '../../common/log/logging';
 import { EventName } from '../../telemetry/constants';
 import { sendTelemetryEvent } from '../../telemetry';
-import { getInterpreterDetails, resolveEnvironment, runPythonExtensionCommand } from '../../common/python';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
-import { ResolvedEnvironment } from '@vscode/python-extension';
 import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
+import { PythonEnvironment } from '../../envExtApi';
+import { resolveEnvironment, getInterpreterDetails, runPythonExtensionCommand } from '../../common/python';
 
 // persistent state names, exported to make use of in testing
 export enum debugStateKeys {
@@ -38,6 +38,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         session: DebugSession,
         _executable: DebugAdapterExecutable | undefined,
     ): Promise<DebugAdapterDescriptor | undefined> {
+        traceLog(`createDebugAdapterDescriptor: request='${session.configuration.request}' name='${session.name}'`);
         const configuration = session.configuration as LaunchRequestArguments | AttachRequestArguments;
 
         // There are four distinct scenarios here:
@@ -67,9 +68,11 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             } else if (configuration.listen === undefined && configuration.processId === undefined) {
                 throw new Error('"request":"attach" requires either "connect", "listen", or "processId"');
             }
+            traceLog('createDebugAdapterDescriptor: attach scenario using spawned adapter');
         }
 
         const command = await this.getDebugAdapterPython(configuration, session.workspaceFolder);
+        traceLog(`createDebugAdapterDescriptor: python command parts='${command.join(' ')}'`);
         if (command.length !== 0) {
             if (configuration.request === 'attach' && configuration.processId !== undefined) {
                 sendTelemetryEvent(EventName.DEBUGGER_ATTACH_TO_LOCAL_PROCESS);
@@ -114,6 +117,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         configuration: LaunchRequestArguments | AttachRequestArguments,
         workspaceFolder?: WorkspaceFolder,
     ): Promise<string[]> {
+        traceVerbose('getDebugAdapterPython: Resolving interpreter for debug adapter');
         if (configuration.debugAdapterPython !== undefined) {
             return this.getExecutableCommand(await resolveEnvironment(configuration.debugAdapterPython));
         } else if (configuration.pythonPath) {
@@ -159,7 +163,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
         const prompts = [Interpreters.changePythonInterpreter, Common.doNotShowAgain];
         const selection = await showErrorMessage(
-            l10n.t('The debugger in the python extension no longer supports python versions minor than 3.9.'),
+            l10n.t('The minimum supported Python version for the debugger extension is 3.9.'),
             { modal: true },
             ...prompts,
         );
@@ -177,15 +181,33 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
         }
     }
 
-    private async getExecutableCommand(interpreter: ResolvedEnvironment | undefined): Promise<string[]> {
+    /**
+     * Extracts the executable command from a resolved Python environment.
+     *
+     * This function takes a resolved Python environment and returns the path to the Python
+     * executable as a string array suitable for spawning processes. It also performs version
+     * validation, showing a deprecation warning if the Python version is below 3.9.
+     *
+     * @param interpreter The resolved Python environment containing executable path and version info
+     * @returns Promise resolving to an array containing the Python executable path, or empty array if no interpreter
+     */
+    private async getExecutableCommand(interpreter: PythonEnvironment | undefined): Promise<string[]> {
         if (interpreter) {
-            if (
-                (interpreter.version?.major ?? 0) < 3 ||
-                ((interpreter.version?.major ?? 0) <= 3 && (interpreter.version?.minor ?? 0) <= 9)
-            ) {
+            const executablePath = interpreter.execInfo.activatedRun?.executable ?? interpreter.execInfo.run.executable;
+            const version = interpreter.version;
+
+            // Parse version string (e.g., "3.8.10" -> major: 3, minor: 8)
+            const parseMajorMinor = (v: string) => {
+                const m = v.match(/^(\d+)(?:\.(\d+))?/);
+                return { major: m && m[1] ? Number(m[1]) : 0, minor: m && m[2] ? Number(m[2]) : 0 };
+            };
+            const { major, minor } = parseMajorMinor(version || '');
+
+            if (major < 3 || (major <= 3 && minor < 9)) {
                 this.showDeprecatedPythonMessage();
             }
-            return interpreter.path.length > 0 ? [interpreter.path] : [];
+            traceLog(`getExecutableCommand: executable='${executablePath}' version='${version}'`);
+            return executablePath ? [executablePath] : [];
         }
         return [];
     }
