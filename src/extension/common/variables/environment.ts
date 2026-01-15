@@ -95,23 +95,23 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
     const globalVars = baseVars ? baseVars : {};
     const vars: EnvironmentVariables = {};
     const content = lines.toString();
-    
+
     // State machine to handle multiline quoted values
     let currentLine = '';
     let inQuotes = false;
     let quoteChar = '';
     let afterEquals = false;
-    
+
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
-        
+
         // Track if we've seen an '=' sign (indicating we're in the value part)
         if (char === '=' && !inQuotes) {
             afterEquals = true;
             currentLine += char;
             continue;
         }
-        
+
         // Handle quote characters - need to check for proper escaping
         if ((char === '"' || char === "'") && afterEquals) {
             // Count consecutive backslashes before this quote
@@ -121,10 +121,10 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
                 numBackslashes++;
                 j--;
             }
-            
+
             // Quote is escaped if there's an odd number of backslashes before it
             const isEscaped = numBackslashes % 2 === 1;
-            
+
             if (!isEscaped) {
                 if (!inQuotes) {
                     // Starting a quoted section
@@ -139,7 +139,7 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
             currentLine += char;
             continue;
         }
-        
+
         // Handle newlines
         if (char === '\n') {
             if (inQuotes) {
@@ -159,7 +159,7 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
             currentLine += char;
         }
     }
-    
+
     // Handle the last line if there's no trailing newline
     if (currentLine.trim() !== '') {
         const [name, value] = parseEnvLine(currentLine);
@@ -167,7 +167,7 @@ export function parseEnvFile(lines: string | Buffer, baseVars?: EnvironmentVaria
             vars[name] = substituteEnvVars(value, vars, globalVars);
         }
     }
-    
+
     return vars;
 }
 
