@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import * as fs from 'fs';
 import { cloneDeep } from 'lodash';
 import { CancellationToken, commands, DebugConfiguration, QuickPickItem, Uri, WorkspaceFolder } from 'vscode';
