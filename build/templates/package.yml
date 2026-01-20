@@ -137,5 +137,4 @@ jobs:
               sourceFolder: ${{ parameters.workingDirectory }}
               contents: '.npmrc'
               targetFolder: $(Build.ArtifactStagingDirectory)/drop
-            condition: and(succeeded(), exists('${{ parameters.workingDirectory }}/.npmrc'))
             displayName: 📦 Copy .npmrc to staging
