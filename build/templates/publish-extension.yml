@@ -165,16 +165,24 @@ jobs:
           type: releaseJob # This makes a job a release job
           isProduction: true # Indicates a production release
         steps:
-          - template: setup.yml
-            parameters:
-              installNode: true
-              installPython: false
-
           - task: 1ES.DownloadPipelineArtifact@1
             inputs:
               artifactName: extension
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
             displayName: 🚛 Download signed extension
+
+          # setup.yml runs npmAuthenticate against a repo-root .npmrc.
+          # Pull the staged .npmrc from the VSIX build artifact and place it at the repo root.
+          - task: 1ES.DownloadPipelineArtifact@1
+            inputs:
+              artifactName: .npmrc
+              targetPath: $(Build.SourcesDirectory)
+            displayName: 🚛 Download VSIX artifact (for .npmrc)
+
+          - template: setup.yml
+            parameters:
+              installNode: true
+              installPython: false
 
           # Extract VSIX to read publisher/version for GitHub release tagging.
           # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which

@@ -131,3 +131,11 @@ jobs:
               contents: '*.vsix'
               targetFolder: $(Build.ArtifactStagingDirectory)/drop
             displayName: 📦 Copy VSIX to staging
+
+          - task: CopyFiles@2
+            inputs:
+              sourceFolder: ${{ parameters.workingDirectory }}
+              contents: '.npmrc'
+              targetFolder: $(Build.ArtifactStagingDirectory)/drop
+            condition: and(succeeded(), exists('${{ parameters.workingDirectory }}/.npmrc'))
+            displayName: 📦 Copy .npmrc to staging

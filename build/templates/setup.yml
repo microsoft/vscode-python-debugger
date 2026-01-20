@@ -9,20 +9,6 @@ parameters:
 
 steps:
   - ${{ if eq(parameters.installNode, true) }}:
-      - pwsh: |
-          if (-not (Test-Path '.npmrc')) {
-            Write-Host 'No .npmrc found, creating one with public npm registry'
-            @"
-          # Force public npm registry to avoid CI auth (E401) when no token is provided
-          registry=https://registry.npmjs.org/
-          # Do not require auth for public installs
-          always-auth=false
-          "@ | Out-File -FilePath '.npmrc' -Encoding utf8
-          } else {
-            Write-Host '.npmrc already exists'
-          }
-        displayName: Ensure .npmrc exists
-
       - task: npmAuthenticate@0
         inputs:
           workingFile: .npmrc
