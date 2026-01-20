@@ -102,12 +102,12 @@ steps:
 
             if ('${{ parameters.preRelease }}' -eq 'True') {
               Write-Host 'Publishing as pre-release'
-              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
-              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
+              Write-Host "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
             } else {
               Write-Host 'Publishing as stable release'
-              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
-              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
+              Write-Host "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
             }
 
             if ($LASTEXITCODE -ne 0) {
