@@ -71,6 +71,11 @@ jobs:
               targetPath: '$(Build.ArtifactStagingDirectory)/drop'
               artifactName: vsix-${{ coalesce(platform.vsceTarget, 'universal') }}
 
+            - output: pipelineArtifact
+              displayName: Publish .npmrc
+              targetPath: '$(Build.SourcesDirectory)/.npmrc'
+              artifactName: npmrc
+
         steps:
           - template: setup.yml@self
 
@@ -132,9 +137,18 @@ jobs:
               targetFolder: $(Build.ArtifactStagingDirectory)/drop
             displayName: 📦 Copy VSIX to staging
 
-          - task: CopyFiles@2
-            inputs:
-              sourceFolder: ${{ parameters.workingDirectory }}
-              contents: '.npmrc'
-              targetFolder: $(Build.ArtifactStagingDirectory)/drop
-            displayName: 📦 Copy .npmrc to staging
+          - ${{ if eq(coalesce(platform.vsceTarget, 'universal'), 'universal') }}:
+              - pwsh: |
+                  $source = "${{ parameters.workingDirectory }}/.npmrc"
+                  $destDir = "$(Build.ArtifactStagingDirectory)/npmrc"
+                  $dest = Join-Path $destDir '.npmrc'
+
+                  New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+
+                  if (-not (Test-Path $source)) {
+                    throw "Expected .npmrc at: $source"
+                  }
+
+                  Copy-Item -LiteralPath $source -Destination $dest -Force
+                  Write-Host "Copied $source -> $dest"
+                displayName: 📦 Stage .npmrc for artifact

@@ -6,12 +6,15 @@ parameters:
   - name: installPython
     type: boolean
     default: true
+  - name: npmrcPath
+    type: string
+    default: '$(Build.SourcesDirectory)/.npmrc'
 
 steps:
   - ${{ if eq(parameters.installNode, true) }}:
       - task: npmAuthenticate@0
         inputs:
-          workingFile: .npmrc
+          workingFile: ${{ parameters.npmrcPath }}
 
       - script: npm config get registry
         displayName: Verify NPM Registry
