@@ -13,9 +13,15 @@ parameters:
   - name: buildPlatforms
     type: object
     displayName: 'List of platforms to sign'
+  - name: customNPMRegistry
+    type: string
+    default: ''
   - name: workingDirectory
     type: string
     default: '$(Build.StagingDirectory)'
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
   - name: signType
     type: string
     default: real
@@ -73,16 +79,10 @@ steps:
       restoreDirectory: '$(Build.SourcesDirectory)/packages'
       nugetConfigPath: '$(Build.SourcesDirectory)/build/NuGet.config'
 
-  # Setup Node.js and npm authentication
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      artifactName: npmrc
-      targetPath: $(Pipeline.Workspace)/npmrc
-    displayName: 🚛 Download .npmrc artifact
-
   - template: setup.yml@self
     parameters:
-      npmrcPath: $(Pipeline.Workspace)/npmrc/.npmrc
+      customNPMRegistry: ${{ parameters.customNPMRegistry }}
+      nodeVersion: ${{ parameters.nodeVersion }}
 
   - task: Npm@1
     displayName: 'npm ci (install vsce)'

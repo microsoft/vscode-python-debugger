@@ -26,6 +26,16 @@ parameters:
     type: object
     displayName: 'List of platforms to sign and publish'
 
+  - name: customNPMRegistry
+    type: string
+    default: ''
+    displayName: 'Custom NPM registry (optional)'
+
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+    displayName: 'Node version to install'
+
   # Signing parameters
   - name: signType
     type: string
@@ -151,6 +161,8 @@ jobs:
           signType: ${{ parameters.signType }}
           verifySignature: ${{ parameters.verifySignature }}
           teamName: ${{ parameters.teamName }}
+          customNPMRegistry: ${{ parameters.customNPMRegistry }}
+          nodeVersion: ${{ parameters.nodeVersion }}
 
   # Job 2: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
@@ -171,17 +183,12 @@ jobs:
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
             displayName: 🚛 Download signed extension
 
-          - task: 1ES.DownloadPipelineArtifact@1
-            inputs:
-              artifactName: npmrc
-              targetPath: $(Pipeline.Workspace)/npmrc
-            displayName: 🚛 Download .npmrc artifact
-
           - template: setup.yml
             parameters:
               installNode: true
               installPython: false
-              npmrcPath: $(Pipeline.Workspace)/npmrc/.npmrc
+              customNPMRegistry: ${{ parameters.customNPMRegistry }}
+              nodeVersion: ${{ parameters.nodeVersion }}
 
           # Extract VSIX to read publisher/version for GitHub release tagging.
           # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which

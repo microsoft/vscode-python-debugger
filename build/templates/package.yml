@@ -10,6 +10,16 @@ parameters:
     type: object
     displayName: 'List of platforms to build'
 
+  - name: customNPMRegistry
+    type: string
+    default: ''
+    displayName: 'Custom NPM registry (optional)'
+
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+    displayName: 'Node version to install'
+
   - name: buildSteps
     type: stepList
     default: []
@@ -71,13 +81,11 @@ jobs:
               targetPath: '$(Build.ArtifactStagingDirectory)/drop'
               artifactName: vsix-${{ coalesce(platform.vsceTarget, 'universal') }}
 
-            - output: pipelineArtifact
-              displayName: Publish .npmrc
-              targetPath: '$(Build.SourcesDirectory)/.npmrc'
-              artifactName: npmrc
-
         steps:
           - template: setup.yml@self
+            parameters:
+              customNPMRegistry: ${{ parameters.customNPMRegistry }}
+              nodeVersion: ${{ parameters.nodeVersion }}
 
           - ${{ if and(eq(parameters.isPreRelease, true), eq(parameters.standardizedVersioning, true)) }}:
               - template: modify-extension-version.yml@self
@@ -136,19 +144,3 @@ jobs:
               contents: '*.vsix'
               targetFolder: $(Build.ArtifactStagingDirectory)/drop
             displayName: 📦 Copy VSIX to staging
-
-          - ${{ if eq(coalesce(platform.vsceTarget, 'universal'), 'universal') }}:
-              - pwsh: |
-                  $source = "${{ parameters.workingDirectory }}/.npmrc"
-                  $destDir = "$(Build.ArtifactStagingDirectory)/npmrc"
-                  $dest = Join-Path $destDir '.npmrc'
-
-                  New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-
-                  if (-not (Test-Path $source)) {
-                    throw "Expected .npmrc at: $source"
-                  }
-
-                  Copy-Item -LiteralPath $source -Destination $dest -Force
-                  Write-Host "Copied $source -> $dest"
-                displayName: 📦 Stage .npmrc for artifact
