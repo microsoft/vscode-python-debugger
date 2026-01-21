@@ -12,9 +12,54 @@ parameters:
 
 steps:
   - ${{ if eq(parameters.installNode, true) }}:
+      - pwsh: |
+          $npmrcPath = "${{ parameters.npmrcPath }}"
+
+          if (Test-Path -LiteralPath $npmrcPath -PathType Container) {
+            throw "npmrcPath points to a directory (expected a file): $npmrcPath"
+          }
+
+          $parent = Split-Path -Parent $npmrcPath
+          if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+            New-Item -ItemType Directory -Path $parent -Force | Out-Null
+          }
+
+          if (-not (Test-Path -LiteralPath $npmrcPath -PathType Leaf)) {
+            New-Item -ItemType File -Path $npmrcPath -Force | Out-Null
+          }
+        displayName: Ensure .npmrc is a file
+
       - task: npmAuthenticate@0
         inputs:
           workingFile: ${{ parameters.npmrcPath }}
+
+      - pwsh: |
+          $source = "${{ parameters.npmrcPath }}"
+          $dest = "$(Build.SourcesDirectory)/.npmrc"
+
+          if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+            throw "Expected authenticated .npmrc file at: $source"
+          }
+
+          if (Test-Path -LiteralPath $dest -PathType Container) {
+            throw "Expected destination .npmrc to be a file, but it is a directory: $dest"
+          }
+
+          $srcFull = [System.IO.Path]::GetFullPath($source)
+          $destFull = [System.IO.Path]::GetFullPath($dest)
+
+          if ($srcFull -ieq $destFull) {
+            Write-Host "Authenticated .npmrc already in repo root: $dest"
+            return
+          }
+
+          if (-not (Test-Path -LiteralPath $dest -PathType Leaf)) {
+            Copy-Item -LiteralPath $source -Destination $dest -Force
+            Write-Host "Copied authenticated .npmrc -> $dest"
+          } else {
+            Write-Host "Repo root .npmrc already exists; not overwriting: $dest"
+          }
+        displayName: Copy .npmrc to repo root (if missing)
 
       - script: npm config get registry
         displayName: Verify NPM Registry

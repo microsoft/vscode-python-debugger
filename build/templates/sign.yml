@@ -77,12 +77,12 @@ steps:
   - task: DownloadPipelineArtifact@2
     inputs:
       artifactName: npmrc
-      targetPath: $(Pipeline.Workspace)/.npmrc
+      targetPath: $(Pipeline.Workspace)/npmrc
     displayName: 🚛 Download .npmrc artifact
 
   - template: setup.yml@self
     parameters:
-      npmrcPath: $(Pipeline.Workspace)/.npmrc
+      npmrcPath: $(Pipeline.Workspace)/npmrc/.npmrc
 
   - task: Npm@1
     displayName: 'npm ci (install vsce)'
