@@ -83,6 +83,7 @@ steps:
         # and `npx` resolve from the custom registry consistently.
         - pwsh: |
             $registry = "${{ parameters.customNPMRegistry }}"
+            $env:NPM_CONFIG_REGISTRY = $registry
             $scriptPath = Join-Path "$(Agent.TempDirectory)" 'setup-npm-registry.js'
 
             $lines = @(
@@ -115,7 +116,8 @@ steps:
               "",
               "async function main() {",
               "  const root = process.cwd();",
-              "  const registry = process.env.NPM_CONFIG_REGISTRY || " + JSON.stringify($registry) + ";",
+              "  const registry = process.env.NPM_CONFIG_REGISTRY;",
+              "  if (!registry) { throw new Error('NPM_CONFIG_REGISTRY is not set'); }",
               "",
               "  for await (const file of getLockFiles(root)) {",
               "    await rewrite(file, registry);",
