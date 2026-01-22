@@ -105,6 +105,7 @@ extends:
               buildPlatforms: ${{ parameters.buildPlatforms }}
               buildSteps: ${{ parameters.buildSteps }}
               isPreRelease: false
+              customNPMRegistry: $(AZURE_ARTIFACTS_FEED)
 
       - stage: Publish
         displayName: Publish Extension
@@ -116,3 +117,4 @@ extends:
               publishExtension: ${{ parameters.publishExtension }}
               preRelease: false
               teamName: $(TeamName)
+              customNPMRegistry: $(AZURE_ARTIFACTS_FEED)

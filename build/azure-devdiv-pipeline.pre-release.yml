@@ -108,6 +108,7 @@ extends:
               buildSteps: ${{ parameters.buildSteps }}
               isPreRelease: true
               standardizedVersioning: true
+              customNPMRegistry: $(AZURE_ARTIFACTS_FEED)
 
       - stage: Publish
         displayName: Publish Extension
@@ -122,3 +123,4 @@ extends:
               ghCreateTag: true
               ghCreateRelease: true
               ghReleaseAddChangeLog: true
+              customNPMRegistry: $(AZURE_ARTIFACTS_FEED)

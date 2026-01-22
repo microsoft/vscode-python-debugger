@@ -6,35 +6,64 @@ parameters:
   - name: installPython
     type: boolean
     default: true
+  - name: customNPMRegistry
+    type: string
+    default: ''
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+  - name: pythonVersion
+    type: string
+    default: '3.9'
+  - name: npmrcPath
+    type: string
+    default: '$(Agent.TempDirectory)/.npmrc'
 
 steps:
   - ${{ if eq(parameters.installNode, true) }}:
-      - pwsh: |
-          if (-not (Test-Path '.npmrc')) {
-            Write-Host 'No .npmrc found, creating one with public npm registry'
-            @"
-          # Force public npm registry to avoid CI auth (E401) when no token is provided
-          registry=https://registry.npmjs.org/
-          # Do not require auth for public installs
-          always-auth=false
-          "@ | Out-File -FilePath '.npmrc' -Encoding utf8
-          } else {
-            Write-Host '.npmrc already exists'
-          }
-        displayName: Ensure .npmrc exists
-
-      - task: npmAuthenticate@0
+      - task: NodeTool@0
         inputs:
-          workingFile: .npmrc
+          versionSpec: ${{ parameters.nodeVersion }}
+          checkLatest: true
+        displayName: 🛠 Install Node ${{ parameters.nodeVersion }}
+
+      - ${{ if ne(parameters.customNPMRegistry, '') }}:
+          # When using a private/custom registry, configure npm to read auth/config from a temp user config
+          # instead of relying on a checked-in project .npmrc.
+          - pwsh: >
+              $(Build.SourcesDirectory)/build/scripts/ensure-npm-userconfig.ps1
+              -Path "${{ parameters.npmrcPath }}"
+              -Registry "${{ parameters.customNPMRegistry }}"
+            displayName: 📦 Setup NPM User Config
+
+          # Configure npm/yarn to use the custom registry and ensure auth headers are sent.
+          - pwsh: >
+              $(Build.SourcesDirectory)/build/scripts/setup-npm-and-yarn.ps1
+              -NpmrcPath "${{ parameters.npmrcPath }}"
+              -Registry "${{ parameters.customNPMRegistry }}"
+            displayName: 📦 Setup NPM & Yarn
+
+          # Populate the temp .npmrc with auth for the configured registry.
+          - task: npmAuthenticate@0
+            inputs:
+              workingFile: ${{ parameters.npmrcPath }}
+            displayName: 📦 Setup NPM Authentication
+
+          # Ensure the registry always sends auth headers (npmAuthenticate may overwrite the file).
+          - pwsh: >
+              $(Build.SourcesDirectory)/build/scripts/finalize-npm-config.ps1
+              -Path "${{ parameters.npmrcPath }}"
+            displayName: 📦 Finalize NPM config
+
+          # Some lockfiles contain hardcoded references to public registries. Rewrite them so installs
+          # and `npx` resolve from the custom registry consistently.
+          - pwsh: >
+              $(Build.SourcesDirectory)/build/scripts/setup-npm-registry.ps1
+              -Registry "${{ parameters.customNPMRegistry }}"
+            displayName: 📦 Setup NPM Registry
 
       - script: npm config get registry
         displayName: Verify NPM Registry
-
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '22.17.0'
-          checkLatest: true
-        displayName: Select Node 22 LTS
 
   - ${{ if eq(parameters.installPython, true) }}:
       - task: PipAuthenticate@1
@@ -44,7 +73,7 @@ steps:
 
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.9' # note Install Python dependencies step below relies on Python 3.9
+          versionSpec: ${{ parameters.pythonVersion }}
           addToPath: true
           architecture: 'x64'
-        displayName: Select Python version
+        displayName: Select Python ${{ parameters.pythonVersion }}
