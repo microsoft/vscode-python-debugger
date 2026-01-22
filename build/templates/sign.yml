@@ -82,6 +82,19 @@ steps:
       command: ci
       workingDir: '$(Build.SourcesDirectory)'
 
+  # Workaround for intermittent MicroBuild plugin install collisions
+  # (e.g. "An item with the specified name ...\\MicroBuild\\Plugins\\Az.Accounts already exists")
+  - powershell: |
+      $pluginsRoot = "$(Agent.TempDirectory)/MicroBuild/Plugins"
+      $azAccountsDir = Join-Path $pluginsRoot "Az.Accounts"
+
+      Write-Host "MicroBuild plugins root: $pluginsRoot"
+      if (Test-Path $azAccountsDir) {
+        Write-Host "Removing existing MicroBuild plugin directory: $azAccountsDir"
+        Remove-Item -LiteralPath $azAccountsDir -Recurse -Force -ErrorAction SilentlyContinue
+      }
+    displayName: '🧹 Clean MicroBuild Az.Accounts plugin cache'
+
   # ✅ Enable MicroBuildSigningPlugin for PME enforcement (once for all platforms)
   - task: MicroBuildSigningPlugin@4
     displayName: Enable MicroBuild Signing
