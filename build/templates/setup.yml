@@ -31,14 +31,14 @@ steps:
           # When using a private/custom registry, configure npm to read auth/config from a temp user config
           # instead of relying on a checked-in project .npmrc.
           - pwsh: >
-              $(Build.SourcesDirectory)/build/scripts/ensure-npm-userconfig.ps1
+              & "$(Build.SourcesDirectory)/build/scripts/ensure-npm-userconfig.ps1"
               -Path "${{ parameters.npmrcPath }}"
               -Registry "${{ parameters.customNPMRegistry }}"
             displayName: 📦 Setup NPM User Config
 
           # Configure npm/yarn to use the custom registry and ensure auth headers are sent.
           - pwsh: >
-              $(Build.SourcesDirectory)/build/scripts/setup-npm-and-yarn.ps1
+              & "$(Build.SourcesDirectory)/build/scripts/setup-npm-and-yarn.ps1"
               -NpmrcPath "${{ parameters.npmrcPath }}"
               -Registry "${{ parameters.customNPMRegistry }}"
             displayName: 📦 Setup NPM & Yarn
@@ -51,14 +51,14 @@ steps:
 
           # Ensure the registry always sends auth headers (npmAuthenticate may overwrite the file).
           - pwsh: >
-              $(Build.SourcesDirectory)/build/scripts/finalize-npm-config.ps1
+              & "$(Build.SourcesDirectory)/build/scripts/finalize-npm-config.ps1"
               -Path "${{ parameters.npmrcPath }}"
             displayName: 📦 Finalize NPM config
 
           # Some lockfiles contain hardcoded references to public registries. Rewrite them so installs
           # and `npx` resolve from the custom registry consistently.
           - pwsh: >
-              $(Build.SourcesDirectory)/build/scripts/setup-npm-registry.ps1
+              & "$(Build.SourcesDirectory)/build/scripts/setup-npm-registry.ps1"
               -Registry "${{ parameters.customNPMRegistry }}"
             displayName: 📦 Setup NPM Registry
 
