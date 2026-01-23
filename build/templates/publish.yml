@@ -143,13 +143,13 @@ steps:
               if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
               $displayCmd += ' --pre-release'
               Write-Host $displayCmd
-              # npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs --pre-release
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs --pre-release
             } else {
               Write-Host 'Publishing as stable release'
               $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
               if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
               Write-Host $displayCmd
-              # npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs
             }
 
             if ($LASTEXITCODE -ne 0) {
