@@ -113,10 +113,20 @@ steps:
               Write-Host "EnabledApiProposalsJson is not set; publishing without --allow-proposed-apis."
             } else {
               try {
-                $enabledApiProposals = @($enabledApiProposalsJson | ConvertFrom-Json)
+                $parsedEnabledApiProposals = ConvertFrom-Json -InputObject $enabledApiProposalsJson
+                $enabledApiProposals = @()
+
+                if ($null -ne $parsedEnabledApiProposals) {
+                  foreach ($proposal in @($parsedEnabledApiProposals)) {
+                    if (-not [string]::IsNullOrWhiteSpace([string]$proposal)) {
+                      $enabledApiProposals += [string]$proposal
+                    }
+                  }
+                }
+
                 if ($enabledApiProposals.Count -gt 0) {
                   Write-Host ("enabledApiProposals (from EnabledApiProposalsJson): " + ($enabledApiProposals -join ', '))
-                  $allowProposedApisArgs = @('--allow-proposed-apis') + @($enabledApiProposals)
+                  $allowProposedApisArgs = @('--allow-proposed-apis') + $enabledApiProposals
                 } else {
                   Write-Host "EnabledApiProposalsJson parsed as empty; no proposed API allowlist flags needed."
                 }
