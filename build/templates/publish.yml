@@ -100,14 +100,41 @@ steps:
             Write-Host "Listing platform folder contents:"
             Get-ChildItem $root | Select-Object Name,Length | Format-Table -AutoSize
 
+            # If the extension uses proposed APIs, vsce requires explicitly allowing them.
+            # We expect EnabledApiProposalsJson to be set by an earlier step (e.g. publish-extension.yml).
+            $allowProposedApisArgs = @()
+            $enabledApiProposalsJson = "$(EnabledApiProposalsJson)"
+            if (-not $enabledApiProposalsJson -or ($enabledApiProposalsJson -match '^\$\(')) {
+              Write-Host "EnabledApiProposalsJson is not set; publishing without --allow-proposed-apis."
+            } else {
+              try {
+                $enabledApiProposals = @($enabledApiProposalsJson | ConvertFrom-Json)
+                if ($enabledApiProposals.Count -gt 0) {
+                  Write-Host ("enabledApiProposals (from EnabledApiProposalsJson): " + ($enabledApiProposals -join ', '))
+                  $allowProposedApisArgs = @('--allow-proposed-apis') + @($enabledApiProposals)
+                } else {
+                  Write-Host "EnabledApiProposalsJson parsed as empty; no proposed API allowlist flags needed."
+                }
+              } catch {
+                Write-Host "EnabledApiProposalsJson was set but could not be parsed; publishing without --allow-proposed-apis."
+              }
+            }
+
             if ('${{ parameters.preRelease }}' -eq 'True') {
               Write-Host 'Publishing as pre-release'
-              Write-Host "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
-              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
+              $allowProposedApisDisplay = ($allowProposedApisArgs -join ' ')
+              $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
+              if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
+              $displayCmd += ' --pre-release'
+              Write-Host $displayCmd
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs --pre-release
             } else {
               Write-Host 'Publishing as stable release'
-              Write-Host "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
-              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
+              $allowProposedApisDisplay = ($allowProposedApisArgs -join ' ')
+              $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
+              if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
+              Write-Host $displayCmd
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs
             }
 
             if ($LASTEXITCODE -ne 0) {

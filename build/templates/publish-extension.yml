@@ -213,6 +213,13 @@ jobs:
               }
 
               $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+              $enabledApiProposals = @()
+              if ($null -ne $package.enabledApiProposals) {
+                $enabledApiProposals = @($package.enabledApiProposals)
+              }
+              $enabledApiProposalsJson = ($enabledApiProposals | ConvertTo-Json -Compress)
+              Write-Host "##vso[task.setvariable variable=EnabledApiProposalsJson]$enabledApiProposalsJson"
+              Write-Host ("enabledApiProposals: " + ($(if ($enabledApiProposals.Count -gt 0) { $enabledApiProposals -join ', ' } else { '<none>' })))
               Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
               Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
             name: SetPublisherAndVersion
