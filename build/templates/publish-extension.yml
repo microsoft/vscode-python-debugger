@@ -239,6 +239,7 @@ jobs:
               azureSubscription: ${{ parameters.azureSubscription }}
               buildPlatforms: ${{ parameters.buildPlatforms }}
               manifestName: ${{ parameters.manifestName }}
+              enabledApiProposalsJson: $(EnabledApiProposalsJson)
               signatureName: ${{ parameters.signatureName }}
               publishFolder: ${{ parameters.publishFolder }}
               preRelease: ${{ parameters.preRelease }}

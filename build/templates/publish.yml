@@ -42,6 +42,9 @@ parameters:
   - name: preRelease
     type: boolean
     default: false
+  - name: enabledApiProposalsJson
+    type: string
+    default: ''
 
 steps:
   # Node & vsce expected to be prepared by parent pipeline; omit local installation.
@@ -68,6 +71,8 @@ steps:
   - ${{ each platform in parameters.buildPlatforms }}:
       - task: PowerShell@2
         displayName: "Publish extension (${{ coalesce(platform.vsceTarget, 'universal') }})"
+        env:
+          EnabledApiProposalsJson: ${{ parameters.enabledApiProposalsJson }}
         inputs:
           targetType: inline
           script: |
@@ -103,15 +108,25 @@ steps:
             # If the extension uses proposed APIs, vsce requires explicitly allowing them.
             # We expect EnabledApiProposalsJson to be set by an earlier step (e.g. publish-extension.yml).
             $allowProposedApisArgs = @()
-            $enabledApiProposalsJson = "$(EnabledApiProposalsJson)"
-            if (-not $enabledApiProposalsJson -or ($enabledApiProposalsJson -match '^\$\(')) {
+            $enabledApiProposalsJson = $env:EnabledApiProposalsJson
+            if ([string]::IsNullOrWhiteSpace($enabledApiProposalsJson)) {
               Write-Host "EnabledApiProposalsJson is not set; publishing without --allow-proposed-apis."
             } else {
               try {
-                $enabledApiProposals = @($enabledApiProposalsJson | ConvertFrom-Json)
+                $parsedEnabledApiProposals = ConvertFrom-Json -InputObject $enabledApiProposalsJson
+                $enabledApiProposals = @()
+
+                if ($null -ne $parsedEnabledApiProposals) {
+                  foreach ($proposal in @($parsedEnabledApiProposals)) {
+                    if (-not [string]::IsNullOrWhiteSpace([string]$proposal)) {
+                      $enabledApiProposals += [string]$proposal
+                    }
+                  }
+                }
+
                 if ($enabledApiProposals.Count -gt 0) {
                   Write-Host ("enabledApiProposals (from EnabledApiProposalsJson): " + ($enabledApiProposals -join ', '))
-                  $allowProposedApisArgs = @('--allow-proposed-apis') + @($enabledApiProposals)
+                  $allowProposedApisArgs = @('--allow-proposed-apis') + $enabledApiProposals
                 } else {
                   Write-Host "EnabledApiProposalsJson parsed as empty; no proposed API allowlist flags needed."
                 }
@@ -120,9 +135,10 @@ steps:
               }
             }
 
+            $allowProposedApisDisplay = ($allowProposedApisArgs -join ' ')
+
             if ('${{ parameters.preRelease }}' -eq 'True') {
               Write-Host 'Publishing as pre-release'
-              $allowProposedApisDisplay = ($allowProposedApisArgs -join ' ')
               $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
               if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
               $displayCmd += ' --pre-release'
@@ -130,7 +146,6 @@ steps:
               npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath $allowProposedApisArgs --pre-release
             } else {
               Write-Host 'Publishing as stable release'
-              $allowProposedApisDisplay = ($allowProposedApisArgs -join ' ')
               $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
               if ($allowProposedApisDisplay) { $displayCmd += " $allowProposedApisDisplay" }
               Write-Host $displayCmd
