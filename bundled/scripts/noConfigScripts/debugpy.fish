@@ -1,3 +1,4 @@
 # Fish script
-set -x DEBUGPY_ADAPTER_ENDPOINTS $VSCODE_DEBUGPY_ADAPTER_ENDPOINTS
+# VSCODE_DEBUGPY_ADAPTER_ENDPOINTS is a prefix; mktemp creates the file atomically to prevent races
+set -x DEBUGPY_ADAPTER_ENDPOINTS (mktemp "$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"XXXXXX.txt)
 python3 $BUNDLED_DEBUGPY_PATH --listen 0 --wait-for-client $argv
