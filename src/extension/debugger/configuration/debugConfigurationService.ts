@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import { cloneDeep } from 'lodash';
-import { CancellationToken, DebugConfiguration, QuickPickItem, Uri, WorkspaceFolder } from 'vscode';
+import { CancellationToken, commands, DebugConfiguration, QuickPickItem, Uri, WorkspaceFolder } from 'vscode';
 import { DebugConfigStrings } from '../../common/utils/localize';
 import { IMultiStepInputFactory, InputStep, IQuickPickParameters, MultiStepInput } from '../../common/multiStepInput';
 import { AttachRequestArguments, DebugConfigurationArguments, LaunchRequestArguments } from '../../types';
@@ -19,6 +19,7 @@ import { IDebugConfigurationResolver } from './types';
 import { buildFileWithArgsLaunchDebugConfiguration } from './providers/fileLaunchWithArgs';
 import { getInterpreterDetails } from '../../common/python';
 import { traceLog } from '../../common/log/logging';
+import { OnErrorsActions, resolveOnErrorsAction } from '../../common/onErrorsAction';
 
 export class PythonDebugConfigurationService implements IDebugConfigurationService {
     private cacheDebugConfig: DebugConfiguration | undefined = undefined;
@@ -50,6 +51,15 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         debugConfiguration: DebugConfiguration,
         token?: CancellationToken,
     ): Promise<DebugConfiguration | undefined> {
+        const action = await resolveOnErrorsAction();
+        switch (action) {
+            case OnErrorsActions.showErrors:
+                await commands.executeCommand('workbench.panel.markers.view.focus');
+                return undefined;
+
+            case OnErrorsActions.abort:
+                return undefined;
+        }
         if (debugConfiguration.request === 'attach') {
             return this.attachResolver.resolveDebugConfiguration(
                 folder,
