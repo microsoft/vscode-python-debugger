@@ -7,16 +7,17 @@ import { l10n } from 'vscode';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
-import { WmicProcessParser } from './wmicProcessParser';
+import { PowerShellProcessParser } from './powerShellProcessParser';
 import { getEnvironmentVariables } from '../../common/python';
 import { plainExec } from '../../common/process/rawProcessApis';
 import { logProcess } from '../../common/process/logger';
+import { WmicProcessParser } from './wmicProcessParser';
 
 export class AttachProcessProvider implements IAttachProcessProvider {
     constructor() {}
 
-    public getAttachItems(): Promise<IAttachItem[]> {
-        return this._getInternalProcessEntries().then((processEntries) => {
+    public getAttachItems(specCommand?: ProcessListCommand): Promise<IAttachItem[]> {
+        return this._getInternalProcessEntries(specCommand).then((processEntries) => {
             processEntries.sort(
                 (
                     { processName: aprocessName, commandLine: aCommandLine },
@@ -57,25 +58,48 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         });
     }
 
-    public async _getInternalProcessEntries(): Promise<IAttachItem[]> {
+    public async _getInternalProcessEntries(specCommand?: ProcessListCommand): Promise<IAttachItem[]> {
         let processCmd: ProcessListCommand;
-        const osType = getOSType();
-        if (osType === OSType.OSX) {
-            processCmd = PsProcessParser.psDarwinCommand;
-        } else if (osType === OSType.Linux) {
-            processCmd = PsProcessParser.psLinuxCommand;
-        } else if (osType === OSType.Windows) {
-            processCmd = WmicProcessParser.wmicCommand;
+        if (specCommand === undefined) {
+            const osType = getOSType();
+            if (osType === OSType.OSX) {
+                processCmd = PsProcessParser.psDarwinCommand;
+            } else if (osType === OSType.Linux) {
+                processCmd = PsProcessParser.psLinuxCommand;
+            } else if (osType === OSType.Windows) {
+                processCmd = PowerShellProcessParser.powerShellCommand;
+            } else {
+                throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
+            }
         } else {
-            throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
+            processCmd = specCommand;
         }
-
         const customEnvVars = await getEnvironmentVariables();
+        if (processCmd === PowerShellProcessParser.powerShellCommand) {
+            try {
+                const checkPowerShell = await plainExec(
+                    'where',
+                    ['powershell'],
+                    { throwOnStdErr: false },
+                    customEnvVars,
+                );
+                if (checkPowerShell.stdout.length === 0) {
+                    processCmd = WmicProcessParser.wmicCommand;
+                }
+            } catch (error) {
+                // If 'where' fails, fall back to wmic (most likely powershell is not available).(Windows Xp or below？
+                console.log('PowerShell check failed, using WMIC fallback');
+                processCmd = WmicProcessParser.wmicCommand;
+            }
+        }
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
-
-        return osType === OSType.Windows
-            ? WmicProcessParser.parseProcesses(output.stdout)
-            : PsProcessParser.parseProcesses(output.stdout);
+        if (processCmd === WmicProcessParser.wmicCommand) {
+            return WmicProcessParser.parseProcesses(output.stdout);
+        } else if (processCmd === PowerShellProcessParser.powerShellCommand ||
+                   processCmd === PowerShellProcessParser.powerShellWithoutCimCommand) {
+            return PowerShellProcessParser.parseProcesses(output.stdout);
+        }
+        return PsProcessParser.parseProcesses(output.stdout);
     }
 }
