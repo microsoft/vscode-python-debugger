@@ -25,7 +25,7 @@ SUPPORTED_DEBUGPY_CPYTHONS = [
 
 # Single source of truth for the debugpy version we bundle.
 # Update this when bumping debugpy (and update bundled/libs/debugpy accordingly).
-DEBUGPY_VERSION = "1.8.19"
+DEBUGPY_VERSION = "1.8.20"
 
 
 def _build_debugpy_wheel_requests(vsce_target: str, version: str) -> list[dict]:
