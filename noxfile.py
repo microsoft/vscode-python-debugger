@@ -184,7 +184,12 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
             abi = req.get("abi")
             platforms = req.get("platforms") or []
 
-            if python_version is None and implementation is None and abi is None and not platforms:
+            if (
+                python_version is None
+                and implementation is None
+                and abi is None
+                and not platforms
+            ):
                 session.run(*base_args)
                 continue
 
