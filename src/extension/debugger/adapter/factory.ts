@@ -193,7 +193,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
      */
     private async getExecutableCommand(interpreter: PythonEnvironment | undefined): Promise<string[]> {
         if (interpreter) {
-            const executablePath = interpreter.execInfo.activatedRun?.executable ?? interpreter.execInfo.run.executable;
+            const executablePath = interpreter.execInfo.run.executable;
             const version = interpreter.version;
 
             // Parse version string (e.g., "3.8.10" -> major: 3, minor: 8)
