@@ -9,7 +9,7 @@ import { Uri, Disposable, Extension, extensions } from 'vscode';
 import * as path from 'path';
 import * as pythonApi from '../../../extension/common/python';
 import * as utilities from '../../../extension/common/utilities';
-import { buildPythonEnvironment } from './helpers';
+import { buildPythonEnvironment, buildPythonEnvironmentWithActivatedRun } from './helpers';
 
 // Platform-specific path constants using path.join so tests assert using native separators.
 // Leading root '/' preserved; on Windows this yields a leading backslash (e.g. '\\usr\\bin').
@@ -165,6 +165,24 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const result = await pythonApi.getSettingsPythonPath();
 
             expect(result).to.be.undefined;
+        });
+
+        test('Should use run.executable instead of activatedRun.executable when they differ', async () => {
+            // Simulates environment managers like pixi/conda that set activatedRun to a wrapper command
+            const actualPythonPath = PYTHON_PATH;
+            const wrapperCommand = path.join('/', 'usr', 'local', 'bin', 'pixi');
+            const mockPythonEnv = buildPythonEnvironmentWithActivatedRun(actualPythonPath, wrapperCommand, '3.9.0', [
+                'run',
+                'python',
+            ]);
+            (mockEnvsExtension as any).exports = mockPythonEnvApi;
+            mockPythonEnvApi.getEnvironment.resolves(mockPythonEnv);
+            mockPythonEnvApi.resolveEnvironment.resolves(mockPythonEnv);
+
+            const result = await pythonApi.getSettingsPythonPath();
+
+            // Should return the actual Python binary path, not the wrapper command
+            expect(result).to.deep.equal([actualPythonPath]);
         });
     });
 
@@ -373,6 +391,26 @@ suite('Python API Tests- useEnvironmentsExtension:true', () => {
             const result = await pythonApi.getInterpreterDetails();
 
             expect(result.path).to.be.undefined;
+        });
+
+        test('Should use run.executable instead of activatedRun.executable when they differ', async () => {
+            // Simulates environment managers like pixi/conda that set activatedRun to a wrapper command
+            const actualPythonPath = PYTHON_PATH;
+            const wrapperCommand = path.join('/', 'usr', 'local', 'bin', 'pixi');
+            const mockEnv = buildPythonEnvironmentWithActivatedRun(actualPythonPath, wrapperCommand, '3.9.0', [
+                'run',
+                'python',
+            ]);
+
+            (mockEnvsExtension as any).exports = mockPythonEnvApi;
+            mockPythonEnvApi.getEnvironment.returns({ environmentPath: Uri.file(actualPythonPath) });
+            mockPythonEnvApi.resolveEnvironment.resolves(mockEnv);
+
+            const result = await pythonApi.getInterpreterDetails();
+
+            // Should return the actual Python binary path, not the wrapper command
+            expect(result.path).to.deep.equal([actualPythonPath]);
+            expect(result.resource).to.be.undefined;
         });
     });
 
