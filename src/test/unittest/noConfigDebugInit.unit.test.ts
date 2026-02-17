@@ -112,9 +112,7 @@ suite('setup for no-config debug scenario', function () {
             })
             .returns(envVarCollectionAppendStub);
 
-        context
-            .setup((c) => c.environmentVariableCollection)
-            .returns(() => environmentVariableCollectionMock.object);
+        context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
 
         setupFileSystemWatchers();
 
