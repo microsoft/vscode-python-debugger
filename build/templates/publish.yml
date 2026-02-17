@@ -42,6 +42,9 @@ parameters:
   - name: preRelease
     type: boolean
     default: false
+  - name: enabledApiProposalsJson
+    type: string
+    default: ''
 
 steps:
   # Node & vsce expected to be prepared by parent pipeline; omit local installation.
@@ -102,12 +105,14 @@ steps:
 
             if ('${{ parameters.preRelease }}' -eq 'True') {
               Write-Host 'Publishing as pre-release'
-              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release"
-              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --pre-release
+              $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify --pre-release"
+              Write-Host $displayCmd
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify --pre-release
             } else {
               Write-Host 'Publishing as stable release'
-              Write-Host "Executing: npx vsce publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath"
-              npx vsce publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath
+              $displayCmd = "Executing: npx @vscode/vsce@latest publish --pat *** --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify"
+              Write-Host $displayCmd
+              npx @vscode/vsce@latest publish --pat $aadToken --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify
             }
 
             if ($LASTEXITCODE -ne 0) {

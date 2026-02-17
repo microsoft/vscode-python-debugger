@@ -13,9 +13,15 @@ parameters:
   - name: buildPlatforms
     type: object
     displayName: 'List of platforms to sign'
+  - name: customNPMRegistry
+    type: string
+    default: ''
   - name: workingDirectory
     type: string
     default: '$(Build.StagingDirectory)'
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
   - name: signType
     type: string
     default: real
@@ -73,14 +79,29 @@ steps:
       restoreDirectory: '$(Build.SourcesDirectory)/packages'
       nugetConfigPath: '$(Build.SourcesDirectory)/build/NuGet.config'
 
-  # Setup Node.js and npm authentication
   - template: setup.yml@self
+    parameters:
+      customNPMRegistry: ${{ parameters.customNPMRegistry }}
+      nodeVersion: ${{ parameters.nodeVersion }}
 
   - task: Npm@1
     displayName: 'npm ci (install vsce)'
     inputs:
       command: ci
       workingDir: '$(Build.SourcesDirectory)'
+
+  # Workaround for intermittent MicroBuild plugin install collisions
+  # (e.g. "An item with the specified name ...\\MicroBuild\\Plugins\\Az.Accounts already exists")
+  - powershell: |
+      $pluginsRoot = "$(Agent.TempDirectory)/MicroBuild/Plugins"
+      $azAccountsDir = Join-Path $pluginsRoot "Az.Accounts"
+
+      Write-Host "MicroBuild plugins root: $pluginsRoot"
+      if (Test-Path $azAccountsDir) {
+        Write-Host "Removing existing MicroBuild plugin directory: $azAccountsDir"
+        Remove-Item -LiteralPath $azAccountsDir -Recurse -Force -ErrorAction SilentlyContinue
+      }
+    displayName: '🧹 Clean MicroBuild Az.Accounts plugin cache'
 
   # ✅ Enable MicroBuildSigningPlugin for PME enforcement (once for all platforms)
   - task: MicroBuildSigningPlugin@4
