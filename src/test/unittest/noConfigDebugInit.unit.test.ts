@@ -125,8 +125,6 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
-
-
     test('should create file system watcher for debuggerAdapterEndpointFolder', async () => {
         // Arrange
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
