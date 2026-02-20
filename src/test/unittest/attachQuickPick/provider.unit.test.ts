@@ -13,6 +13,7 @@ import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 import * as platform from '../../../extension/common/platform';
 import * as rawProcessApis from '../../../extension/common/process/rawProcessApis';
+import { PowerShellProcessParser } from '../../../extension/debugger/attachQuickPick/powerShellProcessParser';
 
 use(chaiAsPromised);
 
@@ -128,7 +129,7 @@ suite('Attach to process - process provider', () => {
         assert.deepEqual(attachItems, expectedOutput);
     });
 
-    test('The Windows process list command should be called if the platform is Windows', async () => {
+    test('The Windows wmic process list command should be called if the platform is Windows when powershell has not been installed', async () => {
         const windowsOutput = `CommandLine=\r
 Name=System\r
 ProcessId=4\r
@@ -170,13 +171,25 @@ ProcessId=5912\r
             },
         ];
         getOSTypeStub.returns(platform.OSType.Windows);
+        const notFoundPowerShellOutput = 'INFO: Could not find files for the given pattern(s).\r\n';
+        plainExecStub
+            .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+            .resolves({ stderr: notFoundPowerShellOutput, stdout: '' });
         plainExecStub
             .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
             .resolves({ stdout: windowsOutput });
 
         const attachItems = await provider._getInternalProcessEntries();
-        sinon.assert.calledOnceWithExactly(
-            plainExecStub,
+        sinon.assert.calledTwice(plainExecStub);
+        sinon.assert.calledWithExactly(
+            plainExecStub.firstCall,
+            'where',
+            ['powershell'],
+            sinon.match.any,
+            sinon.match.any,
+        );
+        sinon.assert.calledWithExactly(
+            plainExecStub.secondCall,
             WmicProcessParser.wmicCommand.command,
             WmicProcessParser.wmicCommand.args,
             sinon.match.any,
@@ -307,7 +320,7 @@ ProcessId=5912\r
             getOSTypeStub.returns(platform.OSType.Windows);
         });
 
-        test('Items returned by getAttachItems should be sorted alphabetically', async () => {
+        test('Items returned by getAttachItems should be sorted alphabetically with wmic', async () => {
             const windowsOutput = `CommandLine=\r
 Name=System\r
 ProcessId=4\r
@@ -353,12 +366,75 @@ ProcessId=5728\r
                 .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
                 .resolves({ stdout: windowsOutput });
 
-            const output = await provider.getAttachItems();
+            const output = await provider.getAttachItems(WmicProcessParser.wmicCommand);
 
             assert.deepEqual(output, expectedOutput);
         });
 
-        test('Python processes should be at the top of the list returned by getAttachItems', async () => {
+        test('Items returned by getAttachItems should be sorted alphabetically with powershell', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 5728,
+                    commandLine: 'sihost.exe',
+                    name: 'sihost.exe',
+                },
+            ];
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'sihost.exe',
+                    description: '5728',
+                    detail: 'sihost.exe',
+                    id: '5728',
+                    processName: 'sihost.exe',
+                    commandLine: 'sihost.exe',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems(PowerShellProcessParser.powerShellCommand);
+
+            assert.deepEqual(output, expectedOutput);
+        });
+
+        test('Python processes should be at the top of the list returned by getAttachItems with wmic', async () => {
             const windowsOutput = `CommandLine=\r
 Name=System\r
 ProcessId=4\r
@@ -445,8 +521,293 @@ ProcessId=8026\r
                 .withArgs(WmicProcessParser.wmicCommand.command, sinon.match.any, sinon.match.any, sinon.match.any)
                 .resolves({ stdout: windowsOutput });
 
-            const output = await provider.getAttachItems();
+            const output = await provider.getAttachItems(WmicProcessParser.wmicCommand);
 
+            assert.deepEqual(output, expectedOutput);
+        });
+        test('Python processes should be at the top of the list returned by getAttachItems with powershell', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 5728,
+                    commandLine: 'sihost.exe',
+                    name: 'sihost.exe',
+                },
+                {
+                    processId: 5912,
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 6028,
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    name: 'python.exe',
+                },
+                {
+                    processId: 8026,
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    name: 'python.exe',
+                },
+            ];
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'python.exe',
+                    description: '8026',
+                    detail: 'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    id: '8026',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                },
+                {
+                    label: 'python.exe',
+                    description: '6028',
+                    detail: 'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    id: '6028',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\Contoso\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                },
+                {
+                    label: 'sihost.exe',
+                    description: '5728',
+                    detail: 'sihost.exe',
+                    id: '5728',
+                    processName: 'sihost.exe',
+                    commandLine: 'sihost.exe',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5912',
+                    detail: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    id: '5912',
+                    processName: 'svchost.exe',
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            //const notFoundPowerShellOutput = 'INFO: Could not find files for the given pattern(s).\r\n';
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems(PowerShellProcessParser.powerShellCommand);
+
+            assert.deepEqual(output, expectedOutput);
+        });
+
+        test('The Windows powershell process list command should be called if the platform is Windows when powershell has been installed', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 5728,
+                    commandLine: 'sihost.exe',
+                    name: 'sihost.exe',
+                },
+                {
+                    processId: 5912,
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    name: 'svchost.exe',
+                },
+                {
+                    processId: 6028,
+                    commandLine:
+                        'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    name: 'python.exe',
+                },
+                {
+                    processId: 8026,
+                    commandLine:
+                        'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    name: 'python.exe',
+                },
+            ];
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'python.exe',
+                    description: '8026',
+                    detail: 'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                    id: '8026',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/foo_bar.py',
+                },
+                {
+                    label: 'python.exe',
+                    description: '6028',
+                    detail: 'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                    id: '6028',
+                    processName: 'python.exe',
+                    commandLine:
+                        'C:\\Users\\ZA139\\AppData\\Local\\Programs\\Python\\Python37\\python.exe c:/Users/Contoso/Documents/hello_world.py',
+                },
+                {
+                    label: 'sihost.exe',
+                    description: '5728',
+                    detail: 'sihost.exe',
+                    id: '5728',
+                    processName: 'sihost.exe',
+                    commandLine: 'sihost.exe',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'svchost.exe',
+                    description: '5912',
+                    detail: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                    id: '5912',
+                    processName: 'svchost.exe',
+                    commandLine: 'C:\\WINDOWS\\system32\\svchost.exe -k UnistackSvcGroup -s CDPUserSvc',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            getOSTypeStub.returns(platform.OSType.Windows);
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems();
+            sinon.assert.calledTwice(plainExecStub);
+            sinon.assert.calledWithExactly(
+                plainExecStub.firstCall,
+                'where',
+                ['powershell'],
+                sinon.match.any,
+                sinon.match.any,
+            );
+            sinon.assert.calledWithExactly(
+                plainExecStub.secondCall,
+                PowerShellProcessParser.powerShellCommand.command,
+                PowerShellProcessParser.powerShellCommand.args,
+                sinon.match.any,
+                sinon.match.any,
+            );
+            assert.deepEqual(output, expectedOutput);
+        });
+
+        test('The Windows powershell Get-WmiObject process list command should be called when Get-CimInstance fails', async () => {
+            const windowsProcesses = [
+                {
+                    processId: 4,
+                    commandLine: null,
+                    name: 'System',
+                },
+                {
+                    processId: 5372,
+                    commandLine: null,
+                    name: 'svchost.exe',
+                },
+            ];
+            const expectedOutput: IAttachItem[] = [
+                {
+                    label: 'svchost.exe',
+                    description: '5372',
+                    detail: '',
+                    id: '5372',
+                    processName: 'svchost.exe',
+                    commandLine: '',
+                },
+                {
+                    label: 'System',
+                    description: '4',
+                    detail: '',
+                    id: '4',
+                    processName: 'System',
+                    commandLine: '',
+                },
+            ];
+            const foundPowerShellOutput = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\r\n';
+            
+            plainExecStub
+                .withArgs('where', ['powershell'], sinon.match.any, sinon.match.any)
+                .resolves({ stderr: '', stdout: foundPowerShellOutput });
+            
+            const windowsOutput = JSON.stringify(windowsProcesses, null, 4);
+            plainExecStub
+                .withArgs(
+                    PowerShellProcessParser.powerShellWithoutCimCommand.command,
+                    sinon.match.any,
+                    sinon.match.any,
+                    sinon.match.any,
+                )
+                .resolves({ stdout: windowsOutput });
+
+            const output = await provider.getAttachItems(PowerShellProcessParser.powerShellWithoutCimCommand);
+            sinon.assert.calledWithExactly(
+                plainExecStub.firstCall,
+                PowerShellProcessParser.powerShellWithoutCimCommand.command,
+                PowerShellProcessParser.powerShellWithoutCimCommand.args,
+                sinon.match.any,
+                sinon.match.any,
+            );
             assert.deepEqual(output, expectedOutput);
         });
     });
