@@ -8,9 +8,9 @@ import {
     DebugSessionOptions,
     Disposable,
     GlobalEnvironmentVariableCollection,
+    env,
     l10n,
     RelativePattern,
-    workspace,
 } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
 import { traceError, traceVerbose } from './common/log/logging';
@@ -39,23 +39,13 @@ export async function registerNoConfigDebug(
     const collection = envVarCollection;
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
-    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
-    let workspaceString = workspace.workspaceFile?.fsPath;
-    if (!workspaceString) {
-        workspaceString = workspace.workspaceFolders?.map((e) => e.uri.fsPath).join(';');
-    }
-    if (!workspaceString) {
-        traceError('No workspace folder found');
-        return Promise.resolve(new Disposable(() => {}));
-    }
-
-    // create a stable hash for the workspace folder, reduce terminal variable churn
-    const hash = crypto.createHash('sha256');
-    hash.update(workspaceString.toString());
-    const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
+    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-<sessionId>.txt
+    // sessionId is unique per VS Code window, ensuring isolation between windows
 
     const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
-    const tempFilePath = path.join(tempDirPath, `endpoint-${stableWorkspaceHash}.txt`);
+    const sessionIdHash = crypto.createHash('sha256').update(env.sessionId).digest('hex').slice(0, 16);
+    const endpointFilename = `endpoint-${sessionIdHash}.txt`;
+    const tempFilePath = path.join(tempDirPath, endpointFilename);
 
     // create the temp directory if it doesn't exist
     if (!fs.existsSync(tempDirPath)) {
@@ -88,8 +78,8 @@ export async function registerNoConfigDebug(
         'Enables use of [no-config debugging](https://github.com/microsoft/vscode-python-debugger/wiki/No%E2%80%90Config-Debugging), `debugpy <script.py>`, in the terminal.',
     );
 
-    // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*.txt'));
+    // create file system watcher for the debugger adapter endpoint for when the communication port is written
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, endpointFilename));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
         sendTelemetryEvent(EventName.DEBUG_SESSION_START, undefined, {
             trigger: 'noConfig' as TriggerType,
