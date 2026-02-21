@@ -8,9 +8,9 @@ import {
     DebugSessionOptions,
     Disposable,
     GlobalEnvironmentVariableCollection,
+    env,
     l10n,
     RelativePattern,
-    workspace,
 } from 'vscode';
 import { createFileSystemWatcher, debugStartDebugging } from './utils';
 import { traceError, traceVerbose } from './common/log/logging';
@@ -39,31 +39,25 @@ export async function registerNoConfigDebug(
     const collection = envVarCollection;
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
-    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-stableWorkspaceHash.txt
-    let workspaceString = workspace.workspaceFile?.fsPath;
-    if (!workspaceString) {
-        workspaceString = workspace.workspaceFolders?.map((e) => e.uri.fsPath).join(';');
-    }
-    if (!workspaceString) {
-        traceError('No workspace folder found');
-        return Promise.resolve(new Disposable(() => {}));
-    }
-
-    // create a stable hash for the workspace folder, reduce terminal variable churn
+    // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-windowHash-*
     const hash = crypto.createHash('sha256');
-    hash.update(workspaceString.toString());
-    const stableWorkspaceHash = hash.digest('hex').slice(0, 16);
+    hash.update(env.sessionId);
+    const windowHash = hash.digest('hex').slice(0, 16);
 
-    const tempDirPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
-    const tempFilePath = path.join(tempDirPath, `endpoint-${stableWorkspaceHash}.txt`);
+    const endpointFolderPath = path.join(extPath, '.noConfigDebugAdapterEndpoints');
+    const endpointPrefix = `endpoint-${windowHash}-`;
 
-    // create the temp directory if it doesn't exist
-    if (!fs.existsSync(tempDirPath)) {
-        fs.mkdirSync(tempDirPath, { recursive: true });
+    // create the directory if it doesn't exist
+    if (!fs.existsSync(endpointFolderPath)) {
+        fs.mkdirSync(endpointFolderPath, { recursive: true });
     } else {
-        // remove endpoint file in the temp directory if it exists
-        if (fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
+        // clean out any existing endpoint files for this window hash
+        const entries = fs.readdirSync(endpointFolderPath, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isFile() && entry.name.startsWith(endpointPrefix)) {
+                const entryPath = path.join(endpointFolderPath, entry.name.toString());
+                fs.unlinkSync(entryPath);
+            }
         }
     }
     // clear the env var collection to remove any existing env vars
@@ -73,7 +67,8 @@ export async function registerNoConfigDebug(
     collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
 
     // Add env vars for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
-    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
+    // VSCODE_DEBUGPY_ADAPTER_ENDPOINTS is the prefix for endpoint files - scripts append something unique to avoid collisions
+    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', path.join(endpointFolderPath, endpointPrefix));
 
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
@@ -88,8 +83,8 @@ export async function registerNoConfigDebug(
         'Enables use of [no-config debugging](https://github.com/microsoft/vscode-python-debugger/wiki/No%E2%80%90Config-Debugging), `debugpy <script.py>`, in the terminal.',
     );
 
-    // create file system watcher for the debuggerAdapterEndpointFolder for when the communication port is written
-    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(tempDirPath, '**/*.txt'));
+    // create file system watcher for endpoint files matching this window's prefix
+    const fileSystemWatcher = createFileSystemWatcher(new RelativePattern(endpointFolderPath, `${endpointPrefix}*`));
     const fileCreationEvent = fileSystemWatcher.onDidCreate(async (uri) => {
         sendTelemetryEvent(EventName.DEBUG_SESSION_START, undefined, {
             trigger: 'noConfig' as TriggerType,
