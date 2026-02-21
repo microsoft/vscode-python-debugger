@@ -1,0 +1,245 @@
+# Template (jobs): Sign and Publish Extension
+# Encapsulates Sign, optional manual validation, and Publish jobs with MicroBuild signing.
+# This template defines multiple jobs with templateContext for MicroBuild signing.
+#
+# Usage (example inside a stage):
+# jobs:
+#   - template: build/templates/publish-extension.yml@self
+#     parameters:
+#       buildPlatforms: ${{ parameters.buildPlatforms }}
+#       publishExtension: ${{ parameters.publishExtension }}
+#       preRelease: false
+#       teamName: $(TeamName)
+#       ghCreateRelease: true
+#       ghCreateTag: true
+#       waitForValidation: true
+#
+# Notes:
+# - Requires MicroBuild pool (VSEngSS-MicroBuild2022-1ES) for signing.
+# - Downloads platform-specific artifacts from previous stage.
+# - Publishes signed artifacts as 'extension' pipeline artifact with SBOM.
+# - Optionally creates a GitHub release and waits for manual validation before marketplace publishing.
+
+parameters:
+  # Build platforms
+  - name: buildPlatforms
+    type: object
+    displayName: 'List of platforms to sign and publish'
+
+  - name: customNPMRegistry
+    type: string
+    default: ''
+    displayName: 'Custom NPM registry (optional)'
+
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+    displayName: 'Node version to install'
+
+  # Signing parameters
+  - name: signType
+    type: string
+    default: real
+    displayName: 'MicroBuild sign type (real or test)'
+  - name: verifySignature
+    type: boolean
+    default: true
+    displayName: 'Verify signature after signing'
+  - name: teamName
+    type: string
+    default: VSCode-python-debugger
+    displayName: 'Team name for signing'
+
+  # Publishing parameters
+  - name: publishExtension
+    type: boolean
+    default: false
+    displayName: 'Publish extension to marketplace'
+  - name: preRelease
+    type: boolean
+    default: false
+    displayName: 'Publish as pre-release'
+  - name: azureSubscription
+    type: string
+    default: PylancePublishPipelineSecureConnectionWithManagedIdentity
+    displayName: 'Azure subscription for marketplace auth'
+
+  # GitHub Release parameters
+  - name: ghCreateTag
+    type: boolean
+    default: false
+    displayName: 'Create GitHub tag'
+  - name: ghCreateRelease
+    type: boolean
+    default: false
+    displayName: 'Create GitHub release'
+  - name: ghReleaseAddChangeLog
+    type: boolean
+    default: true
+    displayName: 'Add changelog to GitHub release'
+  - name: ghTagPrefix
+    type: string
+    default: 'v'
+    displayName: 'Prefix for GitHub tag (e.g., v for v2025.1.0)'
+
+  # Manual validation parameters
+  - name: waitForValidation
+    type: boolean
+    default: true
+    displayName: 'Wait for manual validation before publishing'
+  - name: validationNotifyUsers
+    type: string
+    default: ''
+    displayName: 'Users to notify for manual validation (comma-separated emails)'
+  - name: validationInstructions
+    type: string
+    default: 'Please test the latest draft release then approve to publish to marketplace.'
+    displayName: 'Instructions for manual validation'
+  - name: validationTimeoutInMinutes
+    type: number
+    default: 1440
+    displayName: 'Timeout for manual validation in minutes (default: 1 day)'
+
+  # Paths
+  - name: workingDirectory
+    type: string
+    default: '$(Build.StagingDirectory)\extension'
+    displayName: 'Working directory for signing artifacts'
+  - name: publishFolder
+    type: string
+    default: extension
+    displayName: 'Folder containing signed artifacts for publishing'
+  - name: manifestName
+    type: string
+    default: extension.manifest
+    displayName: 'Manifest filename'
+  - name: signatureName
+    type: string
+    default: extension.signature.p7s
+    displayName: 'Signature filename'
+
+jobs:
+  # Job 1: Sign extension and create GitHub release
+  - job: Sign
+    displayName: Sign Extension
+    pool:
+      name: VSEngSS-MicroBuild2022-1ES
+      os: windows
+    templateContext:
+      mb:
+        signing:
+          enabled: true
+          signType: ${{ parameters.signType }}
+          signWithProd: true
+      outputs:
+        - output: pipelineArtifact
+          displayName: 'Publish Extension Artifact'
+          targetPath: '${{ parameters.workingDirectory }}'
+          artifactName: extension
+          sbomEnabled: true
+    steps:
+      # Download platform-specific artifacts to Build.BinariesDirectory
+      - ${{ each platform in parameters.buildPlatforms }}:
+          - ${{ if eq(platform.vsceTarget, '') }}:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  artifactName: vsix-universal
+                  targetPath: $(Build.BinariesDirectory)/vsix-universal
+                displayName: 🚛 Download extension (universal)
+
+          - ${{ if ne(platform.vsceTarget, '') }}:
+              - task: DownloadPipelineArtifact@2
+                inputs:
+                  artifactName: vsix-${{ platform.vsceTarget }}
+                  targetPath: $(Build.BinariesDirectory)/vsix-${{ platform.vsceTarget }}
+                displayName: 🚛 Download extension (${{ platform.vsceTarget }})
+
+      - template: sign.yml
+        parameters:
+          buildPlatforms: ${{ parameters.buildPlatforms }}
+          workingDirectory: ${{ parameters.workingDirectory }}
+          signType: ${{ parameters.signType }}
+          verifySignature: ${{ parameters.verifySignature }}
+          teamName: ${{ parameters.teamName }}
+          customNPMRegistry: ${{ parameters.customNPMRegistry }}
+          nodeVersion: ${{ parameters.nodeVersion }}
+
+  # Job 2: Publish to marketplace
+  - ${{ if eq(parameters.publishExtension, true) }}:
+      - job: Publish
+        displayName: Publish to Marketplace and GitHub
+        dependsOn: Sign
+        pool:
+          name: AzurePipelines-EO
+          image: 1ESPT-Windows2022
+          os: windows
+        templateContext:
+          type: releaseJob # This makes a job a release job
+          isProduction: true # Indicates a production release
+        steps:
+          - task: 1ES.DownloadPipelineArtifact@1
+            inputs:
+              artifactName: extension
+              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
+            displayName: 🚛 Download signed extension
+
+          - template: setup.yml
+            parameters:
+              installNode: true
+              installPython: false
+              customNPMRegistry: ${{ parameters.customNPMRegistry }}
+              nodeVersion: ${{ parameters.nodeVersion }}
+
+          # Extract VSIX to read publisher/version for GitHub release tagging.
+          # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
+          # is reserved for final artifact staging.
+          - task: ExtractFiles@1
+            inputs:
+              archiveFilePatterns: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}/**/*.vsix
+              destinationFolder: $(Agent.TempDirectory)/vsix-extracted
+              cleanDestinationFolder: true
+              overwriteExistingFiles: true
+            displayName: 📦 Extract VSIX package
+
+          - pwsh: |
+              $extensionDir = Get-ChildItem -Path . -Directory -Filter 'extension*' | Select-Object -First 1
+              if (-not $extensionDir) {
+                throw "Could not find extracted extension folder under: $PWD"
+              }
+
+              $packageJsonPath = Join-Path $extensionDir.FullName 'package.json'
+              if (-not (Test-Path $packageJsonPath)) {
+                throw "Could not find package.json at: $packageJsonPath"
+              }
+
+              $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+              $enabledApiProposals = @()
+              if ($null -ne $package.enabledApiProposals) {
+                $enabledApiProposals = @($package.enabledApiProposals)
+              }
+              $enabledApiProposalsJson = ($enabledApiProposals | ConvertTo-Json -Compress)
+              Write-Host "##vso[task.setvariable variable=EnabledApiProposalsJson]$enabledApiProposalsJson"
+              Write-Host ("enabledApiProposals: " + ($(if ($enabledApiProposals.Count -gt 0) { $enabledApiProposals -join ', ' } else { '<none>' })))
+              Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
+              Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
+            name: SetPublisherAndVersion
+            displayName: 📋 Get Publisher & Version
+            workingDirectory: $(Agent.TempDirectory)/vsix-extracted
+
+          # Get version from package.json for GitHub release tagging
+          - ${{ if and(eq(parameters.ghCreateTag, true), eq(parameters.ghCreateRelease, true)) }}:
+              - template: createGitHubRelease.yml
+                parameters:
+                  isPreRelease: ${{ parameters.preRelease }}
+                  ghReleaseAddChangeLog: ${{ parameters.ghReleaseAddChangeLog }}
+                  tagName: ${{ parameters.ghTagPrefix }}$(SetPublisherAndVersion.version)
+
+          - template: publish.yml
+            parameters:
+              azureSubscription: ${{ parameters.azureSubscription }}
+              buildPlatforms: ${{ parameters.buildPlatforms }}
+              manifestName: ${{ parameters.manifestName }}
+              enabledApiProposalsJson: $(EnabledApiProposalsJson)
+              signatureName: ${{ parameters.signatureName }}
+              publishFolder: ${{ parameters.publishFolder }}
+              preRelease: ${{ parameters.preRelease }}
