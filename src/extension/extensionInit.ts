@@ -4,6 +4,7 @@
 'use strict';
 
 import {
+    commands,
     ConfigurationChangeEvent,
     debug,
     DebugConfigurationProviderTriggerKind,
@@ -54,6 +55,7 @@ import { registerHexDebugVisualizationTreeProvider } from './debugger/visualizer
 import { PythonInlineValueProvider } from './debugger/inlineValue/pythonInlineValueProvider';
 import { traceLog } from './common/log/logging';
 import { registerNoConfigDebug } from './noConfigDebugInit';
+import { OnErrorsActions, resolveOnErrorsAction } from './common/onErrorsAction';
 
 export async function registerDebugger(context: IExtensionContext): Promise<IExtensionApi> {
     const childProcessAttachService = new ChildProcessAttachService();
@@ -87,6 +89,15 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         registerCommand(Commands.Debug_In_Terminal, async (file?: Uri) => {
+            const action = await resolveOnErrorsAction();
+            switch (action) {
+                case OnErrorsActions.showErrors:
+                    await commands.executeCommand('workbench.panel.markers.view.focus');
+                    return;
+
+                case OnErrorsActions.abort:
+                    return;
+            }
             traceLog("Debugging using the editor button 'Debug in terminal'");
             sendTelemetryEvent(EventName.DEBUG_IN_TERMINAL_BUTTON);
             const interpreter = await getInterpreterDetails(file);
@@ -101,6 +112,15 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
 
     context.subscriptions.push(
         registerCommand(Commands.Debug_Using_Launch_Config, async (file?: Uri) => {
+            const action = await resolveOnErrorsAction();
+            switch (action) {
+                case OnErrorsActions.showErrors:
+                    await commands.executeCommand('workbench.panel.markers.view.focus');
+                    return;
+
+                case OnErrorsActions.abort:
+                    return;
+            }
             traceLog("Debugging using the editor button 'Debug using the launch.json'");
             sendTelemetryEvent(EventName.DEBUG_USING_LAUNCH_CONFIG_BUTTON);
             const interpreter = await getInterpreterDetails(file);
