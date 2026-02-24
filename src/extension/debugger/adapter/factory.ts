@@ -80,6 +80,13 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
 
             let executable = command.shift() ?? 'python';
 
+            // Always ensure interpreter/command is quoted if necessary. Previously this was
+            // only done in the debugAdapterPath branch which meant that in the common case
+            // (using the built‑in adapter path) an interpreter path containing spaces would
+            // be passed unquoted, resulting in a fork/spawn failure on Windows. See bug
+            // report for details.
+            executable = fileToCommandArgumentForPythonExt(executable);
+
             // "logToFile" is not handled directly by the adapter - instead, we need to pass
             // the corresponding CLI switch when spawning it.
             const logArgs = configuration.logToFile ? ['--log-dir', EXTENSION_ROOT_DIR] : [];
@@ -87,7 +94,6 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (configuration.debugAdapterPath !== undefined) {
                 const args = command.concat([configuration.debugAdapterPath, ...logArgs]);
                 traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
-                executable = fileToCommandArgumentForPythonExt(executable);
                 return new DebugAdapterExecutable(executable, args);
             }
 
