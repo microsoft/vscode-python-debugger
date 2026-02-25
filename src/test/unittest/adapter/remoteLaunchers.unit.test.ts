@@ -8,6 +8,7 @@ import * as path from 'path';
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import '../../../extension/common/promiseUtils';
 import * as launchers from '../../../extension/debugger/adapter/remoteLaunchers';
+import { fileToCommandArgumentForPythonExt } from '../../../extension/common/stringUtils';
 
 suite('External debugpy Debugger Launcher', () => {
     [
@@ -18,7 +19,7 @@ suite('External debugpy Debugger Launcher', () => {
         },
         {
             testName: 'When path to debugpy contains spaces',
-            path: path.join('path', 'to', 'debugpy', 'with spaces'),
+            path: fileToCommandArgumentForPythonExt(path.join('path', 'to', 'debugpy', 'with spaces')),
             expectedPath: '"path/to/debugpy/with spaces"',
         },
     ].forEach((testParams) => {
