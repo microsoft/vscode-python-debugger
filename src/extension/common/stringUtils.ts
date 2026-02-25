@@ -58,5 +58,8 @@ export function fileToCommandArgumentForPythonExt(source: string): string {
     if (!source) {
         return source;
     }
-    return toCommandArgumentForPythonExt(source).replace(/\\/g, '/');
+
+    let result = toCommandArgumentForPythonExt(source);
+
+    return result;
 }
