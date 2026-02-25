@@ -19,18 +19,12 @@ suite('External debugpy Debugger Launcher', () => {
         {
             testName: 'When path to debugpy does not contains spaces',
             path: path.join('path', 'to', 'debugpy'),
-            expectedPath: osExpectedPath(
-                'path\\to\\debugpy',
-                'path/to/debugpy'
-            ),
+            expectedPath: osExpectedPath('path\\to\\debugpy', 'path/to/debugpy'),
         },
         {
             testName: 'When path to debugpy contains spaces',
             path: path.join('path', 'to', 'debugpy', 'with spaces'),
-            expectedPath: osExpectedPath(
-                '"path\\to\\debugpy\\with spaces"',
-                '"path/to/debugpy/with spaces"'
-            ),
+            expectedPath: osExpectedPath('"path\\to\\debugpy\\with spaces"', '"path/to/debugpy/with spaces"'),
         },
     ].forEach((testParams) => {
         suite(testParams.testName, async () => {
