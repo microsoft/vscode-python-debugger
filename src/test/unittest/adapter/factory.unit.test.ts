@@ -304,7 +304,23 @@ suite('Debugging - Adapter Factory', () => {
 
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
-    test('Add quotes to interpreter path with spaces', async () => {
+    test('Add quotes to interpreter path with spaces (default adapter path)', async () => {
+        const session = createSession({});
+        const interpreterPathSpaces = 'path/to/python interpreter with spaces';
+        const interpreterPathSpacesQuoted = `"${interpreterPathSpaces}"`;
+        const debugExecutable = new DebugAdapterExecutable(interpreterPathSpacesQuoted, [debugAdapterPath]);
+
+        getInterpreterDetailsStub.resolves({ path: [interpreterPathSpaces] });
+        const interpreterSpacePath: PythonEnvironment = createInterpreter(interpreterPathSpaces, '3.7.4-test');
+        // Add architecture for completeness.
+        (interpreterSpacePath as any).architecture = Architecture.Unknown;
+        resolveEnvironmentStub.withArgs(interpreterPathSpaces).resolves(interpreterSpacePath);
+        const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+
+        assert.deepStrictEqual(descriptor, debugExecutable);
+    });
+
+    test('Add quotes to interpreter path with spaces when debugAdapterPath is specified', async () => {
         const customAdapterPath = 'custom/debug/adapter/customAdapterPath';
         const session = createSession({ debugAdapterPath: customAdapterPath });
         const interpreterPathSpaces = 'path/to/python interpreter with spaces';
