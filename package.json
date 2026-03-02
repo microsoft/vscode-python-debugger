@@ -674,7 +674,7 @@
         "ts-mockito": "^2.6.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.4",
-        "webpack": "^5.76.0",
+        "webpack": "^5.105.2",
         "webpack-cli": "^4.9.2"
     },
     "dependencies": {
