@@ -19,7 +19,7 @@ source .venv/bin/activate
 Install then setup with nox.
 ```
 python3 -m pip install nox
-nox --session setup_repo
+nox
 ```
 
 ## Reporting Issues

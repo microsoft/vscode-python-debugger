@@ -4,6 +4,7 @@ build/**
 out/**
 node_modules/**
 src/**
+pre-built/**
 .gitignore
 .yarnrc
 webpack.config.js
