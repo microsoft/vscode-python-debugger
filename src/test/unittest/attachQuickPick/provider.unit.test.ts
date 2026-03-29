@@ -169,7 +169,7 @@ suite('Attach to process - process provider', () => {
             },
         ];
         getOSTypeStub.returns(platform.OSType.Windows);
-        getAllProcessesStub.callsFake((callback: Function) => callback(processList));
+        getAllProcessesStub.callsFake((_flag: any,callback: Function) => callback(null,processList));
 
         const attachItems = await provider._getInternalProcessEntries();
         sinon.assert.notCalled(plainExecStub);
@@ -330,7 +330,7 @@ suite('Attach to process - process provider', () => {
                 },
             ];
 
-            getAllProcessesStub.callsFake((callback: Function) => callback(processList));
+            getAllProcessesStub.callsFake((_flag: any,callback: Function) => callback(null,processList));
 
             const output = await provider.getAttachItems();
 
@@ -416,7 +416,7 @@ suite('Attach to process - process provider', () => {
                 },
             ];
 
-            getAllProcessesStub.callsFake((callback: Function) => callback(processList));
+            getAllProcessesStub.callsFake((_flag: any,callback: Function) => callback(null,processList));
 
             const output = await provider.getAttachItems();
 
@@ -430,7 +430,7 @@ suite('Attach to process - process provider', () => {
         });
 
         test('Should fall back to wmic when getAllProcesses fails', async () => {
-            getAllProcessesStub.callsFake((_callback: Function) => {
+            getAllProcessesStub.callsFake((_flag: any,_callback: Function) => {
                 throw new Error('windows-process-tree unavailable');
             });
             const windowsOutput = `CommandLine=\r
@@ -484,7 +484,7 @@ ProcessId=5912\r
         });
 
         test('Items returned by getAttachItems via wmic fallback should be sorted alphabetically', async () => {
-            getAllProcessesStub.callsFake((_callback: Function) => {
+            getAllProcessesStub.callsFake((_flag: any,_callback: Function) => {
                 throw new Error('windows-process-tree unavailable');
             });
             const windowsOutput = `CommandLine=\r
@@ -538,7 +538,7 @@ ProcessId=5728\r
         });
 
         test('Python processes should be at the top of the list returned by getAttachItems via wmic fallback', async () => {
-            getAllProcessesStub.callsFake((_callback: Function) => {
+            getAllProcessesStub.callsFake((_flag: any,_callback: Function) => {
                 throw new Error('windows-process-tree unavailable');
             });
             const windowsOutput = `CommandLine=\r
