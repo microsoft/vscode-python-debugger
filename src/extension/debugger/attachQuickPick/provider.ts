@@ -3,7 +3,6 @@
 
 'use strict';
 
-import { promisify } from 'util';
 import { l10n } from 'vscode';
 import * as wpc from '@vscode/windows-process-tree';
 import { getOSType, OSType } from '../../common/platform';
@@ -64,8 +63,9 @@ export class AttachProcessProvider implements IAttachProcessProvider {
 
         if (osType === OSType.Windows) {
             try {
-                const getAllProcesses = promisify(wpc.getAllProcesses);
-                const processList = await getAllProcesses(wpc.ProcessDataFlag.CommandLine);
+                const processList = await new Promise<wpc.IProcessInfo[]>((resolve) => {
+                    wpc.getAllProcesses((processes) => resolve(processes), wpc.ProcessDataFlag.CommandLine);
+                });
                 return processList.map((p) => ({
                     label: p.name,
                     description: String(p.pid),
