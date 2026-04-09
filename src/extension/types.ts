@@ -94,6 +94,7 @@ interface IKnownLaunchRequestArguments extends ICommonDebugArguments {
     module?: string;
     // An absolute path to the program to debug.
     program?: string;
+    code?: string;
     python?: string;
     // Automatically stop target after launch. If not specified, target does not stop.
     stopOnEntry?: boolean;
