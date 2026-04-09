@@ -523,6 +523,11 @@
                                 "description": "Absolute path to the program.",
                                 "type": "string"
                             },
+                            "code": {
+                                "default": "",
+                                "description": "Python code to execute in string form.\nExample: \"import debugpy; print(debugpy.__version__)\"",
+                                "type": "string"
+                            },
                             "purpose": {
                                 "default": [],
                                 "description": "Tells extension to use this configuration for test debugging, or when using debug-in-terminal command.",
