@@ -4,7 +4,7 @@
 'use strict';
 
 import { l10n } from 'vscode';
-import * as wpc from '@vscode/windows-process-tree';
+import type { IProcessInfo } from '@vscode/windows-process-tree';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
@@ -63,8 +63,9 @@ export class AttachProcessProvider implements IAttachProcessProvider {
 
         if (osType === OSType.Windows) {
             try {
-                const processList = await new Promise<wpc.IProcessInfo[]>((resolve) => {
-                    wpc.getAllProcesses((processes) => resolve(processes), wpc.ProcessDataFlag.CommandLine);
+                const wpc = require('@vscode/windows-process-tree');
+                const processList = await new Promise<IProcessInfo[]>((resolve) => {
+                    wpc.getAllProcesses((processes: IProcessInfo[]) => resolve(processes), wpc.ProcessDataFlag.CommandLine);
                 });
                 return processList.map((p) => ({
                     label: p.name,

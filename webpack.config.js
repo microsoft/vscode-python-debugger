@@ -38,7 +38,7 @@ const extensionConfig = {
     '@opentelemetry/instrumentation': 'commonjs @opentelemetry/instrumentation', // ignored because we don't ship instrumentation
     '@azure/opentelemetry-instrumentation-azure-sdk': 'commonjs @azure/opentelemetry-instrumentation-azure-sdk', // ignored because we don't ship instrumentation
     '@azure/functions-core': '@azure/functions-core', // ignored because we don't ship instrumentation
-    '@vscode/windows-process-tree': 'commonjs @vscode/windows-process-tree',
+    '@vscode/windows-process-tree': 'commonjs @vscode/windows-process-tree', // native addon (.node binary); webpack cannot bundle it, resolved at runtime via VS Code's built-in copy
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
