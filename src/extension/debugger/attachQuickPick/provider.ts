@@ -65,7 +65,10 @@ export class AttachProcessProvider implements IAttachProcessProvider {
             try {
                 const wpc = require('@vscode/windows-process-tree');
                 const processList = await new Promise<IProcessInfo[]>((resolve) => {
-                    wpc.getAllProcesses((processes: IProcessInfo[]) => resolve(processes), wpc.ProcessDataFlag.CommandLine);
+                    wpc.getAllProcesses(
+                        (processes: IProcessInfo[]) => resolve(processes),
+                        wpc.ProcessDataFlag.CommandLine,
+                    );
                 });
                 return processList.map((p) => ({
                     label: p.name,
@@ -83,7 +86,9 @@ export class AttachProcessProvider implements IAttachProcessProvider {
                     { throwOnStdErr: true },
                     customEnvVars,
                 );
-                logProcess(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, { throwOnStdErr: true });
+                logProcess(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, {
+                    throwOnStdErr: true,
+                });
                 return WmicProcessParser.parseProcesses(output.stdout);
             }
         }
