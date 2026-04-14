@@ -11,11 +11,12 @@ suite('Environment File Parsing Tests', () => {
         const content = 'VAR1=value1\nVAR2=value2';
         const result = parseEnvFile(content);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        /* eslint-disable @typescript-eslint/naming-convention */
         expect(result).to.deep.equal({
             VAR1: 'value1',
             VAR2: 'value2',
         });
+        /* eslint-enable @typescript-eslint/naming-convention */
     });
 
     test('Should parse single-quoted multiline values', () => {
@@ -72,11 +73,12 @@ suite('Environment File Parsing Tests', () => {
         const content = 'VAR1=value1\nInvalid line\nVAR2=value2';
         const result = parseEnvFile(content);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        /* eslint-disable @typescript-eslint/naming-convention */
         expect(result).to.deep.equal({
             VAR1: 'value1',
             VAR2: 'value2',
         });
+        /* eslint-enable @typescript-eslint/naming-convention */
     });
 
     test('Should handle multiline value with multiple newlines', () => {
