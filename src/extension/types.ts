@@ -91,9 +91,10 @@ interface IKnownLaunchRequestArguments extends ICommonDebugArguments {
     sudo?: boolean;
     pyramid?: boolean;
     workspaceFolder?: string;
-    // An absolute path to the program to debug.
     module?: string;
+    // An absolute path to the program to debug.
     program?: string;
+    code?: string;
     python?: string;
     // Automatically stop target after launch. If not specified, target does not stop.
     stopOnEntry?: boolean;

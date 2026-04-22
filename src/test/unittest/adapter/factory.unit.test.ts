@@ -32,6 +32,7 @@ import * as telemetryReporter from '../../../extension/telemetry/reporter';
 import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { DebugConfigStrings } from '../../../extension/common/utils/localize';
 import { PythonEnvironment } from '../../../extension/envExtApi';
+import { buildPythonEnvironmentWithActivatedRun } from '../common/helpers';
 
 use(chaiAsPromised);
 
@@ -303,7 +304,23 @@ suite('Debugging - Adapter Factory', () => {
 
         assert.deepStrictEqual(descriptor, debugExecutable);
     });
-    test('Add quotes to interpreter path with spaces', async () => {
+    test('Add quotes to interpreter path with spaces (default adapter path)', async () => {
+        const session = createSession({});
+        const interpreterPathSpaces = 'path/to/python interpreter with spaces';
+        const interpreterPathSpacesQuoted = `"${interpreterPathSpaces}"`;
+        const debugExecutable = new DebugAdapterExecutable(interpreterPathSpacesQuoted, [debugAdapterPath]);
+
+        getInterpreterDetailsStub.resolves({ path: [interpreterPathSpaces] });
+        const interpreterSpacePath: PythonEnvironment = createInterpreter(interpreterPathSpaces, '3.7.4-test');
+        // Add architecture for completeness.
+        (interpreterSpacePath as any).architecture = Architecture.Unknown;
+        resolveEnvironmentStub.withArgs(interpreterPathSpaces).resolves(interpreterSpacePath);
+        const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+
+        assert.deepStrictEqual(descriptor, debugExecutable);
+    });
+
+    test('Add quotes to interpreter path with spaces when debugAdapterPath is specified', async () => {
         const customAdapterPath = 'custom/debug/adapter/customAdapterPath';
         const session = createSession({ debugAdapterPath: customAdapterPath });
         const interpreterPathSpaces = 'path/to/python interpreter with spaces';
@@ -336,6 +353,29 @@ suite('Debugging - Adapter Factory', () => {
         const debugExecutable = new DebugAdapterExecutable(pythonPath, [debugAdapterPath]);
         getInterpreterDetailsStub.resolves({ path: [interpreter.execInfo.run.executable] });
         resolveEnvironmentStub.withArgs(interpreter.execInfo.run.executable).resolves(interpreter);
+        const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
+
+        assert.deepStrictEqual(descriptor, debugExecutable);
+    });
+
+    test('Use run.executable rather than activatedRun.executable for interpreter identification', async () => {
+        // Simulates environment managers like pixi/conda that set activatedRun to a wrapper
+        // command (e.g. "pixi run python") while run.executable is the actual Python binary.
+        const actualPythonPath = 'path/to/actual/python3';
+        const wrapperCommand = 'pixi';
+        const interpreterWithWrapper = buildPythonEnvironmentWithActivatedRun(
+            actualPythonPath,
+            wrapperCommand,
+            '3.10.0',
+            ['run', 'python'],
+        );
+        const session = createSession({});
+        // The debug adapter should use the actual Python binary, not the wrapper
+        const debugExecutable = new DebugAdapterExecutable(interpreterWithWrapper.execInfo.run.executable, [
+            debugAdapterPath,
+        ]);
+        getInterpreterDetailsStub.resolves({ path: [interpreterWithWrapper.execInfo.run.executable] });
+        resolveEnvironmentStub.resolves(interpreterWithWrapper);
         const descriptor = await factory.createDebugAdapterDescriptor(session, nodeExecutable);
 
         assert.deepStrictEqual(descriptor, debugExecutable);

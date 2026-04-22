@@ -2,7 +2,7 @@
     "name": "debugpy",
     "displayName": "Python Debugger",
     "description": "Python Debugger extension using debugpy.",
-    "version": "2025.19.0-dev",
+    "version": "2026.3.0-dev",
     "publisher": "ms-python",
     "enabledApiProposals": [
         "portsAttributes",
@@ -523,6 +523,11 @@
                                 "description": "Absolute path to the program.",
                                 "type": "string"
                             },
+                            "code": {
+                                "default": "",
+                                "description": "Python code to execute in string form.\nExample: \"import debugpy; print(debugpy.__version__)\"",
+                                "type": "string"
+                            },
                             "purpose": {
                                 "default": [],
                                 "description": "Tells extension to use this configuration for test debugging, or when using debug-in-terminal command.",
@@ -652,7 +657,7 @@
         "@types/chai-as-promised": "^7.1.0",
         "@types/fs-extra": "^11.0.4",
         "@types/glob": "^7.2.0",
-        "@types/lodash": "^4.14.104",
+        "@types/lodash": "^4.17.24",
         "@types/mocha": "^9.1.0",
         "@types/node": "^22.5.0",
         "@types/semver": "^5.5.0",
@@ -660,7 +665,7 @@
         "@types/vscode": "^1.87.0",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
-        "@vscode/test-electron": "^2.3.9",
+        "@vscode/test-electron": "^2.5.2",
         "@vscode/vsce": "^3.7.1-1",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
@@ -674,7 +679,7 @@
         "ts-mockito": "^2.6.1",
         "typemoq": "^2.1.0",
         "typescript": "^5.5.4",
-        "webpack": "^5.76.0",
+        "webpack": "^5.105.2",
         "webpack-cli": "^4.9.2"
     },
     "dependencies": {
@@ -682,10 +687,12 @@
         "@vscode/debugprotocol": "^1.65.0",
         "@vscode/extension-telemetry": "^0.8.4",
         "@vscode/python-extension": "^1.0.6",
+        "@vscode/windows-process-tree": "^0.7.0",
         "fs-extra": "^11.2.0",
         "iconv-lite": "^0.6.3",
         "jsonc-parser": "^3.0.0",
-        "lodash": "^4.17.23",
+        "lodash": "^4.18.1",
         "vscode-languageclient": "^8.0.2"
     }
 }
+

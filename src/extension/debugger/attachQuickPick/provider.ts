@@ -4,6 +4,7 @@
 'use strict';
 
 import { l10n } from 'vscode';
+import type { IProcessInfo } from '@vscode/windows-process-tree';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
@@ -58,14 +59,45 @@ export class AttachProcessProvider implements IAttachProcessProvider {
     }
 
     public async _getInternalProcessEntries(): Promise<IAttachItem[]> {
-        let processCmd: ProcessListCommand;
         const osType = getOSType();
+
+        if (osType === OSType.Windows) {
+            try {
+                const wpc = require('@vscode/windows-process-tree');
+                const processList = await new Promise<IProcessInfo[]>((resolve) => {
+                    wpc.getAllProcesses(
+                        (processes: IProcessInfo[]) => resolve(processes),
+                        wpc.ProcessDataFlag.CommandLine,
+                    );
+                });
+                return processList.map((p) => ({
+                    label: p.name,
+                    description: String(p.pid),
+                    detail: p.commandLine || '',
+                    id: String(p.pid),
+                    processName: p.name,
+                    commandLine: p.commandLine || '',
+                }));
+            } catch {
+                const customEnvVars = await getEnvironmentVariables();
+                const output = await plainExec(
+                    WmicProcessParser.wmicCommand.command,
+                    WmicProcessParser.wmicCommand.args,
+                    { throwOnStdErr: true },
+                    customEnvVars,
+                );
+                logProcess(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, {
+                    throwOnStdErr: true,
+                });
+                return WmicProcessParser.parseProcesses(output.stdout);
+            }
+        }
+
+        let processCmd: ProcessListCommand;
         if (osType === OSType.OSX) {
             processCmd = PsProcessParser.psDarwinCommand;
         } else if (osType === OSType.Linux) {
             processCmd = PsProcessParser.psLinuxCommand;
-        } else if (osType === OSType.Windows) {
-            processCmd = WmicProcessParser.wmicCommand;
         } else {
             throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
         }
@@ -73,9 +105,6 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         const customEnvVars = await getEnvironmentVariables();
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
-
-        return osType === OSType.Windows
-            ? WmicProcessParser.parseProcesses(output.stdout)
-            : PsProcessParser.parseProcesses(output.stdout);
+        return PsProcessParser.parseProcesses(output.stdout);
     }
 }
