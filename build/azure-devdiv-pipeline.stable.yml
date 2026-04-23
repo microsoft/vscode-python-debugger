@@ -110,6 +110,7 @@ extends:
               isPreRelease: false
               standardizedVersioning: true
               customNPMRegistry: $(AZURE_ARTIFACTS_FEED)
+
       - stage: WaitForValidation
         displayName: Wait for Validation
         dependsOn: Build
