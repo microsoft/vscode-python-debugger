@@ -140,4 +140,3 @@ extends:
               ghCreateRelease: true
               ghReleaseAddChangeLog: true
               customNPMRegistry: $(AZURE_ARTIFACTS_FEED)
-
