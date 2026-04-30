@@ -102,4 +102,21 @@ suite('Environment File Parsing Tests', () => {
         expect(result.VAR1).to.equal('value1');
         expect(result.VAR2).to.equal('multiline\nvalue');
     });
+
+    test('Should parse keys containing forward slashes (e.g. Consul-style namespaced variables)', () => {
+        const content = 'routes/my_service=http://localhost:8080\nservices/db/host=localhost';
+        const result = parseEnvFile(content);
+
+        expect(result['routes/my_service']).to.equal('http://localhost:8080');
+        expect(result['services/db/host']).to.equal('localhost');
+    });
+
+    test('Should parse mixed standard and slash-namespaced keys in the same file', () => {
+        const content = 'STANDARD_VAR=value1\nroutes/my_service=http://localhost:8080\nANOTHER_VAR=value2';
+        const result = parseEnvFile(content);
+
+        expect(result['STANDARD_VAR']).to.equal('value1');
+        expect(result['routes/my_service']).to.equal('http://localhost:8080');
+        expect(result['ANOTHER_VAR']).to.equal('value2');
+    });
 });
