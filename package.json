@@ -139,6 +139,27 @@
                     "tags": [
                         "experimental"
                     ]
+                },
+                "debugpy.onErrors": {
+                    "default": "debugAnyway",
+                    "description": "%debugpy.onErrors.description%",
+                    "scope": "resource",
+                    "type": "string",
+                    "enum": [
+                        "debugAnyway",
+                        "showErrors",
+                        "abort",
+                        "prompt"
+                    ],
+                    "enumDescriptions": [
+                        "Continue debugging.",
+                        "Show errors and stop debugging.",
+                        "Stop debugging.",
+                        "Let the user choose the action."
+                    ],
+                    "tags": [
+                        "experimental"
+                    ]
                 }
             },
             "title": "Python Debugger",
