@@ -189,4 +189,50 @@ suite('Debug - Attach to Child Process', () => {
         expect(thirdArg).to.deep.equal({ parentSession: session, lifecycleManagedByParent: true });
         sinon.assert.notCalled(showErrorMessageStub);
     });
+    test('Child process debug config should not inherit purpose from parent session', async () => {
+        // When the parent session is a test debug session (purpose: ['debug-test']),
+        // the child process config inherits 'purpose' via debugpy's notify_of_subprocess.
+        // We must strip 'purpose' from the child config so that VS Code's test adapter
+        // does not treat child process session termination as test run completion,
+        // which would cause premature disconnection of the parent debug session.
+        // Regression test for: https://github.com/microsoft/vscode-python-debugger/issues/548
+        const data: AttachRequestArguments = {
+            request: 'attach',
+            type: debuggerTypeName,
+            name: 'Attach',
+            port: 1234,
+            subProcessId: 2,
+            purpose: ['debug-test'],
+        };
+
+        const session: any = {};
+        getWorkspaceFoldersStub.returns(undefined);
+        startDebuggingStub.resolves(true);
+
+        await attachService.attach(data, session);
+
+        sinon.assert.calledOnce(startDebuggingStub);
+        const [, secondArg] = startDebuggingStub.args[0];
+        expect(secondArg).to.not.have.property('purpose');
+        sinon.assert.notCalled(showErrorMessageStub);
+    });
+    test('Attaching to child process does not mutate the original data object', async () => {
+        const data: AttachRequestArguments = {
+            request: 'attach',
+            type: debuggerTypeName,
+            name: 'Attach',
+            port: 1234,
+            subProcessId: 2,
+            purpose: ['debug-test'],
+        };
+
+        const session: any = {};
+        getWorkspaceFoldersStub.returns(undefined);
+        startDebuggingStub.resolves(true);
+
+        await attachService.attach(data, session);
+
+        // The original data object must not be mutated.
+        expect(data).to.have.property('purpose').deep.equal(['debug-test']);
+    });
 });
