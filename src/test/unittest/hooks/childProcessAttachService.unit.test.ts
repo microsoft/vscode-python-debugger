@@ -195,7 +195,7 @@ suite('Debug - Attach to Child Process', () => {
         // We must strip 'purpose' from the child config so that VS Code's test adapter
         // does not treat child process session termination as test run completion,
         // which would cause premature disconnection of the parent debug session.
-        // Regression test for: https://github.com/microsoft/vscode-python-debugger/issues/548
+        // Regression test for: https://github.com/microsoft/vscode-python-debugger/issues/981
         const data: AttachRequestArguments = {
             request: 'attach',
             type: debuggerTypeName,
