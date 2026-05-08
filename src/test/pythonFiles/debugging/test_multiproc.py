@@ -8,7 +8,7 @@ terminates (i.e., at the point where process.join() returns), before reaching
 subsequent statements in the test body.
 
 This file contains tests that reproduce the issue described in:
-https://github.com/microsoft/vscode-python-debugger/issues/548
+https://github.com/microsoft/vscode-python-debugger/issues/981
 
 Workaround: Use a launch.json with "-s" (--capture=no) in pytest args, or
 launch pytest via a custom launch.json with "module": "pytest".
