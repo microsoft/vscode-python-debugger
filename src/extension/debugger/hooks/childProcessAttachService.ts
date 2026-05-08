@@ -31,7 +31,7 @@ export class ChildProcessAttachService implements IChildProcessAttachService {
         // This can cause the Python extension's test adapter to incorrectly treat the
         // child process session termination as the end of the test run, which results
         // in premature disconnection of the parent (test runner) debug session.
-        // See: https://github.com/microsoft/vscode-python-debugger/issues/548
+        // See: https://github.com/microsoft/vscode-python-debugger/issues/981
         delete debugConfig.purpose;
 
         const debugSessionOption: DebugSessionOptions = {
