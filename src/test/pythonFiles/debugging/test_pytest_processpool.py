@@ -12,7 +12,8 @@ def library_function() -> None:
     with ProcessPoolExecutor(max_workers=4) as pool:
         for _ in range(8):
             futures.append(pool.submit(worker_func))
-        completed_futures, _ = futures_wait(futures)
+        completed_futures, not_done = futures_wait(futures)
+        assert not not_done
         for fut in completed_futures:
             fut.result()
 

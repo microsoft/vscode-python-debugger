@@ -19,6 +19,8 @@ function resolveWSFile(wsRoot: string, ...filePath: string[]): string {
     return path.join(wsRoot, ...filePath);
 }
 
+const SUBPROCESS_DEBUG_TIMEOUT_MS = 120_000;
+
 suite('Debugger Integration', () => {
     const file = resolveWSFile(WS_ROOT, 'pythonFiles', 'debugging', 'wait_for_file.py');
     const processPoolTestFile = resolveWSFile(WS_ROOT, 'pythonFiles', 'debugging', 'test_pytest_processpool.py');
@@ -114,7 +116,7 @@ suite('Debugger Integration', () => {
         test('processpool test reaches code after worker joins in debug-test session', async function () {
             // This path starts pytest under the debugger with subprocess attach enabled,
             // so allow extra time for child session orchestration and process-pool teardown.
-            this.timeout(120_000);
+            this.timeout(SUBPROCESS_DEBUG_TIMEOUT_MS);
             fix.addFSCleanup(processPoolDoneFile);
 
             const config = {
