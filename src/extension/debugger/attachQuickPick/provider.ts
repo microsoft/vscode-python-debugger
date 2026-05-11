@@ -3,7 +3,8 @@
 
 'use strict';
 
-import { l10n } from 'vscode';
+import * as path from 'path';
+import { env, l10n } from 'vscode';
 import type { IProcessInfo } from '@vscode/windows-process-tree';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
@@ -15,6 +16,14 @@ import { logProcess } from '../../common/process/logger';
 
 export class AttachProcessProvider implements IAttachProcessProvider {
     constructor() {}
+
+    public _loadWindowsProcessTree(): typeof import('@vscode/windows-process-tree') {
+        const wpcPath = path.join(env.appRoot, 'node_modules', '@vscode', 'windows-process-tree');
+        // Use eval to bypass webpack's require interception for loading native addon at runtime
+        // eslint-disable-next-line no-eval
+        const nodeRequire = eval('require') as NodeJS.Require;
+        return nodeRequire(wpcPath);
+    }
 
     public getAttachItems(): Promise<IAttachItem[]> {
         return this._getInternalProcessEntries().then((processEntries) => {
@@ -63,7 +72,7 @@ export class AttachProcessProvider implements IAttachProcessProvider {
 
         if (osType === OSType.Windows) {
             try {
-                const wpc = require('@vscode/windows-process-tree');
+                const wpc = this._loadWindowsProcessTree();
                 const processList = await new Promise<IProcessInfo[]>((resolve) => {
                     wpc.getAllProcesses(
                         (processes: IProcessInfo[]) => resolve(processes),

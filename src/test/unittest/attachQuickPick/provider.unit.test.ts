@@ -13,7 +13,6 @@ import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 import * as platform from '../../../extension/common/platform';
 import * as rawProcessApis from '../../../extension/common/process/rawProcessApis';
-import * as wpc from '@vscode/windows-process-tree';
 
 use(chaiAsPromised);
 
@@ -27,7 +26,12 @@ suite('Attach to process - process provider', () => {
         provider = new AttachProcessProvider();
         getOSTypeStub = sinon.stub(platform, 'getOSType');
         plainExecStub = sinon.stub(rawProcessApis, 'plainExec');
-        getAllProcessesStub = sinon.stub(wpc, 'getAllProcesses');
+        getAllProcessesStub = sinon.stub();
+        sinon.stub(provider, '_loadWindowsProcessTree').returns({
+            getAllProcesses: getAllProcessesStub,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ProcessDataFlag: { None: 0, Memory: 1, CommandLine: 2 },
+        } as any);
     });
 
     teardown(() => {
