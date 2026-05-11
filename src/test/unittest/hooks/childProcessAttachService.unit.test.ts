@@ -236,6 +236,7 @@ suite('Debug - Attach to Child Process', () => {
         expect(data).to.have.property('purpose').deep.equal(['debug-test']);
     });
     test('Child process attach keeps pytest launch fields while removing debug-test purpose', async () => {
+        const pytestArgs = ['-s', '/workspace/tests/test_multiproc.py'];
         const data: AttachRequestArguments = {
             request: 'attach',
             type: debuggerTypeName,
@@ -244,7 +245,7 @@ suite('Debug - Attach to Child Process', () => {
             subProcessId: 2,
             purpose: ['debug-test'],
             module: 'pytest',
-            args: ['-s', '${workspaceFolder}/tests/test_multiproc.py'],
+            args: pytestArgs,
             console: 'integratedTerminal',
         };
         const session: any = {};
@@ -260,7 +261,7 @@ suite('Debug - Attach to Child Process', () => {
             module: 'pytest',
             console: 'integratedTerminal',
         });
-        expect(secondArg).to.have.property('args').deep.equal(['-s', '${workspaceFolder}/tests/test_multiproc.py']);
+        expect(secondArg).to.have.property('args').deep.equal(pytestArgs);
         expect(secondArg).to.not.have.property('purpose');
     });
 });
