@@ -3,15 +3,15 @@ import time
 from concurrent.futures import ProcessPoolExecutor, wait as futures_wait
 
 
-def worker_func() -> None:
+def sleep_briefly() -> None:
     time.sleep(0.1)
 
 
 def run_process_pool_tasks() -> None:
-    futures = []
-    with ProcessPoolExecutor(max_workers=4) as pool:
-        for _ in range(8):
-            futures.append(pool.submit(worker_func))
+        futures = []
+        with ProcessPoolExecutor(max_workers=4) as pool:
+            for _ in range(8):
+                futures.append(pool.submit(sleep_briefly))
         completed_futures, not_done = futures_wait(futures)
         assert not not_done
         for fut in completed_futures:
