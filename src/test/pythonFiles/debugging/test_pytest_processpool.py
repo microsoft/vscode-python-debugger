@@ -8,14 +8,14 @@ def sleep_briefly() -> None:
 
 
 def run_process_pool_tasks() -> None:
-        futures = []
-        with ProcessPoolExecutor(max_workers=4) as pool:
-            for _ in range(8):
-                futures.append(pool.submit(sleep_briefly))
-        completed_futures, not_done = futures_wait(futures)
-        assert not not_done
-        for fut in completed_futures:
-            fut.result()
+    futures = []
+    with ProcessPoolExecutor(max_workers=4) as pool:
+        for _ in range(8):
+            futures.append(pool.submit(sleep_briefly))
+    completed_futures, pending_futures = futures_wait(futures)
+    assert not pending_futures
+    for fut in completed_futures:
+        fut.result()
 
 
 def test_library_process_pool() -> None:
