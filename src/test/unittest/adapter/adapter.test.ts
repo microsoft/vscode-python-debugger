@@ -112,6 +112,8 @@ suite('Debugger Integration', () => {
 
     suite('pytest multiprocess test debugging', () => {
         test('processpool test reaches code after worker joins in debug-test session', async function () {
+            // This path starts pytest under the debugger with subprocess attach enabled,
+            // so allow extra time for child session orchestration and process-pool teardown.
             this.timeout(120_000);
             fix.addFSCleanup(processPoolDoneFile);
 

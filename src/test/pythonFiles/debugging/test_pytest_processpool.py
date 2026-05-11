@@ -1,13 +1,10 @@
 import os
-import random
 import time
 from concurrent.futures import ProcessPoolExecutor, wait as futures_wait
 
 
-def worker_func() -> int:
-    time_to_sleep = random.uniform(0.1, 0.2)
-    time.sleep(time_to_sleep)
-    return int(time_to_sleep * 10)
+def worker_func() -> None:
+    time.sleep(0.1)
 
 
 def library_function() -> None:
@@ -17,7 +14,7 @@ def library_function() -> None:
             futures.append(pool.submit(worker_func))
         completed_futures, _ = futures_wait(futures)
         for fut in completed_futures:
-            _ = fut.result()
+            fut.result()
 
 
 def test_library_process_pool() -> None:
