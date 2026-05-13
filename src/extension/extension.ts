@@ -8,7 +8,7 @@ import { registerLogger, traceError } from './common/log/logging';
 import { sendTelemetryEvent } from './telemetry';
 import { EventName } from './telemetry/constants';
 import { IExtensionApi } from './apiTypes';
-import { commands } from 'vscode';
+import { commands, window } from 'vscode';
 import { getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
 
 export async function activate(context: IExtensionContext): Promise<IExtensionApi | undefined> {
@@ -27,7 +27,20 @@ export async function activate(context: IExtensionContext): Promise<IExtensionAp
         sendTelemetryEvent(EventName.DEBUG_SUCCESS_ACTIVATION);
         return api;
     } catch (ex) {
-        traceError('sendDebugpySuccessActivationTelemetry() failed.', ex);
-        throw ex; // re-raise
+        traceError('Python Debugger activation failed.', ex);
+        window
+            .showErrorMessage(
+                'Python Debugger failed to activate. Reload and repair the extension to recover.',
+                'Reload and Repair',
+            )
+            .then((selection) => {
+                if (selection === 'Reload and Repair') {
+                    commands.executeCommand(Commands.ClearStorage).then(
+                        undefined,
+                        () => commands.executeCommand('workbench.action.reloadWindow'),
+                    );
+                }
+            });
+        return undefined;
     }
 }
