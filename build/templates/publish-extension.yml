@@ -26,6 +26,16 @@ parameters:
     type: object
     displayName: 'List of platforms to sign and publish'
 
+  - name: customNPMRegistry
+    type: string
+    default: ''
+    displayName: 'Custom NPM registry (optional)'
+
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+    displayName: 'Node version to install'
+
   # Signing parameters
   - name: signType
     type: string
@@ -151,6 +161,8 @@ jobs:
           signType: ${{ parameters.signType }}
           verifySignature: ${{ parameters.verifySignature }}
           teamName: ${{ parameters.teamName }}
+          customNPMRegistry: ${{ parameters.customNPMRegistry }}
+          nodeVersion: ${{ parameters.nodeVersion }}
 
   # Job 2: Publish to marketplace
   - ${{ if eq(parameters.publishExtension, true) }}:
@@ -165,16 +177,18 @@ jobs:
           type: releaseJob # This makes a job a release job
           isProduction: true # Indicates a production release
         steps:
-          - template: setup.yml
-            parameters:
-              installNode: true
-              installPython: false
-
           - task: 1ES.DownloadPipelineArtifact@1
             inputs:
               artifactName: extension
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.publishFolder }}
             displayName: 🚛 Download signed extension
+
+          - template: setup.yml
+            parameters:
+              installNode: true
+              installPython: false
+              customNPMRegistry: ${{ parameters.customNPMRegistry }}
+              nodeVersion: ${{ parameters.nodeVersion }}
 
           # Extract VSIX to read publisher/version for GitHub release tagging.
           # Use Agent.TempDirectory to avoid reusing Build.ArtifactStagingDirectory which
@@ -199,6 +213,13 @@ jobs:
               }
 
               $package = Get-Content $packageJsonPath -Raw | ConvertFrom-Json
+              $enabledApiProposals = @()
+              if ($null -ne $package.enabledApiProposals) {
+                $enabledApiProposals = @($package.enabledApiProposals)
+              }
+              $enabledApiProposalsJson = ($enabledApiProposals | ConvertTo-Json -Compress)
+              Write-Host "##vso[task.setvariable variable=EnabledApiProposalsJson]$enabledApiProposalsJson"
+              Write-Host ("enabledApiProposals: " + ($(if ($enabledApiProposals.Count -gt 0) { $enabledApiProposals -join ', ' } else { '<none>' })))
               Write-Host "##vso[task.setvariable variable=publisher;isOutput=true]$($package.publisher)"
               Write-Host "##vso[task.setvariable variable=version;isOutput=true]$($package.version)"
             name: SetPublisherAndVersion
@@ -218,6 +239,7 @@ jobs:
               azureSubscription: ${{ parameters.azureSubscription }}
               buildPlatforms: ${{ parameters.buildPlatforms }}
               manifestName: ${{ parameters.manifestName }}
+              enabledApiProposalsJson: $(EnabledApiProposalsJson)
               signatureName: ${{ parameters.signatureName }}
               publishFolder: ${{ parameters.publishFolder }}
               preRelease: ${{ parameters.preRelease }}

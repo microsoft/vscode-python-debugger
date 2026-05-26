@@ -3,7 +3,9 @@
 
 'use strict';
 
-import { l10n } from 'vscode';
+import * as path from 'path';
+import { env, l10n } from 'vscode';
+import type { IProcessInfo } from '@vscode/windows-process-tree';
 import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
@@ -14,6 +16,14 @@ import { logProcess } from '../../common/process/logger';
 
 export class AttachProcessProvider implements IAttachProcessProvider {
     constructor() {}
+
+    public _loadWindowsProcessTree(): typeof import('@vscode/windows-process-tree') {
+        const wpcPath = path.join(env.appRoot, 'node_modules', '@vscode', 'windows-process-tree');
+        // Use eval to bypass webpack's require interception for loading native addon at runtime
+        // eslint-disable-next-line no-eval
+        const nodeRequire = eval('require') as NodeJS.Require;
+        return nodeRequire(wpcPath);
+    }
 
     public getAttachItems(): Promise<IAttachItem[]> {
         return this._getInternalProcessEntries().then((processEntries) => {
@@ -58,14 +68,45 @@ export class AttachProcessProvider implements IAttachProcessProvider {
     }
 
     public async _getInternalProcessEntries(): Promise<IAttachItem[]> {
-        let processCmd: ProcessListCommand;
         const osType = getOSType();
+
+        if (osType === OSType.Windows) {
+            try {
+                const wpc = this._loadWindowsProcessTree();
+                const processList = await new Promise<IProcessInfo[]>((resolve) => {
+                    wpc.getAllProcesses(
+                        (processes: IProcessInfo[]) => resolve(processes),
+                        wpc.ProcessDataFlag.CommandLine,
+                    );
+                });
+                return processList.map((p) => ({
+                    label: p.name,
+                    description: String(p.pid),
+                    detail: p.commandLine || '',
+                    id: String(p.pid),
+                    processName: p.name,
+                    commandLine: p.commandLine || '',
+                }));
+            } catch {
+                const customEnvVars = await getEnvironmentVariables();
+                const output = await plainExec(
+                    WmicProcessParser.wmicCommand.command,
+                    WmicProcessParser.wmicCommand.args,
+                    { throwOnStdErr: true },
+                    customEnvVars,
+                );
+                logProcess(WmicProcessParser.wmicCommand.command, WmicProcessParser.wmicCommand.args, {
+                    throwOnStdErr: true,
+                });
+                return WmicProcessParser.parseProcesses(output.stdout);
+            }
+        }
+
+        let processCmd: ProcessListCommand;
         if (osType === OSType.OSX) {
             processCmd = PsProcessParser.psDarwinCommand;
         } else if (osType === OSType.Linux) {
             processCmd = PsProcessParser.psLinuxCommand;
-        } else if (osType === OSType.Windows) {
-            processCmd = WmicProcessParser.wmicCommand;
         } else {
             throw new Error(l10n.t("Operating system '{0}' not supported.", osType));
         }
@@ -73,9 +114,6 @@ export class AttachProcessProvider implements IAttachProcessProvider {
         const customEnvVars = await getEnvironmentVariables();
         const output = await plainExec(processCmd.command, processCmd.args, { throwOnStdErr: true }, customEnvVars);
         logProcess(processCmd.command, processCmd.args, { throwOnStdErr: true });
-
-        return osType === OSType.Windows
-            ? WmicProcessParser.parseProcesses(output.stdout)
-            : PsProcessParser.parseProcesses(output.stdout);
+        return PsProcessParser.parseProcesses(output.stdout);
     }
 }

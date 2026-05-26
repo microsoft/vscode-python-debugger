@@ -22,7 +22,6 @@ import { sendTelemetryEvent } from '../../telemetry';
 import { Commands, EXTENSION_ROOT_DIR } from '../../common/constants';
 import { Common, DebugConfigStrings, Interpreters } from '../../common/utils/localize';
 import { IPersistentStateFactory } from '../../common/types';
-import { fileToCommandArgumentForPythonExt } from '../../common/stringUtils';
 import { PythonEnvironment } from '../../envExtApi';
 import { resolveEnvironment, getInterpreterDetails, runPythonExtensionCommand } from '../../common/python';
 
@@ -79,6 +78,12 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             }
 
             let executable = command.shift() ?? 'python';
+            // DO NOT apply shell-style quoting here.
+            // The 'executable' path is passed to 'DebugAdapterExecutable', which internally
+            // uses 'child_process.spawn' in a non-shell environment.
+            // Manual quoting will cause the OS (especially Windows) to treat the quotes
+            // as part of the filename, leading to ENOENT.
+            // See regression reported in #1013 and analysis of #964.
 
             // "logToFile" is not handled directly by the adapter - instead, we need to pass
             // the corresponding CLI switch when spawning it.
@@ -87,7 +92,6 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
             if (configuration.debugAdapterPath !== undefined) {
                 const args = command.concat([configuration.debugAdapterPath, ...logArgs]);
                 traceLog(`DAP Server launched with command: ${executable} ${args.join(' ')}`);
-                executable = fileToCommandArgumentForPythonExt(executable);
                 return new DebugAdapterExecutable(executable, args);
             }
 
@@ -193,7 +197,7 @@ export class DebugAdapterDescriptorFactory implements IDebugAdapterDescriptorFac
      */
     private async getExecutableCommand(interpreter: PythonEnvironment | undefined): Promise<string[]> {
         if (interpreter) {
-            const executablePath = interpreter.execInfo.activatedRun?.executable ?? interpreter.execInfo.run.executable;
+            const executablePath = interpreter.execInfo.run.executable;
             const version = interpreter.version;
 
             // Parse version string (e.g., "3.8.10" -> major: 3, minor: 8)

@@ -10,6 +10,16 @@ parameters:
     type: object
     displayName: 'List of platforms to build'
 
+  - name: customNPMRegistry
+    type: string
+    default: ''
+    displayName: 'Custom NPM registry (optional)'
+
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+    displayName: 'Node version to install'
+
   - name: buildSteps
     type: stepList
     default: []
@@ -73,6 +83,9 @@ jobs:
 
         steps:
           - template: setup.yml@self
+            parameters:
+              customNPMRegistry: ${{ parameters.customNPMRegistry }}
+              nodeVersion: ${{ parameters.nodeVersion }}
 
           - ${{ if and(eq(parameters.isPreRelease, true), eq(parameters.standardizedVersioning, true)) }}:
               - template: modify-extension-version.yml@self

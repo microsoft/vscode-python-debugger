@@ -2,17 +2,99 @@
 # Licensed under the MIT License.
 """All the action we need during build"""
 
-import hashlib
-import io
 import json
 import os
 import pathlib
 import re
 import tempfile
-import urllib.request as url_lib
 import zipfile
 
 import nox  # pylint: disable=import-error
+from nox.command import CommandFailed
+
+# Keep this list explicit and ordered (oldest -> newest).
+# Update it whenever we bump supported Python versions.
+SUPPORTED_DEBUGPY_CPYTHONS = [
+    "cp310",
+    "cp311",
+    "cp312",
+    "cp313",
+    "cp314",
+]
+
+
+# Single source of truth for the debugpy version we bundle.
+# Update this when bumping debugpy (and update bundled/libs/debugpy accordingly).
+DEBUGPY_VERSION = "1.8.20"
+
+
+def _build_debugpy_wheel_requests(vsce_target: str, version: str) -> list[dict]:
+    # Platform tags are pip --platform values; keep a small fallback list for resiliency.
+    # Note: these are used only when we build per-target VSIXs (VSCETARGET is set in CI).
+    if "darwin" in vsce_target:
+        platforms = [
+            "macosx_15_0_universal2",
+            "macosx_14_0_universal2",
+            "macosx_13_0_universal2",
+            "macosx_12_0_universal2",
+        ]
+        return [
+            {
+                "version": version,
+                "python_version": cp.removeprefix("cp"),
+                "implementation": "cp",
+                "abi": cp,
+                "platforms": platforms,
+            }
+            for cp in SUPPORTED_DEBUGPY_CPYTHONS
+        ]
+
+    if vsce_target == "win32-x64":
+        return [
+            {
+                "version": version,
+                "python_version": cp.removeprefix("cp"),
+                "implementation": "cp",
+                "abi": cp,
+                "platforms": ["win_amd64"],
+            }
+            for cp in SUPPORTED_DEBUGPY_CPYTHONS
+        ]
+
+    if vsce_target == "linux-x64":
+        platforms = [
+            "manylinux_2_34_x86_64",
+            "manylinux_2_31_x86_64",
+            "manylinux_2_28_x86_64",
+            "manylinux_2_27_x86_64",
+            "manylinux_2_17_x86_64",
+        ]
+        return [
+            {
+                "version": version,
+                "python_version": cp.removeprefix("cp"),
+                "implementation": "cp",
+                "abi": cp,
+                "platforms": platforms,
+            }
+            for cp in SUPPORTED_DEBUGPY_CPYTHONS
+        ]
+
+    # Default/fallback: ensure we only download the pure-Python wheel (py2.py3-none-any).
+    # This is used for targets that don't have compiled wheels (e.g., linux-arm64) and
+    # for workflows that don't set VSCETARGET.
+    return [
+        {
+            "version": version,
+            # Intentionally omit pip targeting flags here.
+            # Passing --python-version 3 makes pip treat it as Python 3.0, which
+            # excludes debugpy (Requires-Python >= 3.8).
+            "python_version": None,
+            "implementation": None,
+            "abi": None,
+            "platforms": [],
+        }
+    ]
 
 
 @nox.session()
@@ -60,54 +142,14 @@ def install_bundled_libs(session):
     )
     session.install("packaging")
 
-    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
-    debugpy_info = json.loads(debugpy_info_json_path.read_text(encoding="utf-8"))
-
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
-    if "darwin" in target:
-        wheels = debugpy_info["macOS"]
-    elif "win32-ia32" == target:
-        wheels = debugpy_info.get("win32", debugpy_info["any"])
-    elif "win32-x64" == target:
-        wheels = debugpy_info["win64"]
-    elif "linux-x64" == target:
-        wheels = debugpy_info["linux"]
-    else:
-        wheels = debugpy_info["any"]
 
-    download_debugpy_via_pip(session, wheels)
+    requests = _build_debugpy_wheel_requests(target, DEBUGPY_VERSION)
+    download_debugpy_via_pip(session, requests)
 
 
-def _parse_wheel_info(url: str) -> dict:
-    """Parse version and platform info from a wheel URL.
-
-    Example URL: .../debugpy-1.8.19-cp311-cp311-win_amd64.whl
-    Returns: {"version": "1.8.19", "py_ver": "311", "abi": "cp311", "platform": "win_amd64"}
-    """
-    filename = url.rsplit("/", 1)[-1]
-    # Wheel filename format: {name}-{version}-{python}-{abi}-{platform}.whl
-    match = re.match(r"debugpy-([^-]+)-cp(\d+)-([^-]+)-(.+)\.whl", filename)
-    if match:
-        return {
-            "version": match.group(1),
-            "py_ver": match.group(2),
-            "abi": match.group(3),
-            "platform": match.group(4),
-        }
-    # Fallback for py2.py3-none-any wheels
-    match = re.match(r"debugpy-([^-]+)-py\d\.py\d-none-any\.whl", filename)
-    if match:
-        return {
-            "version": match.group(1),
-            "py_ver": None,
-            "abi": "none",
-            "platform": "any",
-        }
-    raise ValueError(f"Could not parse wheel filename: {filename}")
-
-
-def download_debugpy_via_pip(session: nox.Session, wheels: list) -> None:
+def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None:
     """Downloads debugpy wheels via pip and extracts them into bundled/libs.
 
     Uses pip to download by package name, allowing pip to use configured
@@ -116,35 +158,64 @@ def download_debugpy_via_pip(session: nox.Session, wheels: list) -> None:
     libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
     libs_dir.mkdir(parents=True, exist_ok=True)
 
-    # Parse version and platform info from wheel URLs
-    parsed = [_parse_wheel_info(w["url"]) for w in wheels]
-    version = parsed[0]["version"]
+    if not requests:
+        raise ValueError("No debugpy wheel requests were provided.")
+    version = requests[0]["version"]
 
     with tempfile.TemporaryDirectory(prefix="debugpy_wheels_") as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
 
-        for info in parsed:
-            args = [
+        for req in requests:
+            base_args = [
                 "python",
                 "-m",
                 "pip",
                 "download",
-                f"debugpy=={version}",
+                f"debugpy=={req['version']}",
                 "--no-deps",
                 "--only-binary",
                 ":all:",
                 "--dest",
                 str(tmp_path),
             ]
-            if info["py_ver"]:
-                # Platform-specific wheel
-                args.extend(["--python-version", info["py_ver"]])
-                args.extend(["--implementation", "cp"])
-                args.extend(["--abi", info["abi"]])
-                args.extend(["--platform", info["platform"]])
-            # For none-any wheels, no platform args needed
 
-            session.run(*args)
+            python_version = req.get("python_version")
+            implementation = req.get("implementation")
+            abi = req.get("abi")
+            platforms = req.get("platforms") or []
+
+            if (
+                python_version is None
+                and implementation is None
+                and abi is None
+                and not platforms
+            ):
+                session.run(*base_args)
+                continue
+
+            last_error = None
+            for platform in platforms:
+                args = base_args + [
+                    "--python-version",
+                    python_version,
+                    "--implementation",
+                    implementation,
+                    "--abi",
+                    abi,
+                    "--platform",
+                    platform,
+                ]
+
+                try:
+                    session.run(*args)
+                    last_error = None
+                    break
+                except CommandFailed as exc:
+                    last_error = exc
+                    continue
+
+            if last_error is not None:
+                raise last_error
 
         wheel_paths = sorted(tmp_path.glob("debugpy-*.whl"))
         if not wheel_paths:
@@ -155,22 +226,6 @@ def download_debugpy_via_pip(session: nox.Session, wheels: list) -> None:
         for wheel_path in wheel_paths:
             print("Downloaded:", wheel_path.name)
             with zipfile.ZipFile(wheel_path, "r") as wheel:
-                for zip_info in wheel.infolist():
-                    print("\t" + zip_info.filename)
-                    wheel.extract(zip_info.filename, libs_dir)
-
-
-def download_url(values):
-    for value in values:
-        with url_lib.urlopen(value["url"]) as response:
-            data = response.read()
-            digest = value["hash"]["sha256"]
-            if hashlib.new("sha256", data).hexdigest() != digest:
-                raise ValueError(f"Failed hash verification for {value['url']}.")
-
-            print("Download: ", value["url"])
-            with zipfile.ZipFile(io.BytesIO(data), "r") as wheel:
-                libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
                 for zip_info in wheel.infolist():
                     print("\t" + zip_info.filename)
                     wheel.extract(zip_info.filename, libs_dir)
@@ -197,52 +252,3 @@ def update_build_number(session: nox.Session) -> None:
     session.log(f"Updating version from {package_json['version']} to {version}")
     package_json["version"] = version
     package_json_path.write_text(json.dumps(package_json, indent=4), encoding="utf-8")
-
-
-def _get_pypi_package_data(package_name):
-    json_uri = "https://pypi.org/pypi/{0}/json".format(package_name)
-    # Response format: https://warehouse.readthedocs.io/api-reference/json/#project
-    # Release metadata format: https://github.com/pypa/interoperability-peps/blob/master/pep-0426-core-metadata.rst
-    with url_lib.urlopen(json_uri) as response:
-        return json.loads(response.read())
-
-
-def _get_debugpy_info(version="latest", platform="none-any", cp="cp311"):
-    from packaging.version import parse as version_parser
-
-    data = _get_pypi_package_data("debugpy")
-
-    if version == "latest":
-        use_version = max(data["releases"].keys(), key=version_parser)
-    else:
-        use_version = version
-
-    return list(
-        {"url": r["url"], "hash": {"sha256": r["digests"]["sha256"]}}
-        for r in data["releases"][use_version]
-        if f"{cp}-{platform}" in r["url"] or f"py3-{platform}" in r["url"]
-    )[0]
-
-
-@nox.session
-def create_debugpy_json(session: nox.Session):
-    platforms = [
-        ("macOS", "macosx"),
-        # ("win32", "win32"), # VS Code does not support 32-bit Windows anymore
-        ("win64", "win_amd64"),
-        ("linux", "manylinux"),
-        ("any", "none-any"),
-    ]
-    debugpy_info_json_path = pathlib.Path(__file__).parent / "debugpy_info.json"
-    debugpy_info = {}
-    for p, id in platforms:
-        # we typically have the latest 3 versions of debugpy compiled bits
-        downloads = []
-        for cp in ["cp310", "cp311", "cp312"]:
-            data = _get_debugpy_info("latest", id, cp)
-            if not any(d["url"] == data["url"] for d in downloads):
-                downloads.append(data)
-        debugpy_info[p] = downloads
-    debugpy_info_json_path.write_text(
-        json.dumps(debugpy_info, indent=4), encoding="utf-8"
-    )

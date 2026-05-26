@@ -6,7 +6,7 @@ import { IExtensionContext } from '../../extension/common/types';
 import { registerNoConfigDebug as registerNoConfigDebug } from '../../extension/noConfigDebugInit';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
-import { DebugConfiguration, DebugSessionOptions, RelativePattern, Uri, workspace } from 'vscode';
+import { DebugConfiguration, DebugSessionOptions, env, RelativePattern, Uri } from 'vscode';
 import * as utils from '../../extension/utils';
 import { assert } from 'console';
 import * as fs from 'fs';
@@ -21,7 +21,8 @@ suite('setup for no-config debug scenario', function () {
     let bundledDebugPath: string;
     let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
-    let workspaceUriStub: sinon.SinonStub;
+    const testSessionId = 'test-session-id-1234';
+    const hashedSessionId = crypto.createHash('sha256').update(testSessionId).digest('hex').slice(0, 16);
 
     const testDataDir = path.join(__dirname, 'testData');
     const testFilePath = path.join(testDataDir, 'debuggerAdapterEndpoint.txt');
@@ -39,14 +40,14 @@ suite('setup for no-config debug scenario', function () {
             // Provide a valid Buffer object
             randomBytesStub.callsFake((_size: number) => Buffer.from('1234567899', 'hex'));
 
-            workspaceUriStub = sinon.stub(workspace, 'workspaceFolders').value([{ uri: Uri.parse(os.tmpdir()) }]);
+            // Stub env.sessionId to return a consistent value for tests
+            sinon.stub(env, 'sessionId').value(testSessionId);
         } catch (error) {
             console.error('Error in setup:', error);
         }
     });
     teardown(() => {
         sinon.restore();
-        workspaceUriStub.restore();
     });
 
     test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
@@ -71,7 +72,8 @@ suite('setup for no-config debug scenario', function () {
             .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === 'PATH') {
-                    assert(value.includes(noConfigScriptsDir));
+                    const pathSeparator = process.platform === 'win32' ? ';' : ':';
+                    assert(value === `${pathSeparator}${noConfigScriptsDir}`);
                 }
             })
             .returns(envVarCollectionAppendStub);
@@ -88,98 +90,38 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
-    test('should not add extra separator when PATH already ends with separator', async () => {
+    test('should always add separator when appending to PATH', async () => {
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         envVarCollectionReplaceStub = sinon.stub();
         envVarCollectionAppendStub = sinon.stub();
 
-        // Simulate a PATH that already ends with a separator to test the fix
+        // The separator should always be prepended regardless of process.env.PATH
         const pathSeparator = process.platform === 'win32' ? ';' : ':';
-        const originalPath = process.env.PATH;
-        process.env.PATH = `/some/path${pathSeparator}`;
 
-        try {
-            environmentVariableCollectionMock
-                .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-                .returns(envVarCollectionReplaceStub);
+        environmentVariableCollectionMock
+            .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+            .returns(envVarCollectionReplaceStub);
 
-            environmentVariableCollectionMock
-                .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-                .callback((key, value) => {
-                    if (key === 'PATH') {
-                        // Since PATH already ends with separator, we should NOT add another one
-                        assert(value === noConfigScriptsDir);
-                        assert(!value.startsWith(pathSeparator));
-                    }
-                })
-                .returns(envVarCollectionAppendStub);
+        environmentVariableCollectionMock
+            .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+            .callback((key, value) => {
+                if (key === 'PATH') {
+                    // Should always add separator when appending
+                    assert(value === `${pathSeparator}${noConfigScriptsDir}`);
+                    assert(value.startsWith(pathSeparator));
+                }
+            })
+            .returns(envVarCollectionAppendStub);
 
-            context
-                .setup((c) => c.environmentVariableCollection)
-                .returns(() => environmentVariableCollectionMock.object);
+        context.setup((c) => c.environmentVariableCollection).returns(() => environmentVariableCollectionMock.object);
 
-            setupFileSystemWatchers();
+        setupFileSystemWatchers();
 
-            // run init for no config debug
-            await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
+        // run init for no config debug
+        await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
-            // assert that append was called for PATH
-            sinon.assert.calledOnce(envVarCollectionAppendStub);
-        } finally {
-            // Restore original PATH
-            if (originalPath !== undefined) {
-                process.env.PATH = originalPath;
-            } else {
-                delete process.env.PATH;
-            }
-        }
-    });
-
-    test('should add separator when PATH does not end with separator', async () => {
-        const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
-        envVarCollectionReplaceStub = sinon.stub();
-        envVarCollectionAppendStub = sinon.stub();
-
-        // Simulate a PATH that does NOT end with a separator
-        const pathSeparator = process.platform === 'win32' ? ';' : ':';
-        const originalPath = process.env.PATH;
-        process.env.PATH = '/some/path';
-
-        try {
-            environmentVariableCollectionMock
-                .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-                .returns(envVarCollectionReplaceStub);
-
-            environmentVariableCollectionMock
-                .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-                .callback((key, value) => {
-                    if (key === 'PATH') {
-                        // Since PATH does NOT end with separator, we should add one
-                        assert(value === `${pathSeparator}${noConfigScriptsDir}`);
-                        assert(value.startsWith(pathSeparator));
-                    }
-                })
-                .returns(envVarCollectionAppendStub);
-
-            context
-                .setup((c) => c.environmentVariableCollection)
-                .returns(() => environmentVariableCollectionMock.object);
-
-            setupFileSystemWatchers();
-
-            // run init for no config debug
-            await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
-
-            // assert that append was called for PATH
-            sinon.assert.calledOnce(envVarCollectionAppendStub);
-        } finally {
-            // Restore original PATH
-            if (originalPath !== undefined) {
-                process.env.PATH = originalPath;
-            } else {
-                delete process.env.PATH;
-            }
-        }
+        // assert that append was called for PATH
+        sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
     test('should create file system watcher for debuggerAdapterEndpointFolder', async () => {
@@ -195,7 +137,7 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledOnce(createFileSystemWatcherFunct);
         const expectedPattern = new RelativePattern(
             path.join(os.tmpdir(), '.noConfigDebugAdapterEndpoints'),
-            '**/*.txt',
+            `endpoint-${hashedSessionId}.txt`,
         );
         sinon.assert.calledWith(createFileSystemWatcherFunct, expectedPattern);
     });

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { getOSType, OSType } from './platform';
+
 /**
  * Replaces all instances of a substring with a new substring.
  */
@@ -58,5 +60,12 @@ export function fileToCommandArgumentForPythonExt(source: string): string {
     if (!source) {
         return source;
     }
-    return toCommandArgumentForPythonExt(source).replace(/\\/g, '/');
+
+    let result = toCommandArgumentForPythonExt(source);
+
+    if (getOSType() !== OSType.Windows) {
+        result = result.replace(/\\/g, '/');
+    }
+
+    return result;
 }

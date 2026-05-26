@@ -133,7 +133,7 @@ export async function getSettingsPythonPath(resource?: Uri): Promise<string[] | 
             return undefined;
         }
 
-        const runConfig = execInfo.activatedRun ?? execInfo.run;
+        const runConfig = execInfo.run;
         traceLog(
             `getSettingsPythonPath: Using executable='${runConfig.executable}' args='${
                 runConfig.args?.join(' ') || ''
@@ -255,9 +255,7 @@ export async function getInterpreterDetails(resource?: Uri): Promise<IInterprete
         const env: PythonEnvironment | undefined = await api.getEnvironment(resource);
         // resolve the environment to get full details
         const resolvedEnv = env ? await api.resolveEnvironment(env?.environmentPath) : undefined;
-        const executablePath = resolvedEnv?.execInfo.activatedRun?.executable
-            ? resolvedEnv.execInfo.activatedRun.executable
-            : resolvedEnv?.execInfo.run.executable;
+        const executablePath = resolvedEnv?.execInfo.run.executable;
 
         const a: IInterpreterDetails = {
             path: executablePath ? [executablePath] : undefined,

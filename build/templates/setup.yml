@@ -1,4 +1,9 @@
 # DevDiv pipeline setup steps
+#
+# Notes on custom registry support:
+# - Custom npm registry setup is implemented inline below (no external scripts).
+# - The template creates a temp .npmrc, sets NPM_CONFIG_USERCONFIG/REGISTRY, and
+#   rewrites lockfiles via a transient JS helper emitted into Agent.TempDirectory.
 parameters:
   - name: installNode
     type: boolean
@@ -6,35 +11,134 @@ parameters:
   - name: installPython
     type: boolean
     default: true
+  - name: customNPMRegistry
+    type: string
+    default: ''
+  - name: nodeVersion
+    type: string
+    default: '22.17.0'
+  - name: pythonVersion
+    type: string
+    default: '3.9'
+  - name: npmrcPath
+    type: string
+    default: '$(Agent.TempDirectory)/.npmrc'
 
 steps:
   - ${{ if eq(parameters.installNode, true) }}:
-      - pwsh: |
-          if (-not (Test-Path '.npmrc')) {
-            Write-Host 'No .npmrc found, creating one with public npm registry'
-            @"
-          # Force public npm registry to avoid CI auth (E401) when no token is provided
-          registry=https://registry.npmjs.org/
-          # Do not require auth for public installs
-          always-auth=false
-          "@ | Out-File -FilePath '.npmrc' -Encoding utf8
-          } else {
-            Write-Host '.npmrc already exists'
-          }
-        displayName: Ensure .npmrc exists
-
-      - task: npmAuthenticate@0
+      - task: NodeTool@0
         inputs:
-          workingFile: .npmrc
+          versionSpec: ${{ parameters.nodeVersion }}
+          checkLatest: true
+        displayName: 🛠 Install Node ${{ parameters.nodeVersion }}
+
+      - ${{ if ne(parameters.customNPMRegistry, '') }}:
+          # When using a private/custom registry, configure npm to read auth/config from a temp user config
+          # instead of relying on a checked-in project .npmrc.
+          - pwsh: |
+              $path = "${{ parameters.npmrcPath }}"
+
+              if (Test-Path -LiteralPath $path -PathType Container) {
+                throw "npmrcPath points to a directory (expected a file): $path"
+              }
+
+              $parent = Split-Path -Parent $path
+              if ($parent -and -not (Test-Path -LiteralPath $parent)) {
+                New-Item -ItemType Directory -Path $parent -Force | Out-Null
+              }
+
+              if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+                New-Item -ItemType File -Path $path -Force | Out-Null
+              }
+
+              Write-Host "##vso[task.setvariable variable=NPM_CONFIG_USERCONFIG]$path"
+              Write-Host "##vso[task.setvariable variable=NPM_CONFIG_REGISTRY]${{ parameters.customNPMRegistry }}"
+            displayName: 📦 Setup NPM User Config
+
+          # Configure npm/yarn to use the custom registry and ensure auth headers are sent.
+          - pwsh: |
+              $path = "${{ parameters.npmrcPath }}"
+              $registry = "${{ parameters.customNPMRegistry }}"
+
+              $env:NPM_CONFIG_USERCONFIG = $path
+              $env:NPM_CONFIG_REGISTRY = $registry
+
+              npm config set registry "$registry"
+
+              # npm >v7 deprecated the `always-auth` config option, refs npm/cli@72a7eeb
+              # following is a workaround for yarn-like clients to send authorization header for GET
+              # requests to the registry.
+              "always-auth=true" | Out-File -FilePath $path -Append -Encoding utf8
+
+              $yarn = Get-Command yarn -ErrorAction SilentlyContinue
+              if ($null -ne $yarn) {
+                yarn config set registry "$registry"
+              } else {
+                Write-Host "yarn not found; skipping yarn registry configuration"
+              }
+            displayName: 📦 Setup NPM & Yarn
+
+          # Populate the temp .npmrc with auth for the configured registry.
+          - task: npmAuthenticate@0
+            inputs:
+              workingFile: ${{ parameters.npmrcPath }}
+            displayName: 📦 Setup NPM Authentication
+
+          # Some lockfiles contain hardcoded references to public registries. Rewrite them so installs
+          # and `npx` resolve from the custom registry consistently.
+          - pwsh: |
+              $registry = "${{ parameters.customNPMRegistry }}"
+              $env:NPM_CONFIG_REGISTRY = $registry
+              $scriptPath = Join-Path "$(Agent.TempDirectory)" 'setup-npm-registry.js'
+              $lines = @(
+                "const fs = require('fs').promises;",
+                "const path = require('path');",
+                "",
+                "async function* getLockFiles(dir) {",
+                "  const files = await fs.readdir(dir);",
+                "",
+                "  for (const file of files) {",
+                "    const fullPath = path.join(dir, file);",
+                "    const stat = await fs.stat(fullPath);",
+                "",
+                "    if (stat.isDirectory()) {",
+                "      if (file === 'node_modules' || file === '.git') {",
+                "        continue;",
+                "      }",
+                "      yield* getLockFiles(fullPath);",
+                "    } else if (file === 'yarn.lock' || file === 'package-lock.json') {",
+                "      yield fullPath;",
+                "    }",
+                "  }",
+                "}",
+                "",
+                "async function rewrite(file, registry) {",
+                "  let contents = await fs.readFile(file, 'utf8');",
+                "  const re = new RegExp('https://registry\\.[^.]+\\.(com|org)/', 'g');",
+                "  contents = contents.replace(re, registry);",
+                "  await fs.writeFile(file, contents);",
+                "}",
+                "",
+                "async function main() {",
+                "  const root = process.cwd();",
+                "  const registry = process.env.NPM_CONFIG_REGISTRY;",
+                "  if (!registry) { throw new Error('NPM_CONFIG_REGISTRY is not set'); }",
+                "",
+                "  for await (const file of getLockFiles(root)) {",
+                "    await rewrite(file, registry);",
+                "    console.log('Updated node registry:', file);",
+                "  }",
+                "}",
+                "",
+                "main();"
+              )
+
+              Set-Content -LiteralPath $scriptPath -Value ($lines -join "`n") -Encoding utf8
+              node $scriptPath
+            displayName: 📦 Setup NPM Registry
 
       - script: npm config get registry
         displayName: Verify NPM Registry
-
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '22.17.0'
-          checkLatest: true
-        displayName: Select Node 22 LTS
 
   - ${{ if eq(parameters.installPython, true) }}:
       - task: PipAuthenticate@1
@@ -44,7 +148,7 @@ steps:
 
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.9' # note Install Python dependencies step below relies on Python 3.9
+          versionSpec: ${{ parameters.pythonVersion }}
           addToPath: true
           architecture: 'x64'
-        displayName: Select Python version
+        displayName: Select Python ${{ parameters.pythonVersion }}
