@@ -111,6 +111,13 @@ export namespace DebugConfigStrings {
             label: l10n.t('FastAPI'),
             description: l10n.t('Launch and debug a FastAPI web application'),
         };
+        export const snippetFile = {
+            name: l10n.t('Python Debugger: FastAPI File'),
+        };
+        export const selectConfigurationWithFile = {
+            label: l10n.t('FastAPI File'),
+            description: l10n.t('Launch and debug a FastAPI web application using the current file'),
+        };
     }
     export namespace flask {
         export const snippet = {
