@@ -20,10 +20,31 @@ export async function buildFastAPILaunchDebugConfiguration(
         type: DebuggerTypeName,
         request: 'launch',
         module: 'fastapi',
-        args: ['run'],
+        args: ['dev'],
+        jinja: true,
+        subProcess: true,
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPI,
+    });
+    Object.assign(state.config, config);
+}
+
+export async function buildFastAPIWithFileLaunchDebugConfiguration(
+    _input: MultiStepInput<DebugConfigurationState>,
+    state: DebugConfigurationState,
+): Promise<void> {
+    const config: Partial<LaunchRequestArguments> = {
+        name: DebugConfigStrings.fastapi.snippetFile.name,
+        type: DebuggerTypeName,
+        request: 'launch',
+        module: 'fastapi',
+        args: ['dev', '${file}'],
+        jinja: true,
+        subProcess: true,
+    };
+    sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
+        configurationType: DebugConfigurationType.launchFastAPIWithFile,
     });
     Object.assign(state.config, config);
 }

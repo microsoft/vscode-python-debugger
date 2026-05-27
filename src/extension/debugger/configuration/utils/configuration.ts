@@ -15,8 +15,11 @@ import { AttachRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
 import { Uri, WorkspaceFolder, workspace } from 'vscode';
 import { asyncFilter } from '../../../common/utilities';
+import { getInterpreterDetails } from '../../../common/python';
+import { plainExec } from '../../../common/process/rawProcessApis';
 
 const defaultPort = 5678;
+const fastApiCliCache = new Map<string, Promise<boolean>>();
 
 export async function configurePort(
     input: MultiStepInput<DebugConfigurationState>,
@@ -79,6 +82,22 @@ export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
     );
 
     return fastApiPaths;
+}
+
+export async function isFastApiCliAvailable(resource?: Uri): Promise<boolean> {
+    const interpreterDetails = await getInterpreterDetails(resource);
+    const pythonPath = interpreterDetails?.path?.[0];
+    if (!pythonPath) {
+        return false;
+    }
+    if (fastApiCliCache.has(pythonPath)) {
+        return fastApiCliCache.get(pythonPath)!;
+    }
+    const promise = plainExec(pythonPath, ['-c', 'import fastapi_cli'], { throwOnStdErr: false })
+        .then(() => true)
+        .catch(() => false);
+    fastApiCliCache.set(pythonPath, promise);
+    return promise;
 }
 
 export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {

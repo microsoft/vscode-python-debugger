@@ -31,7 +31,28 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             type: DebuggerTypeName,
             request: 'launch',
             module: 'fastapi',
-            args: ['run'],
+            args: ['dev'],
+            jinja: true,
+            subProcess: true,
+        };
+
+        expect(state.config).to.be.deep.equal(config);
+    });
+
+    test('Launch JSON with file configuration', async () => {
+        const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
+        const state = { config: {}, folder };
+
+        await fastApiLaunch.buildFastAPIWithFileLaunchDebugConfiguration(instance(input), state);
+
+        const config = {
+            name: DebugConfigStrings.fastapi.snippetFile.name,
+            type: DebuggerTypeName,
+            request: 'launch',
+            module: 'fastapi',
+            args: ['dev', '${file}'],
+            jinja: true,
+            subProcess: true,
         };
 
         expect(state.config).to.be.deep.equal(config);
