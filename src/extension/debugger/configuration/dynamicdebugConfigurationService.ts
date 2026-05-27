@@ -8,10 +8,9 @@ import * as path from 'path';
 import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { IDynamicDebugConfigurationService } from '../types';
 import { DebuggerTypeName } from '../../constants';
-import { getDjangoPaths, getFastApiPaths, getFlaskPaths, isFastApiCliAvailable } from './utils/configuration';
+import { getDjangoPaths, getFastApiPaths, getFlaskPaths } from './utils/configuration';
 import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
-import { replaceAll } from '../../common/stringUtils';
 
 const workspaceFolderToken = '${workspaceFolder}';
 
@@ -64,38 +63,22 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
 
         const fastApiPaths = await getFastApiPaths(folder);
         if (fastApiPaths?.length) {
-            const hasFastApiCli = await isFastApiCliAvailable(folder.uri);
-            if (hasFastApiCli) {
-                providers.push({
-                    name: 'Python Debugger: FastAPI',
-                    type: DebuggerTypeName,
-                    request: 'launch',
-                    module: 'fastapi',
-                    args: ['dev'],
-                    jinja: true,
-                    subProcess: true,
-                });
-                providers.push({
-                    name: 'Python Debugger: FastAPI File',
-                    type: DebuggerTypeName,
-                    request: 'launch',
-                    module: 'fastapi',
-                    args: ['dev', '${file}'],
-                    jinja: true,
-                    subProcess: true,
-                });
-            } else {
-                // Legacy fallback when fastapi-cli is not available.
-                const fastApiPath = replaceAll(path.relative(folder.uri.fsPath, fastApiPaths[0].fsPath), path.sep, '.').replace('.py', '');
-                providers.push({
-                    name: 'Python Debugger: FastAPI',
-                    type: DebuggerTypeName,
-                    request: 'launch',
-                    module: 'uvicorn',
-                    args: [`${fastApiPath}:app`, '--reload'],
-                    jinja: true,
-                });
-            }
+            providers.push({
+                name: 'Python Debugger: FastAPI',
+                type: DebuggerTypeName,
+                request: 'launch',
+                module: 'fastapi',
+                args: ['run'],
+                jinja: true,
+            });
+            providers.push({
+                name: 'Python Debugger: FastAPI File',
+                type: DebuggerTypeName,
+                request: 'launch',
+                module: 'fastapi',
+                args: ['run', '${file}'],
+                jinja: true,
+            });
         }
 
         sendTelemetryEvent(EventName.DEBUGGER_DYNAMIC_CONFIGURATION, undefined, { providers: providers });

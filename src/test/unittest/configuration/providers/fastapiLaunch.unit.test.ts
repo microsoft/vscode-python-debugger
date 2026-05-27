@@ -31,9 +31,8 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             type: DebuggerTypeName,
             request: 'launch',
             module: 'fastapi',
-            args: ['dev'],
+            args: ['run'],
             jinja: true,
-            subProcess: true,
         };
 
         expect(state.config).to.be.deep.equal(config);
@@ -50,9 +49,8 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             type: DebuggerTypeName,
             request: 'launch',
             module: 'fastapi',
-            args: ['dev', '${file}'],
+            args: ['run', '${file}'],
             jinja: true,
-            subProcess: true,
         };
 
         expect(state.config).to.be.deep.equal(config);

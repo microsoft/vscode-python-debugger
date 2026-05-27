@@ -20,9 +20,8 @@ export async function buildFastAPILaunchDebugConfiguration(
         type: DebuggerTypeName,
         request: 'launch',
         module: 'fastapi',
-        args: ['dev'],
+        args: ['run'],
         jinja: true,
-        subProcess: true,
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPI,
@@ -39,9 +38,8 @@ export async function buildFastAPIWithFileLaunchDebugConfiguration(
         type: DebuggerTypeName,
         request: 'launch',
         module: 'fastapi',
-        args: ['dev', '${file}'],
+        args: ['run', '${file}'],
         jinja: true,
-        subProcess: true,
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPIWithFile,
