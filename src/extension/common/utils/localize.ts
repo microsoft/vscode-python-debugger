@@ -111,10 +111,12 @@ export namespace DebugConfigStrings {
             label: l10n.t('FastAPI'),
             description: l10n.t('Launch and debug a FastAPI web application'),
         };
-        export const enterAppPathOrNamePath = {
-            title: l10n.t('Debug FastAPI'),
-            prompt: l10n.t("Enter the path to the application, e.g. 'main.py' or 'main'"),
-            invalid: l10n.t('Enter a valid name'),
+        export const snippetFile = {
+            name: l10n.t('Python Debugger: FastAPI File'),
+        };
+        export const selectConfigurationWithFile = {
+            label: l10n.t('FastAPI File'),
+            description: l10n.t('Launch and debug a FastAPI web application using the current file'),
         };
     }
     export namespace flask {
