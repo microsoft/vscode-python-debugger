@@ -8,7 +8,10 @@ import { IMultiStepInputFactory, InputStep, IQuickPickParameters, MultiStepInput
 import { AttachRequestArguments, DebugConfigurationArguments, LaunchRequestArguments } from '../../types';
 import { DebugConfigurationState, DebugConfigurationType, IDebugConfigurationService } from '../types';
 import { buildDjangoLaunchDebugConfiguration } from './providers/djangoLaunch';
-import { buildFastAPILaunchDebugConfiguration, buildFastAPIWithFileLaunchDebugConfiguration } from './providers/fastapiLaunch';
+import {
+    buildFastAPILaunchDebugConfiguration,
+    buildFastAPIWithFileLaunchDebugConfiguration,
+} from './providers/fastapiLaunch';
 import { buildFileLaunchDebugConfiguration } from './providers/fileLaunch';
 import { buildFlaskLaunchDebugConfiguration } from './providers/flaskLaunch';
 import { buildModuleLaunchConfiguration } from './providers/moduleLaunch';
@@ -183,7 +186,10 @@ export class PythonDebugConfigurationService implements IDebugConfigurationServi
         >();
         debugConfigurations.set(DebugConfigurationType.launchDjango, buildDjangoLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFastAPI, buildFastAPILaunchDebugConfiguration);
-        debugConfigurations.set(DebugConfigurationType.launchFastAPIWithFile, buildFastAPIWithFileLaunchDebugConfiguration);
+        debugConfigurations.set(
+            DebugConfigurationType.launchFastAPIWithFile,
+            buildFastAPIWithFileLaunchDebugConfiguration,
+        );
         debugConfigurations.set(DebugConfigurationType.launchFile, buildFileLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFileWithArgs, buildFileWithArgsLaunchDebugConfiguration);
         debugConfigurations.set(DebugConfigurationType.launchFlask, buildFlaskLaunchDebugConfiguration);

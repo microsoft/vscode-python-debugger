@@ -22,9 +22,7 @@ async function promptForAppPath(
         prompt: DebugConfigStrings.fastapi.enterAppPath.prompt,
         value: value ?? '',
         validate: (v) =>
-            Promise.resolve(
-                v && v.trim().length > 0 ? undefined : DebugConfigStrings.fastapi.enterAppPath.invalid,
-            ),
+            Promise.resolve(v && v.trim().length > 0 ? undefined : DebugConfigStrings.fastapi.enterAppPath.invalid),
     });
     return entered?.trim();
 }
@@ -42,9 +40,7 @@ export async function buildFastAPILaunchDebugConfiguration(
     } else {
         const workspaceRoot = state.folder?.uri.fsPath;
         const prefill =
-            workspaceRoot && fastApiPaths.length > 0
-                ? path.relative(workspaceRoot, fastApiPaths[0].fsPath)
-                : undefined;
+            workspaceRoot && fastApiPaths.length > 0 ? path.relative(workspaceRoot, fastApiPaths[0].fsPath) : undefined;
         const entered = await promptForAppPath(input, prefill);
         if (!entered) {
             return;
