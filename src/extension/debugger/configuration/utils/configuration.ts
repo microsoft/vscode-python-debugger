@@ -87,7 +87,7 @@ export function tryResolveFastApiArgs(folder: WorkspaceFolder, paths: Uri[]): st
         return undefined;
     }
     const relative = path.relative(folder.uri.fsPath, paths[0].fsPath);
-    return relative.includes(path.sep) ? ['run', relative] : ['run'];
+    return ['run', relative];
 }
 
 export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {

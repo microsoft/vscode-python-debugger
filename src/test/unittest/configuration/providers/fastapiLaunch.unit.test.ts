@@ -28,7 +28,7 @@ suite('Debugging - Configuration Provider FastAPI', () => {
         sinon.restore();
     });
 
-    test('Single match at workspace root → plain `fastapi run`', async () => {
+    test('Single match at workspace root → passes path explicitly', async () => {
         const folder = { uri: Uri.parse(path.join('one', 'two')), name: '1', index: 0 };
         const state = { config: {}, folder };
         getFastApiPathsStub.resolves([Uri.parse(path.join('one', 'two', 'main.py'))]);
@@ -40,7 +40,7 @@ suite('Debugging - Configuration Provider FastAPI', () => {
             type: DebuggerTypeName,
             request: 'launch',
             module: 'fastapi',
-            args: ['run'],
+            args: ['run', 'main.py'],
             jinja: true,
         };
 
