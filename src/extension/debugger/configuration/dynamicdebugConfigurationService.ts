@@ -8,7 +8,7 @@ import * as path from 'path';
 import { CancellationToken, DebugConfiguration, WorkspaceFolder } from 'vscode';
 import { IDynamicDebugConfigurationService } from '../types';
 import { DebuggerTypeName } from '../../constants';
-import { getDjangoPaths, getFastApiPaths, getFlaskPaths } from './utils/configuration';
+import { getDjangoPaths, getFastApiPaths, getFlaskPaths, tryResolveFastApiArgs } from './utils/configuration';
 import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 
@@ -63,12 +63,13 @@ export class DynamicPythonDebugConfigurationService implements IDynamicDebugConf
 
         const fastApiPaths = await getFastApiPaths(folder);
         if (fastApiPaths?.length) {
+            const fastApiArgs = tryResolveFastApiArgs(folder, fastApiPaths) ?? ['run'];
             providers.push({
                 name: 'Python Debugger: FastAPI',
                 type: DebuggerTypeName,
                 request: 'launch',
                 module: 'fastapi',
-                args: ['run'],
+                args: fastApiArgs,
                 jinja: true,
             });
             providers.push({
