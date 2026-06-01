@@ -35,6 +35,7 @@ export async function buildFastAPILaunchDebugConfiguration(
     const autoArgs = state.folder ? tryResolveFastApiArgs(state.folder, fastApiPaths) : undefined;
 
     let args: string[];
+    let manuallyEnteredAValue = false;
     if (autoArgs) {
         args = autoArgs;
     } else {
@@ -46,6 +47,7 @@ export async function buildFastAPILaunchDebugConfiguration(
             return;
         }
         args = ['run', entered];
+        manuallyEnteredAValue = true;
     }
 
     const config: Partial<LaunchRequestArguments> = {
@@ -58,6 +60,8 @@ export async function buildFastAPILaunchDebugConfiguration(
     };
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPI,
+        autoDetectedFastAPIMainPyPath: !!autoArgs,
+        manuallyEnteredAValue,
     });
     Object.assign(state.config, config);
 }

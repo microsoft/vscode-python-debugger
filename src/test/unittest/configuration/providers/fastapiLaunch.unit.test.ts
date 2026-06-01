@@ -138,3 +138,36 @@ suite('Debugging - Configuration Provider FastAPI', () => {
         expect(state.config).to.be.deep.equal(config);
     });
 });
+
+suite('Debugging - tryResolveFastApiArgs', () => {
+    const workspaceFolder = (root: string) => ({
+        uri: Uri.file(root),
+        name: 'ws',
+        index: 0,
+    });
+
+    test('Returns undefined for empty paths', () => {
+        expect(configurationUtils.tryResolveFastApiArgs(workspaceFolder('/work'), [])).to.equal(undefined);
+    });
+
+    test('Returns undefined for multiple paths', () => {
+        const paths = [Uri.file('/work/svc-a/main.py'), Uri.file('/work/svc-b/main.py')];
+        expect(configurationUtils.tryResolveFastApiArgs(workspaceFolder('/work'), paths)).to.equal(undefined);
+    });
+
+    test('Returns resolved path for single root-level match', () => {
+        const paths = [Uri.file('/work/main.py')];
+        expect(configurationUtils.tryResolveFastApiArgs(workspaceFolder('/work'), paths)).to.deep.equal([
+            'run',
+            'main.py',
+        ]);
+    });
+
+    test('Returns resolved path for single nested match', () => {
+        const paths = [Uri.file('/work/backend/app/main.py')];
+        expect(configurationUtils.tryResolveFastApiArgs(workspaceFolder('/work'), paths)).to.deep.equal([
+            'run',
+            path.join('backend', 'app', 'main.py'),
+        ]);
+    });
+});

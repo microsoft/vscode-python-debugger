@@ -82,7 +82,7 @@ export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
     return fastApiPaths;
 }
 
-export function tryResolveFastApiArgs(folder: WorkspaceFolder, paths: Uri[]): string[] | undefined {
+export function tryResolveFastApiArgs(folder: WorkspaceFolder, paths: readonly Uri[]): string[] | undefined {
     if (paths.length !== 1) {
         return undefined;
     }
