@@ -19,7 +19,7 @@ suite('setup for no-config debug scenario', function () {
     let context: TypeMoq.IMock<IExtensionContext>;
     let noConfigScriptsDir: string;
     let bundledDebugPath: string;
-    let DEBUGPY_ADAPTER_ENDPOINTS = 'DEBUGPY_ADAPTER_ENDPOINTS';
+    let DEBUGPY_ADAPTER_ENDPOINTS = 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS';
     let BUNDLED_DEBUGPY_PATH = 'BUNDLED_DEBUGPY_PATH';
     const testSessionId = 'test-session-id-1234';
     const hashedSessionId = crypto.createHash('sha256').update(testSessionId).digest('hex').slice(0, 16);
@@ -50,7 +50,7 @@ suite('setup for no-config debug scenario', function () {
         sinon.restore();
     });
 
-    test('should add environment variables for DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
+    test('should add environment variables for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH', async () => {
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         envVarCollectionReplaceStub = sinon.stub();
         envVarCollectionAppendStub = sinon.stub();
