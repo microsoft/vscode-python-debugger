@@ -177,7 +177,7 @@ function parseEnvLine(line: string): [string, string] {
     // We don't use dotenv here because it loses ordering, which is
     // significant for substitution.
     // Modified to handle multiline values by using 's' flag so $ matches before newlines in multiline strings
-    const match = line.match(/^\s*(_*[a-zA-Z]\w*)\s*=\s*(.*?)?\s*$/s);
+    const match = line.match(/^\s*(_*[a-zA-Z][\w/]*)\s*=\s*(.*?)?\s*$/s);
     if (!match) {
         return ['', ''];
     }
