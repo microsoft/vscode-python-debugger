@@ -685,7 +685,7 @@
     "dependencies": {
         "@vscode/debugadapter": "^1.65.0",
         "@vscode/debugprotocol": "^1.65.0",
-        "@vscode/extension-telemetry": "^0.8.4",
+        "@vscode/extension-telemetry": "^1.5.2",
         "@vscode/python-extension": "^1.0.6",
         "@vscode/windows-process-tree": "^0.7.0",
         "fs-extra": "^11.2.0",
