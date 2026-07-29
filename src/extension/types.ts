@@ -43,6 +43,11 @@ export type PathMapping = {
     remoteRoot: string;
 };
 
+export type SystemExitRange = {
+    from: number;
+    to: number;
+};
+
 type Connection = {
     host?: string;
     port?: number | string;
@@ -69,6 +74,9 @@ interface ICommonDebugArguments {
     // Show return values of functions while stepping.
     showReturnValue?: boolean;
     subProcess?: boolean;
+    // SystemExit codes (and/or inclusive ranges) that cause the debugger to break.
+    // An empty array disables breaking on SystemExit entirely.
+    breakOnSystemExit?: (number | SystemExitRange)[];
     // An absolute path to local directory with source.
     pathMappings?: PathMapping[];
 }

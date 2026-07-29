@@ -186,6 +186,37 @@
                                 },
                                 "type": "object"
                             },
+                            "breakOnSystemExit": {
+                                "description": "Controls which SystemExit exit codes cause the debugger to break. Accepts an array of exit codes and/or inclusive ranges. Set to an empty array to never break on SystemExit. When omitted, the debugger's default applies: successful exits (SystemExit(0) and SystemExit(None), plus 3 under Django/Flask) are ignored, and any other code causes a break when uncaught-exception breaking is enabled.",
+                                "type": "array",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "integer",
+                                            "description": "A specific SystemExit code to break on."
+                                        },
+                                        {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "description": "An inclusive range of SystemExit codes to break on.",
+                                            "properties": {
+                                                "from": {
+                                                    "type": "integer",
+                                                    "description": "Lower bound of the range (inclusive)."
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "description": "Upper bound of the range (inclusive)."
+                                                }
+                                            },
+                                            "required": [
+                                                "from",
+                                                "to"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
                             "connect": {
                                 "label": "Attach by connecting to debugpy over a socket.",
                                 "properties": {
@@ -404,6 +435,37 @@
                                     }
                                 },
                                 "type": "object"
+                            },
+                            "breakOnSystemExit": {
+                                "description": "Controls which SystemExit exit codes cause the debugger to break. Accepts an array of exit codes and/or inclusive ranges. Set to an empty array to never break on SystemExit. When omitted, the debugger's default applies: successful exits (SystemExit(0) and SystemExit(None), plus 3 under Django/Flask) are ignored, and any other code causes a break when uncaught-exception breaking is enabled.",
+                                "type": "array",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "type": "integer",
+                                            "description": "A specific SystemExit code to break on."
+                                        },
+                                        {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "description": "An inclusive range of SystemExit codes to break on.",
+                                            "properties": {
+                                                "from": {
+                                                    "type": "integer",
+                                                    "description": "Lower bound of the range (inclusive)."
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "description": "Upper bound of the range (inclusive)."
+                                                }
+                                            },
+                                            "required": [
+                                                "from",
+                                                "to"
+                                            ]
+                                        }
+                                    ]
+                                }
                             },
                             "console": {
                                 "default": "integratedTerminal",
