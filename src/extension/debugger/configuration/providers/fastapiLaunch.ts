@@ -4,8 +4,6 @@
 'use strict';
 
 import * as path from 'path';
-import * as fs from 'fs-extra';
-import { WorkspaceFolder } from 'vscode';
 import { MultiStepInput } from '../../../common/multiStepInput';
 import { DebugConfigStrings } from '../../../common/utils/localize';
 import { sendTelemetryEvent } from '../../../telemetry';
@@ -13,56 +11,75 @@ import { EventName } from '../../../telemetry/constants';
 import { DebuggerTypeName } from '../../../constants';
 import { LaunchRequestArguments } from '../../../types';
 import { DebugConfigurationState, DebugConfigurationType } from '../../types';
+import { getFastApiPaths, tryResolveFastApiArgs } from '../utils/configuration';
+
+async function promptForAppPath(
+    input: MultiStepInput<DebugConfigurationState>,
+    value?: string,
+): Promise<string | undefined> {
+    const entered = await input.showInputBox({
+        title: DebugConfigStrings.fastapi.enterAppPath.title,
+        prompt: DebugConfigStrings.fastapi.enterAppPath.prompt,
+        value: value ?? '',
+        validate: (v) =>
+            Promise.resolve(v && v.trim().length > 0 ? undefined : DebugConfigStrings.fastapi.enterAppPath.invalid),
+    });
+    return entered?.trim();
+}
 
 export async function buildFastAPILaunchDebugConfiguration(
     input: MultiStepInput<DebugConfigurationState>,
     state: DebugConfigurationState,
 ): Promise<void> {
-    const application = await getApplicationPath(state.folder);
-    let manuallyEnteredAValue: boolean | undefined;
+    const fastApiPaths = await getFastApiPaths(state.folder);
+    const autoArgs = state.folder ? tryResolveFastApiArgs(state.folder, fastApiPaths) : undefined;
+
+    let args: string[];
+    let manuallyEnteredAValue = false;
+    if (autoArgs) {
+        args = autoArgs;
+    } else {
+        const workspaceRoot = state.folder?.uri.fsPath;
+        const prefill =
+            workspaceRoot && fastApiPaths.length > 0 ? path.relative(workspaceRoot, fastApiPaths[0].fsPath) : undefined;
+        const entered = await promptForAppPath(input, prefill);
+        if (!entered) {
+            return;
+        }
+        args = ['run', entered];
+        manuallyEnteredAValue = true;
+    }
+
     const config: Partial<LaunchRequestArguments> = {
         name: DebugConfigStrings.fastapi.snippet.name,
         type: DebuggerTypeName,
         request: 'launch',
-        module: 'uvicorn',
-        args: ['main:app', '--reload'],
+        module: 'fastapi',
+        args,
         jinja: true,
     };
-
-    if (!application) {
-        const selectedPath = await input.showInputBox({
-            title: DebugConfigStrings.fastapi.enterAppPathOrNamePath.title,
-            value: 'main.py',
-            prompt: DebugConfigStrings.fastapi.enterAppPathOrNamePath.prompt,
-            validate: (value) =>
-                Promise.resolve(
-                    value && value.trim().length > 0
-                        ? undefined
-                        : DebugConfigStrings.fastapi.enterAppPathOrNamePath.invalid,
-                ),
-        });
-        if (selectedPath) {
-            manuallyEnteredAValue = true;
-            config.args = [`${path.basename(selectedPath, '.py').replace('/', '.')}:app`, '--reload'];
-        } else {
-            return;
-        }
-    }
-
     sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
         configurationType: DebugConfigurationType.launchFastAPI,
-        autoDetectedFastAPIMainPyPath: !!application,
+        autoDetectedFastAPIMainPyPath: !!autoArgs,
         manuallyEnteredAValue,
     });
     Object.assign(state.config, config);
 }
-export async function getApplicationPath(folder: WorkspaceFolder | undefined): Promise<string | undefined> {
-    if (!folder) {
-        return undefined;
-    }
-    const defaultLocationOfManagePy = path.join(folder.uri.fsPath, 'main.py');
-    if (await fs.pathExists(defaultLocationOfManagePy)) {
-        return 'main.py';
-    }
-    return undefined;
+
+export async function buildFastAPIWithFileLaunchDebugConfiguration(
+    _input: MultiStepInput<DebugConfigurationState>,
+    state: DebugConfigurationState,
+): Promise<void> {
+    const config: Partial<LaunchRequestArguments> = {
+        name: DebugConfigStrings.fastapi.snippetFile.name,
+        type: DebuggerTypeName,
+        request: 'launch',
+        module: 'fastapi',
+        args: ['run', '${file}'],
+        jinja: true,
+    };
+    sendTelemetryEvent(EventName.DEBUGGER_CONFIGURATION_PROMPTS, undefined, {
+        configurationType: DebugConfigurationType.launchFastAPIWithFile,
+    });
+    Object.assign(state.config, config);
 }
