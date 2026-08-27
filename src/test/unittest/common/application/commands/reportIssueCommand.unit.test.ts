@@ -41,6 +41,7 @@ suite('Report Issue Command', () => {
     });
 
     test('Test if issue body is filled correctly when including all the settings', async () => {
+        executeCommandStub.withArgs('workbench.action.openIssueReporter', sinon.match.any).resolves();
         await openReportIssue();
 
         const issueTemplatePath = path.join(
@@ -60,8 +61,6 @@ suite('Report Issue Command', () => {
             'issueUserDataTemplate.md',
         );
         const expectedData = fs.readFileSync(userDataTemplatePath, 'utf8');
-
-        executeCommandStub.withArgs('workbench.action.openIssueReporter', sinon.match.any).resolves();
 
         sinon.assert.calledOnceWithExactly(executeCommandStub, 'workbench.action.openIssueReporter', sinon.match.any);
 
