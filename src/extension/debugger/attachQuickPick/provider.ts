@@ -10,6 +10,7 @@ import { getOSType, OSType } from '../../common/platform';
 import { PsProcessParser } from './psProcessParser';
 import { IAttachItem, IAttachProcessProvider, ProcessListCommand } from './types';
 import { WmicProcessParser } from './wmicProcessParser';
+import { traceError } from '../../common/log/logging';
 import { getEnvironmentVariables } from '../../common/python';
 import { plainExec } from '../../common/process/rawProcessApis';
 import { logProcess } from '../../common/process/logger';
@@ -17,12 +18,28 @@ import { logProcess } from '../../common/process/logger';
 export class AttachProcessProvider implements IAttachProcessProvider {
     constructor() {}
 
-    public _loadWindowsProcessTree(): typeof import('@vscode/windows-process-tree') {
-        const wpcPath = path.join(env.appRoot, 'node_modules', '@vscode', 'windows-process-tree');
+    public _loadWindowsProcessTree(
+        nodeRequire?: (id: string) => typeof import('@vscode/windows-process-tree'),
+    ): typeof import('@vscode/windows-process-tree') {
         // Use eval to bypass webpack's require interception for loading native addon at runtime
         // eslint-disable-next-line no-eval
-        const nodeRequire = eval('require') as NodeJS.Require;
-        return nodeRequire(wpcPath);
+        const nativeRequire = nodeRequire ?? (eval('require') as NodeJS.Require);
+        const modulePath = path.join('@vscode', 'windows-process-tree');
+        const candidatePaths = [
+            path.join(env.appRoot, 'node_modules.asar', modulePath),
+            path.join(env.appRoot, 'node_modules', modulePath),
+        ];
+        let loadError: unknown;
+
+        for (const candidatePath of candidatePaths) {
+            try {
+                return nativeRequire(candidatePath);
+            } catch (error) {
+                loadError ??= error;
+            }
+        }
+
+        throw loadError;
     }
 
     public getAttachItems(): Promise<IAttachItem[]> {
@@ -87,7 +104,8 @@ export class AttachProcessProvider implements IAttachProcessProvider {
                     processName: p.name,
                     commandLine: p.commandLine || '',
                 }));
-            } catch {
+            } catch (error) {
+                traceError('Failed to list processes with @vscode/windows-process-tree. Falling back to WMIC.', error);
                 const customEnvVars = await getEnvironmentVariables();
                 const output = await plainExec(
                     WmicProcessParser.wmicCommand.command,
