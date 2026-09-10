@@ -12,6 +12,7 @@ import { assert } from 'console';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as crypto from 'crypto';
+import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../constants';
 
 suite('setup for no-config debug scenario', function () {
     let envVarCollectionReplaceStub: sinon.SinonStub;
@@ -224,6 +225,29 @@ suite('setup for no-config debug scenario', function () {
         // Cleanup
         fsExistsSyncStub.restore();
         fsUnlinkSyncStub.restore();
+    });
+
+    test('should ship quoted no-config launcher scripts', () => {
+        const scriptDir = path.join(EXTENSION_ROOT_DIR_FOR_TESTS, 'bundled', 'scripts', 'noConfigScripts');
+        const bashScript = fs.readFileSync(path.join(scriptDir, 'debugpy'), 'utf8');
+        const shScript = fs.readFileSync(path.join(scriptDir, 'debugpy.sh'), 'utf8');
+        const fishScript = fs.readFileSync(path.join(scriptDir, 'debugpy.fish'), 'utf8');
+        const batScript = fs.readFileSync(path.join(scriptDir, 'debugpy.bat'), 'utf8');
+        const ps1Script = fs.readFileSync(path.join(scriptDir, 'debugpy.ps1'), 'utf8');
+
+        assert(bashScript.includes('export DEBUGPY_ADAPTER_ENDPOINTS="$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"'));
+        assert(bashScript.includes('python3 "$BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client "$@"'));
+        assert(!bashScript.includes('\r\n'));
+        assert(shScript.includes('export DEBUGPY_ADAPTER_ENDPOINTS="$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"'));
+        assert(shScript.includes('python3 "$BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client "$@"'));
+        assert(!shScript.includes('\r\n'));
+        assert(fishScript.includes('set -x DEBUGPY_ADAPTER_ENDPOINTS "$VSCODE_DEBUGPY_ADAPTER_ENDPOINTS"'));
+        assert(fishScript.includes('python3 "$BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client $argv'));
+        assert(!fishScript.includes('\r\n'));
+        assert(batScript.includes('set "DEBUGPY_ADAPTER_ENDPOINTS=%VSCODE_DEBUGPY_ADAPTER_ENDPOINTS%"'));
+        assert(batScript.includes('python "%BUNDLED_DEBUGPY_PATH%" --listen 0 --wait-for-client %*'));
+        assert(ps1Script.includes('python "$env:BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client $args'));
+        assert(ps1Script.includes('python3 "$env:BUNDLED_DEBUGPY_PATH" --listen 0 --wait-for-client $args'));
     });
 });
 
