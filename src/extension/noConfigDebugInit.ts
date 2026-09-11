@@ -7,6 +7,7 @@ import * as crypto from 'crypto';
 import {
     DebugSessionOptions,
     Disposable,
+    EnvironmentVariableMutatorOptions,
     GlobalEnvironmentVariableCollection,
     env,
     l10n,
@@ -37,6 +38,9 @@ export async function registerNoConfigDebug(
     extPath: string,
 ): Promise<Disposable> {
     const collection = envVarCollection;
+    const shellIntegrationMutatorOptions: EnvironmentVariableMutatorOptions = {
+        applyAtShellIntegration: true,
+    };
 
     // create a temp directory for the noConfigDebugAdapterEndpoints
     // file path format: extPath/.noConfigDebugAdapterEndpoints/endpoint-<sessionId>.txt
@@ -60,19 +64,19 @@ export async function registerNoConfigDebug(
     collection.clear();
 
     // Add env var for PYDEVD_DISABLE_FILE_VALIDATION to disable extra output in terminal when starting the debug session.
-    collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1');
+    collection.replace('PYDEVD_DISABLE_FILE_VALIDATION', '1', shellIntegrationMutatorOptions);
 
     // Add env vars for VSCODE_DEBUGPY_ADAPTER_ENDPOINTS, BUNDLED_DEBUGPY_PATH, and PATH
-    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath);
+    collection.replace('VSCODE_DEBUGPY_ADAPTER_ENDPOINTS', tempFilePath, shellIntegrationMutatorOptions);
 
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
 
     // Always prepend separator when appending to PATH since append() concatenates to existing value
-    collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`);
+    collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`, shellIntegrationMutatorOptions);
 
     const bundledDebugPath = path.join(extPath, 'bundled', 'libs', 'debugpy');
-    collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
+    collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath, shellIntegrationMutatorOptions);
 
     envVarCollection.description = l10n.t(
         'Enables use of [no-config debugging](https://github.com/microsoft/vscode-python-debugger/wiki/No%E2%80%90Config-Debugging), `debugpy <script.py>`, in the terminal.',
