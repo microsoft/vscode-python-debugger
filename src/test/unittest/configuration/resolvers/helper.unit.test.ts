@@ -8,8 +8,13 @@ import * as sinon from 'sinon';
 import * as typemoq from 'typemoq';
 import { TextDocument, TextEditor } from 'vscode';
 import { PYTHON_LANGUAGE } from '../../../../extension/common/constants';
+import * as platform from '../../../../extension/common/platform';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';
-import { getProgram } from '../../../../extension/debugger/configuration/resolvers/helper';
+import {
+    getDebugEnvironmentVariables,
+    getProgram,
+} from '../../../../extension/debugger/configuration/resolvers/helper';
+import { LaunchRequestArguments } from '../../../../extension/types';
 
 suite('Debugging - Helpers', () => {
     let getActiveTextEditorStub: sinon.SinonStub;
@@ -66,5 +71,43 @@ suite('Debugging - Helpers', () => {
         const program = getProgram();
 
         expect(program).to.be.equal(undefined, 'Not undefined');
+    });
+
+    test('Debug environment should not include duplicate Windows search path keys', async () => {
+        sinon.stub(platform, 'getOSType').returns(platform.OSType.Windows);
+
+        const originalPath = process.env.Path;
+        const originalPATH = process.env.PATH;
+        process.env.Path = 'C:\\Windows\\System32';
+        process.env.PATH = 'C:\\Tools';
+
+        try {
+            const launchEnv = { ['PATH']: 'C:\\Project\\.venv\\Scripts' };
+            const env = await getDebugEnvironmentVariables({
+                name: 'Python Debug Test',
+                type: 'debugpy',
+                request: 'launch',
+                env: launchEnv,
+                console: 'internalConsole',
+            } as unknown as LaunchRequestArguments);
+
+            expect(env).to.have.property('Path');
+            expect(env).not.to.have.property('PATH');
+            expect(env.Path).to.contain('C:\\Project\\.venv\\Scripts');
+            expect(env.Path).to.contain('C:\\Tools');
+            expect(env.Path!.split(';').filter((item) => item === 'C:\\Project\\.venv\\Scripts')).to.have.lengthOf(1);
+            expect(env.Path!.split(';').filter((item) => item === 'C:\\Tools')).to.have.lengthOf(1);
+        } finally {
+            if (originalPath === undefined) {
+                delete process.env.Path;
+            } else {
+                process.env.Path = originalPath;
+            }
+            if (originalPATH === undefined) {
+                delete process.env.PATH;
+            } else {
+                process.env.PATH = originalPATH;
+            }
+        }
     });
 });
