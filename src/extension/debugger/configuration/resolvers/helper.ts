@@ -19,7 +19,9 @@ export async function getDebugEnvironmentVariables(args: LaunchRequestArguments)
         args.env && Object.keys(args.env).length > 0
             ? ({ ...args.env } as Record<string, string>)
             : ({} as Record<string, string>);
-    const envFileVars = await envParser.parseFile(args.envFile, debugLaunchEnvVars);
+    // Merge process.env with debugLaunchEnvVars for variable substitution in .env file
+    const baseVars = { ...process.env, ...debugLaunchEnvVars };
+    const envFileVars = await envParser.parseFile(args.envFile, baseVars);
     const env = envFileVars ? { ...envFileVars } : {};
 
     // "overwrite: true" to ensure that debug-configuration env variable values
