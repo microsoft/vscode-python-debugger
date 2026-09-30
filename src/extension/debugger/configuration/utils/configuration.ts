@@ -7,6 +7,7 @@
 'use strict';
 
 import * as fs from 'fs-extra';
+import * as path from 'path';
 import { MultiStepInput } from '../../../common/multiStepInput';
 import { sendTelemetryEvent } from '../../../telemetry';
 import { EventName } from '../../../telemetry/constants';
@@ -79,6 +80,14 @@ export async function getFastApiPaths(folder: WorkspaceFolder | undefined) {
     );
 
     return fastApiPaths;
+}
+
+export function tryResolveFastApiArgs(folder: WorkspaceFolder, paths: readonly Uri[]): string[] | undefined {
+    if (paths.length !== 1) {
+        return undefined;
+    }
+    const relative = path.relative(folder.uri.fsPath, paths[0].fsPath);
+    return ['run', relative];
 }
 
 export async function getFlaskPaths(folder: WorkspaceFolder | undefined) {
