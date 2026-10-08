@@ -8,4 +8,5 @@ updates:
     schedule:
       interval: 'weekly'
     cooldown:
-      default-days: 7
+      # Delay updates beyond the highest-risk window after a release.
+      default-days: 14
