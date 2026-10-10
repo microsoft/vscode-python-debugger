@@ -261,6 +261,29 @@
                                 "description": "If true, show and debug only user-written code. If false, show and debug all code, including library calls.",
                                 "type": "boolean"
                             },
+                            "rules": {
+                                "description": "Overrides whether code matching a path glob or module name is treated as user code. Each rule requires include and either path or module.",
+                                "items": {
+                                    "additionalProperties": false,
+                                    "anyOf": [{ "required": ["path"] }, { "required": ["module"] }],
+                                    "properties": {
+                                        "include": {
+                                            "type": "boolean"
+                                        },
+                                        "module": {
+                                            "type": "string"
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "include"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
                             "listen": {
                                 "label": "Attach by listening for incoming socket connection from debugpy",
                                 "properties": {
@@ -527,6 +550,29 @@
                                 "description": "Debug only user-written code.",
                                 "type": "boolean"
                             },
+                            "rules": {
+                                "description": "Overrides whether code matching a path glob or module name is treated as user code. Each rule requires include and either path or module.",
+                                "items": {
+                                    "additionalProperties": false,
+                                    "anyOf": [{ "required": ["path"] }, { "required": ["module"] }],
+                                    "properties": {
+                                        "include": {
+                                            "type": "boolean"
+                                        },
+                                        "module": {
+                                            "type": "string"
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "include"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
                             "logToFile": {
                                 "default": false,
                                 "description": "Enable logging of debugger events to a log file. This file can be found in the debugpy extension install folder.",
@@ -757,4 +803,3 @@
         "vscode-languageclient": "^8.0.2"
     }
 }
-
