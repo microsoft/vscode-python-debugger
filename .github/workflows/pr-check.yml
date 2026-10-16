@@ -6,6 +6,8 @@ on:
 permissions: {}
 
 env:
+  NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple/
   NODE_VERSION: 22.17.0
   TEST_RESULTS_DIRECTORY: .
   # Force a path with spaces and unicode chars to test extension works in these scenarios
@@ -84,7 +86,7 @@ jobs:
           cache-dependency-path: ${{ env.special-working-directory-relative }}/package-lock.json
 
       - name: Install dependencies (npm ci)
-        run: npm ci
+        run: npm run ci:msft
 
       # Now that the bundle is installed to target using python 3.9
       # switch back the python we want to test with

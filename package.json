@@ -701,6 +701,13 @@
         "ms-python.python"
     ],
     "scripts": {
+        "setup": "node ./build/setup.js",
+        "setup:msft": "node ./build/setup-msft.js",
+        "setup:msft-registry": "node ./build/setup-npm-registry.js",
+        "ci:msft": "node ./build/setup-npm-registry.js --ci",
+        "setup-hooks": "node ./build/setup-hooks.js",
+        "normalize-lockfile": "node ./build/normalize-package-lock.js",
+        "test:setup": "node --test ./build/setup.test.js ./build/setup-npm-registry.test.js ./build/normalize-package-lock.test.js",
         "vscode:prepublish": "npm run package",
         "compile": "webpack",
         "watch": "webpack --watch",
@@ -708,9 +715,9 @@
         "compile-tests": "tsc -p . --outDir out",
         "watch-tests": "tsc -p . -w --outDir out",
         "pretest": "npm run compile-tests && npm run compile && npm run lint",
-        "lint": "eslint src --ext ts",
-        "format-check": "prettier --check \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
-        "format-fix": "prettier --write \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\"",
+        "lint": "eslint src --ext ts \"build/setup*.js\" \"build/normalize-package-lock*.js\"",
+        "format-check": "prettier --check \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\" \"build/setup*.js\" \"build/normalize-package-lock*.js\" build/package-feeds.json",
+        "format-fix": "prettier --write \"src/**/*.ts\" \"build/**/*.yml\" \".github/**/*.yml\" \"build/setup*.js\" \"build/normalize-package-lock*.js\" build/package-feeds.json",
         "test": "node ./out/test/runTest.js",
         "vsce-package": "npx @vscode/vsce package -o python-debugger.vsix"
     },
