@@ -277,6 +277,16 @@ class DebuggerSession {
 }
 
 export class DebuggerFixture extends PythonFixture {
+    public resolveDebuggerWithConfig(
+        config: vscode.DebugConfiguration,
+        wsRoot?: vscode.WorkspaceFolder,
+    ): DebuggerSession {
+        const id = debuggers.track(config);
+        const session = new DebuggerSession(id, config, wsRoot);
+        debuggers.setDAPHandler(id, (src, msg) => session.handleDAPMessage(src, msg));
+        return session;
+    }
+
     public resolveDebugger(
         configName: string,
         file: string,
