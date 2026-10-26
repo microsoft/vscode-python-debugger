@@ -47,6 +47,7 @@ You can reference the table below to find the most recent Python Debugger extens
 | >= 3.7         | 2024.0.XXX                                         | 1.7.0            |
 | >= 3.8         | 2024.2.XXX                                         | 1.8.1            |
 | >= 3.9         | 2025.5.XXX                                         | 1.8.13           |
+| >= 3.14        | 2025.14.1                                          | 1.8.16           |
 
 
 > **Note**: Once you install an older version of the Python Debugger extension in VS Code, you may want to disable auto update by changing the value of the `"extensions.autoUpdate"` setting in your `settings.json` file.
