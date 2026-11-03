@@ -12,15 +12,41 @@ import * as Telemetry from '../../../../../extension/telemetry/index';
 import { EventName } from '../../../../../extension/telemetry/constants';
 import * as vscodeapi from '../../../../../extension/common/vscodeapi';
 import * as pythonApi from '../../../../../extension/common/python';
-import { EXTENSION_ROOT_DIR_FOR_TESTS } from '../../../../constants';
+import { EXTENSION_ROOT_DIR_FOR_TESTS, TEST_TIMEOUT } from '../../../../constants';
+import { EXTENSION_ROOT_DIR } from '../../../../../extension/common/constants';
 import { openReportIssue } from '../../../../../extension/common/application/commands/reportIssueCommand';
 import { PythonEnvironment } from '../../../../../extension/envExtApi';
 
 suite('Report Issue Command', () => {
     let executeCommandStub: sinon.SinonStub;
     let resolveEnvironmentStub: sinon.SinonStub;
+    const templatePath = path.join(EXTENSION_ROOT_DIR, 'resources', 'report_issue_template.md');
+    const userTemplatePath = path.join(EXTENSION_ROOT_DIR, 'resources', 'report_issue_user_data_template.md');
+    let template: string;
+    let userTemplate: string;
+    let expectedIssueBody: string;
+    let expectedData: string;
 
-    setup(async () => {
+    suiteSetup(async function () {
+        this.timeout(TEST_TIMEOUT);
+        [template, userTemplate, expectedIssueBody, expectedData] = await Promise.all([
+            fs.readFile(templatePath, 'utf8'),
+            fs.readFile(userTemplatePath, 'utf8'),
+            fs.readFile(
+                path.join(EXTENSION_ROOT_DIR_FOR_TESTS, 'src', 'test', 'resources', 'issueTemplate.md'),
+                'utf8',
+            ),
+            fs.readFile(
+                path.join(EXTENSION_ROOT_DIR_FOR_TESTS, 'src', 'test', 'resources', 'issueUserDataTemplate.md'),
+                'utf8',
+            ),
+        ]);
+    });
+
+    setup(() => {
+        const readFileStub = sinon.stub(fs, 'readFile').rejects(new Error('Unexpected template file read'));
+        readFileStub.withArgs(templatePath, 'utf8').resolves(template);
+        readFileStub.withArgs(userTemplatePath, 'utf8').resolves(userTemplate);
         executeCommandStub = sinon.stub(vscodeapi, 'executeCommand');
         sinon
             .stub(pythonApi, 'getActiveEnvironmentPath')
@@ -44,24 +70,6 @@ suite('Report Issue Command', () => {
         executeCommandStub.withArgs('workbench.action.openIssueReporter', sinon.match.any).resolves();
         await openReportIssue();
         sinon.assert.calledOnceWithExactly(resolveEnvironmentStub, '/path/to/interpreter');
-
-        const issueTemplatePath = path.join(
-            EXTENSION_ROOT_DIR_FOR_TESTS,
-            'src',
-            'test',
-            'resources',
-            'issueTemplate.md',
-        );
-        const expectedIssueBody = fs.readFileSync(issueTemplatePath, 'utf8');
-
-        const userDataTemplatePath = path.join(
-            EXTENSION_ROOT_DIR_FOR_TESTS,
-            'src',
-            'test',
-            'resources',
-            'issueUserDataTemplate.md',
-        );
-        const expectedData = fs.readFileSync(userDataTemplatePath, 'utf8');
 
         sinon.assert.calledOnceWithExactly(executeCommandStub, 'workbench.action.openIssueReporter', sinon.match.any);
 
