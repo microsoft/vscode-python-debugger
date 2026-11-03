@@ -22,9 +22,10 @@ suite('Report Issue Command', () => {
 
     setup(async () => {
         executeCommandStub = sinon.stub(vscodeapi, 'executeCommand');
+        sinon
+            .stub(pythonApi, 'getActiveEnvironmentPath')
+            .resolves({ id: '/path/to/interpreter', path: '/path/to/interpreter' });
         resolveEnvironmentStub = sinon.stub(pythonApi, 'resolveEnvironment');
-        // Ensure useEnvironmentsExtension is false for these tests
-        (pythonApi as any).useEnvironmentsExtension = false;
         const interpreter = {
             envId: {
                 id: '/path/to/interpreter',
@@ -37,12 +38,12 @@ suite('Report Issue Command', () => {
 
     teardown(() => {
         sinon.restore();
-        (pythonApi as any).useEnvironmentsExtension = undefined;
     });
 
     test('Test if issue body is filled correctly when including all the settings', async () => {
         executeCommandStub.withArgs('workbench.action.openIssueReporter', sinon.match.any).resolves();
         await openReportIssue();
+        sinon.assert.calledOnceWithExactly(resolveEnvironmentStub, '/path/to/interpreter');
 
         const issueTemplatePath = path.join(
             EXTENSION_ROOT_DIR_FOR_TESTS,
