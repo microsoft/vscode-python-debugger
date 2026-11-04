@@ -79,6 +79,7 @@ suite('Debugging - Adapter Factory', () => {
         public static eventNames: string[] = [];
         public static properties: Record<string, string>[] = [];
         public static measures: {}[] = [];
+        public dispose = sinon.stub().resolves();
         public sendTelemetryEvent(eventName: string, properties?: {}, measures?: {}) {
             Reporter.eventNames.push(eventName);
             Reporter.properties.push(properties!);
@@ -105,13 +106,13 @@ suite('Debugging - Adapter Factory', () => {
         factory = new DebugAdapterDescriptorFactory(instance(stateFactory));
     });
 
-    teardown(() => {
+    teardown(async () => {
         process.env.VSC_PYTHON_UNIT_TEST = oldValueOfVSC_PYTHON_UNIT_TEST;
         process.env.VSC_PYTHON_CI_TEST = oldValueOfVSC_PYTHON_CI_TEST;
         Reporter.properties = [];
         Reporter.eventNames = [];
         Reporter.measures = [];
-        telemetry.clearTelemetryReporter();
+        await telemetry.clearTelemetryReporter();
         sinon.restore();
     });
 

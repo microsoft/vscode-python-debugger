@@ -40,9 +40,9 @@ suite('Debugging - Outdated Debugger Prompt tests.', () => {
         promptFactory = new OutdatedDebuggerPromptFactory();
     });
 
-    teardown(() => {
+    teardown(async () => {
+        await clearTelemetryReporter();
         sinon.restore();
-        clearTelemetryReporter();
     });
 
     function createSession(workspaceFolder?: WorkspaceFolder): DebugSession {
