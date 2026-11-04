@@ -34,8 +34,10 @@ const sharedProperties: Record<string, unknown> = {};
 
 let telemetryReporter: TelemetryReporter | undefined;
 
-export function clearTelemetryReporter(): void {
+export async function clearTelemetryReporter(): Promise<void> {
+    const reporter = telemetryReporter;
     telemetryReporter = undefined;
+    await reporter?.dispose();
 }
 
 export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extends keyof P>(
@@ -48,6 +50,7 @@ export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extend
         return;
     }
     const reporter = getTelemetryReporter(telemetryReporter);
+    telemetryReporter = reporter;
     const measures =
         typeof measuresOrDurationMs === 'number'
             ? { duration: measuresOrDurationMs }

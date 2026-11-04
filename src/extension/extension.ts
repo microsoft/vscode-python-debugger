@@ -5,11 +5,15 @@ import { IExtensionContext } from './common/types';
 import { createOutputChannel, registerCommand } from './common/vscodeapi';
 import { Commands } from './common/constants';
 import { registerLogger, traceError } from './common/log/logging';
-import { sendTelemetryEvent } from './telemetry';
+import { clearTelemetryReporter, sendTelemetryEvent } from './telemetry';
 import { EventName } from './telemetry/constants';
 import { IExtensionApi } from './apiTypes';
 import { commands } from 'vscode';
 import { getDebugpyPackagePath } from './debugger/adapter/remoteLaunchers';
+
+export async function deactivate(): Promise<void> {
+    await clearTelemetryReporter();
+}
 
 export async function activate(context: IExtensionContext): Promise<IExtensionApi | undefined> {
     const outputChannel = createOutputChannel('Python Debugger');
