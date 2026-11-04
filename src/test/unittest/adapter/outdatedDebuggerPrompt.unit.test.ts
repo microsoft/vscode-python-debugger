@@ -11,7 +11,7 @@ import { DebugProtocol } from '@vscode/debugprotocol';
 import { createDeferred } from '../../../extension/common/utils/async';
 import { Common } from '../../../extension/common/utils/localize';
 import { OutdatedDebuggerPromptFactory } from '../../../extension/debugger/adapter/outdatedDebuggerPrompt';
-import { clearTelemetryReporter } from '../../../extension/telemetry';
+import { clearTelemetryReporter } from '../../../extension/telemetry/reporter';
 import * as vscodeapi from '../../../extension/common/vscodeapi';
 import { sleep } from '../../core';
 

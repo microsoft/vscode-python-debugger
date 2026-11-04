@@ -27,7 +27,6 @@ import { PersistentState, PersistentStateFactory } from '../../../extension/comm
 import { EXTENSION_ROOT_DIR } from '../../../extension/common/constants';
 import { Architecture } from '../../../extension/common/platform';
 import * as pythonApi from '../../../extension/common/python';
-import * as telemetry from '../../../extension/telemetry';
 import * as telemetryReporter from '../../../extension/telemetry/reporter';
 import * as vscodeApi from '../../../extension/common/vscodeapi';
 import { DebugConfigStrings } from '../../../extension/common/utils/localize';
@@ -112,7 +111,7 @@ suite('Debugging - Adapter Factory', () => {
         Reporter.properties = [];
         Reporter.eventNames = [];
         Reporter.measures = [];
-        await telemetry.clearTelemetryReporter();
+        await telemetryReporter.clearTelemetryReporter();
         sinon.restore();
     });
 
