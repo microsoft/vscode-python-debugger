@@ -1,0 +1,3 @@
+bundled/scripts/noConfigScripts/debugpy text eol=lf
+bundled/scripts/noConfigScripts/debugpy.sh text eol=lf
+bundled/scripts/noConfigScripts/debugpy.fish text eol=lf
