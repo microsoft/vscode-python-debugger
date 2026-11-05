@@ -19,10 +19,14 @@ function resolveWSFile(wsRoot: string, ...filePath: string[]): string {
     return path.join(wsRoot, ...filePath);
 }
 
+const SUBPROCESS_DEBUG_TIMEOUT_MS = 120_000;
+
 suite('Debugger Integration', () => {
     const file = resolveWSFile(WS_ROOT, 'pythonFiles', 'debugging', 'wait_for_file.py');
+    const processPoolTestFile = resolveWSFile(WS_ROOT, 'pythonFiles', 'debugging', 'test_pytest_processpool.py');
     const doneFile = resolveWSFile(WS_ROOT, 'should-not-exist');
     const outFile = resolveWSFile(WS_ROOT, 'output.txt');
+    const processPoolDoneFile = resolveWSFile(WS_ROOT, 'pytest-processpool-debug-done.txt');
     const resource = vscode.Uri.file(file);
     const defaultScriptArgs = [doneFile];
     let workspaceRoot: vscode.WorkspaceFolder;
@@ -106,5 +110,39 @@ suite('Debugger Integration', () => {
                 expect(output.trim().endsWith('done!')).to.equal(true, `bad output\n${output}`);
             });
         }
+    });
+
+    suite('pytest multiprocess test debugging', () => {
+        test('process-pool test reaches code after worker joins in debug-test session', async function () {
+            // This path starts pytest under the debugger with subprocess attach enabled,
+            // so allow extra time for child session orchestration and process-pool teardown.
+            this.timeout(SUBPROCESS_DEBUG_TIMEOUT_MS);
+            fix.addFSCleanup(processPoolDoneFile);
+
+            const config = {
+                type: 'python',
+                name: 'debug pytest processpool',
+                request: 'launch',
+                module: 'pytest',
+                args: ['-s', processPoolTestFile, '-k', 'test_library_process_pool'],
+                console: 'integratedTerminal',
+                purpose: ['debug-test'],
+                subProcess: true,
+                cwd: WS_ROOT,
+                env: {
+                    DEBUG_DONE_FILE: processPoolDoneFile,
+                },
+            };
+
+            const session = fix.resolveDebuggerWithConfig(config, workspaceRoot);
+            await session.start();
+            const result = await session.waitUntilDone();
+
+            expect(result.exitCode).to.equal(0, 'bad exit code');
+            expect(await fs.pathExists(processPoolDoneFile)).to.equal(
+                true,
+                'pytest test did not reach code after process pool join',
+            );
+        });
     });
 });
