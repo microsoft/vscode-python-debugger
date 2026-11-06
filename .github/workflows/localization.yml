@@ -1,0 +1,30 @@
+name: Localization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package.nls.json
+      - src/**/*.ts
+      - .github/workflows/localization.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  localization:
+    if: github.repository == 'microsoft/vscode-python-debugger'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: microsoft/vscode-common-python-lsp/.github/actions/localization@d1877b84bb10ff7caa6bd12ab4e75498ba760790
+        with:
+          app-id: ${{ vars.PYTHON_LOCALIZATION_APP_ID }}
+          private-key: ${{ secrets.PYTHON_LOCALIZATION_PRIVATE_KEY }}

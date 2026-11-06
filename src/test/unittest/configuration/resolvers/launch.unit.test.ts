@@ -38,6 +38,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
         let getOSTypeStub: sinon.SinonStub;
         let getWorkspaceFolderStub: sinon.SinonStub;
         let getInterpreterDetailsStub: sinon.SinonStub;
+        let getActiveEnvironmentPathStub: sinon.SinonStub;
         let getEnvFileStub: sinon.SinonStub;
         let getDebugEnvironmentVariablesStub: sinon.SinonStub;
         let getConfigurationStub: sinon.SinonStub;
@@ -48,6 +49,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             getWorkspaceFolderStub = sinon.stub(vscodeapi, 'getWorkspaceFolders');
             getOSTypeStub.returns(osType);
             getInterpreterDetailsStub = sinon.stub(pythonApi, 'getInterpreterDetails');
+            getActiveEnvironmentPathStub = sinon.stub(pythonApi, 'getActiveEnvironmentPath');
             getEnvFileStub = sinon.stub(settings, 'getEnvFile');
             getDebugEnvironmentVariablesStub = sinon.stub(helper, 'getDebugEnvironmentVariables');
             getConfigurationStub = sinon.stub(vscodeapi, 'getConfiguration');
@@ -87,6 +89,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
 
         function setupIoc(pythonPath: string, workspaceFolder?: WorkspaceFolder) {
             getInterpreterDetailsStub.resolves({ path: [pythonPath] });
+            getActiveEnvironmentPathStub.resolves({ id: pythonPath, path: pythonPath });
 
             if (workspaceFolder) {
                 getEnvFileStub
@@ -868,7 +871,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
             const pythonFile = 'xyz.py';
             setupIoc(pythonPath);
             setupActiveEditor(pythonFile, PYTHON_LANGUAGE);
-            testsForRedirectOutput.forEach(async (testParams) => {
+            for (const testParams of testsForRedirectOutput) {
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...launch,
                     console: testParams.console as ConsoleType,
@@ -879,7 +882,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     expect(debugConfig).to.have.property('debugOptions');
                     expect((debugConfig as DebugConfiguration).debugOptions).to.contain(DebugOptions.RedirectOutput);
                 }
-            });
+            }
         });
 
         test('Test fixFilePathCase', async () => {
@@ -956,13 +959,13 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 uriFormat: '%s',
                 action: 'openExternally',
             };
-            testsForautoStartBrowser.forEach(async (testParams) => {
+            for (const testParams of testsForautoStartBrowser) {
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...launch,
                     ...testParams,
                 });
-                expect(debugConfig).to.have.property('serverReadyAction', expectedServerReadyAction);
-            });
+                expect(debugConfig).to.have.deep.property('serverReadyAction', expectedServerReadyAction);
+            }
         });
 
         test('Preserve serverReadyAction when already defined in configuration', async () => {
@@ -978,7 +981,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                 action: 'debugWithChrome',
             };
 
-            testsForautoStartBrowser.forEach(async (testParams) => {
+            for (const testParams of testsForautoStartBrowser) {
                 const debugConfig = await resolveDebugConfiguration(workspaceFolder, {
                     ...launch,
                     ...testParams,
@@ -995,7 +998,7 @@ getInfoPerOS().forEach(([osName, osType, path]) => {
                     uriFormat: '%s',
                     action: 'openExternally',
                 });
-            });
+            }
         });
 
         test('Send consoleName value to debugpy as consoleTitle', async () => {

@@ -14,3 +14,7 @@ bundled/libs/
 l10n/bundle.l10n.*.json
 package.nls.*.json
 telemetry.json
+
+# Localization is generated from the dev handback during releases.
+/package.nls.*.json
+/l10n/
