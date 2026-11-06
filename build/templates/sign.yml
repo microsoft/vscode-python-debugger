@@ -87,7 +87,16 @@ steps:
   - task: Npm@1
     displayName: 'npm ci (install vsce)'
     inputs:
-      command: ci
+      command: custom
+      customCommand: ci --ignore-scripts
+      workingDir: '$(Build.SourcesDirectory)'
+
+  # Only vsce-sign needs its install script when signing prebuilt VSIX files.
+  - task: Npm@1
+    displayName: 'Initialize vsce signing binary'
+    inputs:
+      command: custom
+      customCommand: rebuild @vscode/vsce-sign
       workingDir: '$(Build.SourcesDirectory)'
 
   # Workaround for intermittent MicroBuild plugin install collisions
