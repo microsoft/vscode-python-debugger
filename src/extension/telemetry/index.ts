@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import type { TelemetryReporter } from '@vscode/extension-telemetry';
-
 import { isTestExecution } from '../common/constants';
 import { StopWatch } from '../common/utils/stopWatch';
 import { ConsoleType, TriggerType } from '../types';
@@ -32,12 +30,6 @@ function isTelemetrySupported(): boolean {
 
 const sharedProperties: Record<string, unknown> = {};
 
-let telemetryReporter: TelemetryReporter | undefined;
-
-export function clearTelemetryReporter(): void {
-    telemetryReporter = undefined;
-}
-
 export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extends keyof P>(
     eventName: E,
     measuresOrDurationMs?: Record<string, number> | number,
@@ -47,7 +39,7 @@ export function sendTelemetryEvent<P extends IEventNamePropertyMapping, E extend
     if (isTestExecution() || !isTelemetrySupported()) {
         return;
     }
-    const reporter = getTelemetryReporter(telemetryReporter);
+    const reporter = getTelemetryReporter();
     const measures =
         typeof measuresOrDurationMs === 'number'
             ? { duration: measuresOrDurationMs }
