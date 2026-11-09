@@ -13,9 +13,10 @@ schedules:
 resources:
   repositories:
     - repository: templates
-      type: git
-      name: DevDiv/Pylance-Eng
+      type: github
+      name: microsoft/pylance-eng
       ref: refs/heads/main
+      endpoint: Github-Pylance
     - repository: translations
       type: github
       name: microsoft/vscode-python-extensions-loc
@@ -25,7 +26,7 @@ resources:
     - repository: localizationTools
       type: github
       name: microsoft/vscode-common-python-lsp
-      ref: d1877b84bb10ff7caa6bd12ab4e75498ba760790
+      ref: 6b4a3573e7e7a9fe1e468e129544432278aec2d6
       endpoint: Github-Pylance
 variables:
   - name: TeamName
