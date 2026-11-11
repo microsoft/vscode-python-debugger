@@ -135,7 +135,7 @@ Dependabot continues to use public registries and its existing update settings. 
 
 ### Localization
 
-The **Localization** GitHub workflow submits English strings using the [shared composite action and Python tooling](https://github.com/microsoft/vscode-common-python-lsp#shared-localization-automation). Stable and pre-release DevDiv pipelines independently retrieve translations through Pylance-Eng's `pullLocalization: true`; releases never submit English or create translation-update PRs.
+The **Localization** GitHub workflow submits English strings using the [shared composite action and Python tooling](https://github.com/microsoft/vscode-python-ci/tree/main/actions/localization). Stable and pre-release DevDiv pipelines independently retrieve translations through Pylance-Eng's `pullLocalization: true`; releases never submit English or create translation-update PRs.
 
 Both paths use `microsoft/vscode-python-extensions-loc`, branch **`dev`**, with canonical extension ID **`ms-python.debugpy`**. English XLF is stored in `src/en/ms-python.debugpy` and handbacks in `out/ms-python.debugpy`. The action and Azure tooling checkout are pinned to the same reviewed revision.
 
