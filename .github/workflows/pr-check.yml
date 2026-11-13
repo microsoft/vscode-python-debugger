@@ -6,7 +6,7 @@ on:
 permissions: {}
 
 env:
-  PIP_INDEX_URL: https://pkgs.dev.azure.com/devdiv/DevDiv/_packaging/debugpy/pypi/simple/
+  NPM_CONFIG_REGISTRY: https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/Pylance_PublicPackages/npm/registry/
   NODE_VERSION: 22.17.0
   TEST_RESULTS_DIRECTORY: .
   # Force a path with spaces and unicode chars to test extension works in these scenarios
@@ -17,6 +17,9 @@ jobs:
   build-vsix:
     name: Create VSIX
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,6 +34,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,6 +51,9 @@ jobs:
   tests:
     name: Tests
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
     defaults:
       run:
         working-directory: ${{ env.special-working-directory }}
@@ -60,6 +69,20 @@ jobs:
         with:
           path: ${{ env.special-working-directory-relative }}
           persist-credentials: false
+
+      - name: Checkout feed authentication action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: ci-actions
+          persist-credentials: false
+          sparse-checkout: |
+            /.github/actions/authenticate-feeds/
+            /build/setup-github-feeds.js
+            /build/package-feeds.json
+          sparse-checkout-cone-mode: false
+
+      - name: Authenticate package feeds
+        uses: ./ci-actions/.github/actions/authenticate-feeds
 
       # Install bundled libs using 3.10 (minimum supported; debugpy dropped 3.9 support,
       # and pip 26.1+ requires Python >= 3.10).

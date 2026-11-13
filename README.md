@@ -121,9 +121,9 @@ To normalize manually, run `npm run normalize-lockfile`, review the changes, and
 
 ### GitHub Actions package feeds
 
-The PR and push workflows set `PIP_INDEX_URL` to `https://packagefeedproxy.microsoft.io/pypi/simple/` for pip and nox installs. Their Node installation steps select `https://packagefeedproxy.microsoft.io/npm/` explicitly through `npm run ci:msft`, so these workflows do not set `NPM_CONFIG_REGISTRY`. CodeQL retains both environment variables because its autobuild step does not use the install helper. The npm endpoint follows the [TypeScript CI package-feed-proxy job](https://github.com/microsoft/TypeScript/blob/main/.github/workflows/ci.yml).
+Package-installing GitHub workflows authenticate to the DevDiv `Pylance_PublicPackages` npm and pip feeds using the shared `.github/actions/authenticate-feeds` action and Azure OIDC. Authenticating jobs require `contents: read` and `id-token: write`. Authentication runs before Python setup or package installation, exporting a masked, authenticated `PIP_INDEX_URL`, `PIP_NO_INPUT=1`, `NODE_AUTH_TOKEN`, and a temporary `NPM_CONFIG_USERCONFIG`. Workflows retain `NPM_CONFIG_REGISTRY` for npm requests; credentials are not written into repository files.
 
-The shared lint and VSIX build actions and applicable PR/push test jobs use `npm run ci:msft`, rewriting working-copy lockfile URLs before installation and explicitly selecting the proxy for npm requests. Workflows do not commit these rewrites or change local registry configuration or Dependabot configuration. Existing dependency caches are retained; the VSIX build also retains its offline-cache preference. CodeQL retains workflow-level feed settings for its autobuild step.
+The shared lint and VSIX build actions and applicable PR/push test jobs use `npm run ci:msft`, rewriting working-copy lockfile URLs before installation and explicitly selecting the feed for npm requests. Workflows do not commit these rewrites or change local registry configuration or Dependabot configuration. Existing dependency caches are retained; the VSIX build also retains its offline-cache preference. Test jobs continue bundling separately on each platform: debugpy's default wheel download selects a host-specific wheel, so the Ubuntu VSIX bundle cannot safely be shared with Windows tests.
 
 ### Azure release package feeds
 
