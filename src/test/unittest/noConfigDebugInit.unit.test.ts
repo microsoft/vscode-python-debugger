@@ -58,7 +58,7 @@ suite('setup for no-config debug scenario', function () {
         // set up the environment variable collection mock including asserts for the key, value pairs
         environmentVariableCollectionMock
             .setup((x) => x.replace(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-            .callback((key, value) => {
+            .callback((key, value, options) => {
                 if (key === DEBUGPY_ADAPTER_ENDPOINTS) {
                     assert(value.includes('endpoint-'));
                 } else if (key === BUNDLED_DEBUGPY_PATH) {
@@ -66,15 +66,19 @@ suite('setup for no-config debug scenario', function () {
                 } else if (key === 'PYDEVD_DISABLE_FILE_VALIDATION') {
                     assert(value === '1');
                 }
+                assert(options?.applyAtShellIntegration === true);
+                assert(options?.applyAtProcessCreation !== true);
             })
             .returns(envVarCollectionReplaceStub);
         environmentVariableCollectionMock
             .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
-            .callback((key, value) => {
+            .callback((key, value, options) => {
                 if (key === 'PATH') {
                     const pathSeparator = process.platform === 'win32' ? ';' : ':';
                     assert(value === `${pathSeparator}${noConfigScriptsDir}`);
                 }
+                assert(options?.applyAtShellIntegration === true);
+                assert(options?.applyAtProcessCreation !== true);
             })
             .returns(envVarCollectionAppendStub);
 
