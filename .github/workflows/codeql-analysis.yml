@@ -20,9 +20,6 @@ on:
   schedule:
     - cron: '15 16 * * 2'
 
-env:
-  NPM_CONFIG_REGISTRY: https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/Pylance_PublicPackages/npm/registry/
-
 jobs:
   analyze:
     name: Analyze
@@ -31,7 +28,6 @@ jobs:
       actions: read
       contents: read
       security-events: write
-      id-token: write
 
     strategy:
       fail-fast: false
@@ -45,9 +41,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Authenticate package feeds
-        uses: ./.github/actions/authenticate-feeds
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL

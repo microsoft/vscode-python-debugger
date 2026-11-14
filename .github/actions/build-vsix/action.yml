@@ -9,9 +9,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Authenticate package feeds
-      uses: ./.github/actions/authenticate-feeds
-
     - name: Install Node
       uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
       with:
@@ -38,8 +35,8 @@ runs:
       run: python -m pip install -U pip pipx wheel
       shell: bash
 
-    - name: Install Node dependencies through Microsoft feeds
-      run: npm run ci:msft
+    - name: Install Node dependencies
+      run: npm ci
       env:
         npm_config_prefer_offline: 'true'
       shell: bash
