@@ -355,6 +355,16 @@
                                 "description": "Show return value of functions when stepping.",
                                 "type": "boolean"
                             },
+                            "steppingResumesAllThreads": {
+                                "default": true,
+                                "description": "If true (default), all threads are resumed during a step operation. If false, only the current thread is resumed.",
+                                "type": "boolean"
+                            },
+                            "stopAllThreadsOnSuspend": {
+                                "default": true,
+                                "description": "If true (default), all threads are suspended when a breakpoint is hit or the program is paused. If false, only the thread that triggered the stop is suspended.",
+                                "type": "boolean"
+                            },
                             "subProcess": {
                                 "default": false,
                                 "description": "Whether to enable Sub Process debugging",
@@ -631,6 +641,16 @@
                             "showReturnValue": {
                                 "default": true,
                                 "description": "Show return value of functions when stepping.",
+                                "type": "boolean"
+                            },
+                            "steppingResumesAllThreads": {
+                                "default": true,
+                                "description": "If true (default), all threads are resumed during a step operation. If false, only the current thread is resumed.",
+                                "type": "boolean"
+                            },
+                            "stopAllThreadsOnSuspend": {
+                                "default": true,
+                                "description": "If true (default), all threads are suspended when a breakpoint is hit or the program is paused. If false, only the thread that triggered the stop is suspended.",
                                 "type": "boolean"
                             },
                             "stopOnEntry": {
