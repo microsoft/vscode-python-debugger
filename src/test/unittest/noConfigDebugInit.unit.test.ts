@@ -69,11 +69,11 @@ suite('setup for no-config debug scenario', function () {
             })
             .returns(envVarCollectionReplaceStub);
         environmentVariableCollectionMock
-            .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+            .setup((x) => x.prepend(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === 'PATH') {
                     const pathSeparator = process.platform === 'win32' ? ';' : ':';
-                    assert(value === `${pathSeparator}${noConfigScriptsDir}`);
+                    assert(value === `${noConfigScriptsDir}${pathSeparator}`);
                 }
             })
             .returns(envVarCollectionAppendStub);
@@ -90,12 +90,12 @@ suite('setup for no-config debug scenario', function () {
         sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
-    test('should always add separator when appending to PATH', async () => {
+    test('should always add separator when prepending to PATH', async () => {
         const environmentVariableCollectionMock = TypeMoq.Mock.ofType<any>();
         envVarCollectionReplaceStub = sinon.stub();
         envVarCollectionAppendStub = sinon.stub();
 
-        // The separator should always be prepended regardless of process.env.PATH
+        // The separator should always be appended regardless of process.env.PATH
         const pathSeparator = process.platform === 'win32' ? ';' : ':';
 
         environmentVariableCollectionMock
@@ -103,12 +103,12 @@ suite('setup for no-config debug scenario', function () {
             .returns(envVarCollectionReplaceStub);
 
         environmentVariableCollectionMock
-            .setup((x) => x.append(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+            .setup((x) => x.prepend(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
             .callback((key, value) => {
                 if (key === 'PATH') {
-                    // Should always add separator when appending
-                    assert(value === `${pathSeparator}${noConfigScriptsDir}`);
-                    assert(value.startsWith(pathSeparator));
+                    // Should always add separator when prepending
+                    assert(value === `${noConfigScriptsDir}${pathSeparator}`);
+                    assert(value.endsWith(pathSeparator));
                 }
             })
             .returns(envVarCollectionAppendStub);
@@ -120,7 +120,7 @@ suite('setup for no-config debug scenario', function () {
         // run init for no config debug
         await registerNoConfigDebug(context.object.environmentVariableCollection, context.object.extensionPath);
 
-        // assert that append was called for PATH
+        // assert that prepend was called for PATH
         sinon.assert.calledOnce(envVarCollectionAppendStub);
     });
 
