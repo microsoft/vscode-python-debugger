@@ -34,6 +34,7 @@ export enum DebugConfigurationType {
     remoteAttach = 'remoteAttach',
     launchDjango = 'launchDjango',
     launchFastAPI = 'launchFastAPI',
+    launchFastAPIWithFile = 'launchFastAPIWithFile',
     launchFlask = 'launchFlask',
     launchModule = 'launchModule',
     launchPyramid = 'launchPyramid',
