@@ -50,7 +50,7 @@ export function mergeVariables(
     if (!target) {
         return;
     }
-    const settingsNotToMerge = ['PYTHONPATH', getSearchPathEnvVarNames()[0]];
+    const settingsNotToMerge = ['PYTHONPATH', ...getSearchPathEnvVarNames()];
     Object.keys(source).forEach((setting) => {
         if (settingsNotToMerge.indexOf(setting) >= 0) {
             return;
@@ -59,6 +59,44 @@ export function mergeVariables(
             target[setting] = source[setting];
         }
     });
+}
+
+export function normalizeSearchPathEnvironmentVariable(
+    vars: EnvironmentVariables,
+    variableNames = getSearchPathEnvVarNames(),
+) {
+    if (!vars || variableNames.length <= 1) {
+        return vars;
+    }
+
+    const [preferredName, ...aliasNames] = variableNames;
+    const mergedPathEntries: string[] = [];
+
+    for (const variableName of variableNames) {
+        const value = vars[variableName];
+        if (typeof value !== 'string' || value.length === 0) {
+            continue;
+        }
+
+        for (const entry of value.split(path.delimiter)) {
+            const trimmedEntry = entry.trim();
+            if (!trimmedEntry || mergedPathEntries.includes(trimmedEntry)) {
+                continue;
+            }
+            mergedPathEntries.push(trimmedEntry);
+        }
+    }
+
+    if (mergedPathEntries.length === 0) {
+        return vars;
+    }
+
+    vars[preferredName] = mergedPathEntries.join(path.delimiter);
+    for (const aliasName of aliasNames) {
+        delete vars[aliasName];
+    }
+
+    return vars;
 }
 
 export function appendPythonPath(vars: EnvironmentVariables, ...pythonPaths: string[]) {
