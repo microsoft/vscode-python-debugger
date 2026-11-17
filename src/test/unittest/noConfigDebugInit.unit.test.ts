@@ -2,7 +2,12 @@
 // Licensed under the MIT License.
 
 import * as path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import { expect } from 'chai';
 import { IExtensionContext } from '../../extension/common/types';
+import { EXTENSION_ROOT_DIR } from '../../extension/common/constants';
+import { TEST_TIMEOUT } from '../constants';
 import { registerNoConfigDebug as registerNoConfigDebug } from '../../extension/noConfigDebugInit';
 import * as TypeMoq from 'typemoq';
 import * as sinon from 'sinon';
@@ -12,6 +17,8 @@ import { assert } from 'console';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as crypto from 'crypto';
+
+const execFileAsync = promisify(execFile);
 
 suite('setup for no-config debug scenario', function () {
     let envVarCollectionReplaceStub: sinon.SinonStub;
@@ -225,7 +232,53 @@ suite('setup for no-config debug scenario', function () {
         fsExistsSyncStub.restore();
         fsUnlinkSyncStub.restore();
     });
+
+    test('debugpy.ps1 forwards array arguments as separate arguments', async function () {
+        this.timeout(TEST_TIMEOUT);
+        const shell = await findPowerShell();
+        if (!shell) {
+            return this.skip();
+        }
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'debugpy-ps1-test-'));
+        try {
+            const adapterStub = path.join(tmpDir, 'print_argv.py');
+            fs.writeFileSync(adapterStub, 'import json, sys\nprint(json.dumps(sys.argv[1:]))\n');
+            const wrapper = path.join(EXTENSION_ROOT_DIR, 'bundled', 'scripts', 'noConfigScripts', 'debugpy.ps1');
+            const caller = path.join(tmpDir, 'caller.ps1');
+            fs.writeFileSync(
+                caller,
+                `$argList = @('arg1', 'arg2')\n& '${wrapper.replace(/'/g, "''")}' 'test.py' $argList\n`,
+            );
+            const env = { ...process.env };
+            env.BUNDLED_DEBUGPY_PATH = adapterStub;
+            env.VSCODE_DEBUGPY_ADAPTER_ENDPOINTS = '';
+            const { stdout } = await execFileAsync(
+                shell,
+                ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', caller],
+                {
+                    env,
+                },
+            );
+            const argv = JSON.parse(stdout.trim().split('\n').pop()!);
+            expect(argv).to.deep.equal(['--listen', '0', '--wait-for-client', 'test.py', 'arg1', 'arg2']);
+        } finally {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
 });
+
+async function findPowerShell(): Promise<string | undefined> {
+    const shells = process.platform === 'win32' ? ['powershell', 'pwsh'] : ['pwsh', 'powershell'];
+    for (const shell of shells) {
+        try {
+            await execFileAsync(shell, ['-NoProfile', '-Command', '$PSVersionTable.PSVersion']);
+            return shell;
+        } catch {
+            continue;
+        }
+    }
+    return undefined;
+}
 
 function setupFileSystemWatchers(): sinon.SinonStub {
     // create stub of createFileSystemWatcher function that will return a fake watcher with a callback
