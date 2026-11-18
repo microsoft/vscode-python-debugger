@@ -14,11 +14,17 @@ import { PsProcessParser } from '../../../extension/debugger/attachQuickPick/psP
 import { IAttachItem } from '../../../extension/debugger/attachQuickPick/types';
 import { WmicProcessParser } from '../../../extension/debugger/attachQuickPick/wmicProcessParser';
 import * as platform from '../../../extension/common/platform';
+import { TEST_TIMEOUT } from '../../constants';
 import * as rawProcessApis from '../../../extension/common/process/rawProcessApis';
 
 use(chaiAsPromised);
 
-suite('Attach to process - process provider', () => {
+suite('Attach to process - process provider', function () {
+    // Use the shared test timeout instead of the 2s Mocha default: on a cold
+    // start the first test in this suite can exceed 2s (initial module loading),
+    // and when it times out its still-pending async work leaks into the next
+    // test and pollutes that test's stub assertions (#1031).
+    this.timeout(TEST_TIMEOUT);
     let provider: AttachProcessProvider;
     let getOSTypeStub: sinon.SinonStub;
     let plainExecStub: sinon.SinonStub;
