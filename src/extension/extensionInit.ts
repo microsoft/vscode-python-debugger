@@ -242,11 +242,15 @@ export async function registerDebugger(context: IExtensionContext): Promise<IExt
         }),
     );
 
-    executeCommand(
-        'setContext',
-        'dynamicPythonConfigAvailable',
-        window.activeTextEditor?.document.languageId === 'python',
-    );
+    const updateDynamicPythonConfigAvailable = () => {
+        executeCommand(
+            'setContext',
+            'dynamicPythonConfigAvailable',
+            window.activeTextEditor?.document.languageId === 'python',
+        );
+    };
+    updateDynamicPythonConfigAvailable();
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(updateDynamicPythonConfigAvailable));
 
     context.subscriptions.push(
         await registerNoConfigDebug(context.environmentVariableCollection, context.extensionPath),
