@@ -14,6 +14,7 @@ import {
 import { EventEmitter, extensions, Uri, Disposable, Extension } from 'vscode';
 import { createDeferred } from './utils/async';
 import { traceError, traceLog } from './log/logging';
+import { restoreWindowsExeSuffix } from './executablePath';
 
 /**
  * Interface for the Python extension API.
@@ -163,8 +164,17 @@ export async function legacyResolveEnvironment(
 ): Promise<ResolvedEnvironment | undefined> {
     const api = await legacyGetPythonExtensionEnviromentAPI();
     traceLog(`legacyResolveEnvironment: Resolving environment '${typeof env === 'string' ? env : (env as any).path}'`);
-    const resolved = api.environments.resolveEnvironment(env);
-    resolved.then((r) => traceLog(`legacyResolveEnvironment: Resolved executable='${r?.executable.uri?.fsPath}'`));
+    const resolved = await api.environments.resolveEnvironment(env);
+    const execUri = resolved?.executable.uri;
+    if (resolved && execUri) {
+        // The legacy API can drop the `.exe` suffix on Windows, so restore it when the file exists.
+        const fixedPath = restoreWindowsExeSuffix(execUri.fsPath);
+        if (fixedPath !== execUri.fsPath) {
+            traceLog(`legacyResolveEnvironment: Restored '.exe' suffix, executable='${fixedPath}'`);
+            return { ...resolved, executable: { ...resolved.executable, uri: Uri.file(fixedPath) } };
+        }
+    }
+    traceLog(`legacyResolveEnvironment: Resolved executable='${execUri?.fsPath}'`);
     return resolved;
 }
 
@@ -197,7 +207,7 @@ export async function legacyGetInterpreterDetails(resource?: Uri): Promise<Legac
         traceLog(
             `legacyGetInterpreterDetails: executable='${environment.executable.uri.fsPath}' resource='${resource?.fsPath}'`,
         );
-        return { path: [environment?.executable.uri.fsPath], resource };
+        return { path: [restoreWindowsExeSuffix(environment.executable.uri.fsPath)], resource };
     }
     traceLog('legacyGetInterpreterDetails: No executable found');
     return { path: undefined, resource };
