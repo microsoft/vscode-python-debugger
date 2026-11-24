@@ -30,7 +30,7 @@ import { TriggerType } from './types';
  * Environment Variables:
  * - `DEBUGPY_ADAPTER_ENDPOINTS`: Path to the file containing the debugger adapter endpoint.
  * - `BUNDLED_DEBUGPY_PATH`: Path to the bundled debugpy library.
- * - `PATH`: Appends the path to the noConfigScripts directory.
+ * - `PATH`: Prepends the path to the noConfigScripts directory.
  */
 export async function registerNoConfigDebug(
     envVarCollection: GlobalEnvironmentVariableCollection,
@@ -68,8 +68,10 @@ export async function registerNoConfigDebug(
     const noConfigScriptsDir = path.join(extPath, 'bundled', 'scripts', 'noConfigScripts');
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
 
-    // Always prepend separator when appending to PATH since append() concatenates to existing value
-    collection.append('PATH', `${pathSeparator}${noConfigScriptsDir}`);
+    // Prepend so the bundled `debugpy` wrapper wins over any user-installed debugpy
+    // package that also provides a `debugpy` command on PATH. Always append the
+    // separator since prepend() concatenates to the existing value.
+    collection.prepend('PATH', `${noConfigScriptsDir}${pathSeparator}`);
 
     const bundledDebugPath = path.join(extPath, 'bundled', 'libs', 'debugpy');
     collection.replace('BUNDLED_DEBUGPY_PATH', bundledDebugPath);
