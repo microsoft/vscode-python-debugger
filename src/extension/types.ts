@@ -73,6 +73,12 @@ interface ICommonDebugArguments {
     host?: string;
     // Show return values of functions while stepping.
     showReturnValue?: boolean;
+    // If false, only the thread that triggered the stop is suspended when a breakpoint
+    // is hit or the program is paused; if true (default), all threads are suspended.
+    stopAllThreadsOnSuspend?: boolean;
+    // If false, only the current thread is resumed during a step operation;
+    // if true (default), all threads are resumed.
+    steppingResumesAllThreads?: boolean;
     subProcess?: boolean;
     // SystemExit codes (and/or inclusive ranges) that cause the debugger to break.
     // An empty array disables breaking on SystemExit entirely.
