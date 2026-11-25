@@ -34,7 +34,17 @@
         "onDebugInitialConfigurations",
         "onDebugDynamicConfigurations:debugpy",
         "onDebugResolve:debugpy",
-        "onLanguage:python"
+        "onLanguage:python",
+        "workspaceContains:mspythonconfig.json",
+        "workspaceContains:pyproject.toml",
+        "workspaceContains:Pipfile",
+        "workspaceContains:setup.py",
+        "workspaceContains:requirements.txt",
+        "workspaceContains:pylock.toml",
+        "workspaceContains:manage.py",
+        "workspaceContains:app.py",
+        "workspaceContains:.venv",
+        "workspaceContains:.conda"
     ],
     "main": "./dist/extension.js",
     "l10n": "./l10n",
