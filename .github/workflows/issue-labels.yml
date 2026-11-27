@@ -7,8 +7,7 @@ on:
 env:
   TRIAGERS: '["karthiknadig","eleanorjboyd","anthonykim1"]'
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   # From https://github.com/marketplace/actions/github-script#apply-a-label-to-an-issue.
@@ -22,6 +21,7 @@ jobs:
       - name: Checkout Actions
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: 'microsoft/vscode-github-triage-actions'
           ref: stable
           path: ./actions

@@ -6,8 +6,7 @@ on:
     types: [trigger-needs-more-info]
   workflow_dispatch:
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   main:
@@ -19,6 +18,7 @@ jobs:
       - name: Checkout Actions
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           repository: 'microsoft/vscode-github-triage-actions'
           path: ./actions
           ref: stable
