@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: 'microsoft/vscode-github-triage-actions'
-          ref: stable
+          ref: 5e5f89b56270c343b86cd79cb988698d64bd7908 # stable
           path: ./actions
 
       - name: Install Actions
