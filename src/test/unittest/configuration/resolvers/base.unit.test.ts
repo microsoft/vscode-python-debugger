@@ -8,8 +8,7 @@
 import { expect } from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
-import { CancellationToken } from 'vscode-jsonrpc';
+import { CancellationToken, DebugConfiguration, Uri, WorkspaceFolder } from 'vscode';
 import { BaseConfigurationResolver } from '../../../../extension/debugger/configuration/resolvers/base';
 import * as helper from '../../../../extension/debugger/configuration/resolvers/helper';
 import * as vscodeapi from '../../../../extension/common/vscodeapi';

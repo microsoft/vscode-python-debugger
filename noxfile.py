@@ -119,29 +119,12 @@ def lint(session: nox.Session) -> None:
 @nox.session()
 def tests(session: nox.Session) -> None:
     """Runs all the tests for the extension."""
-    session.install("-r", "./requirements.txt")
     session.run("npm", "run", "test")
 
 
 @nox.session()
 def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
-    session.install("wheel")
-    session.install(
-        "-t",
-        "./bundled/libs",
-        "--no-cache-dir",
-        "--implementation",
-        "py",
-        "--no-deps",
-        "--require-hashes",
-        "--only-binary",
-        ":all:",
-        "-r",
-        "./requirements.txt",
-    )
-    session.install("packaging")
-
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
 
