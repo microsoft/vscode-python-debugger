@@ -6,6 +6,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import tempfile
 import zipfile
 
@@ -139,13 +140,15 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
     index URLs (e.g., Azure Artifacts feed) instead of direct PyPI URLs.
     """
     libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
-    libs_dir.mkdir(parents=True, exist_ok=True)
 
     if not requests:
         raise ValueError("No debugpy wheel requests were provided.")
     version = requests[0]["version"]
 
-    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_") as tmp_dir:
+    libs_dir.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="debugpy_wheels_", dir=libs_dir.parent
+    ) as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
 
         for req in requests:
@@ -206,12 +209,18 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
                 f"pip download produced no debugpy wheels for version {version}."
             )
 
+        staged_libs = tmp_path / "libs"
         for wheel_path in wheel_paths:
             print("Downloaded:", wheel_path.name)
             with zipfile.ZipFile(wheel_path, "r") as wheel:
                 for zip_info in wheel.infolist():
                     print("\t" + zip_info.filename)
-                    wheel.extract(zip_info.filename, libs_dir)
+                    wheel.extract(zip_info.filename, staged_libs)
+
+        # Replace the generated bundle only after all wheels have been extracted.
+        if libs_dir.exists():
+            shutil.rmtree(libs_dir)
+        staged_libs.rename(libs_dir)
 
 
 @nox.session()
