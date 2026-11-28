@@ -5,11 +5,53 @@
 'use strict';
 
 import { PYTHON_LANGUAGE } from '../../../common/constants';
+import { getOSType, OSType } from '../../../common/platform';
 import { getSearchPathEnvVarNames } from '../../../common/utils/exec';
 import { EnvironmentVariables } from '../../../common/variables/types';
 import { getActiveTextEditor } from '../../../common/vscodeapi';
 import { LaunchRequestArguments } from '../../../types';
 import * as envParser from '../../../common/variables/environment';
+
+/**
+ * Environment variable names are case-insensitive on Windows, but debugpy rejects an "env"
+ * that contains keys differing only in case (e.g. both "Path" and "PATH"). Collapse such keys
+ * into one entry. For the executable search path the distinct entries of all variants are
+ * merged; for any other variable the last value wins.
+ */
+export function normalizeEnvironmentVariableCase(
+    env: EnvironmentVariables,
+    ostype: OSType = getOSType(),
+): EnvironmentVariables {
+    if (ostype !== OSType.Windows) {
+        return env;
+    }
+    const preferredPathName = getSearchPathEnvVarNames(ostype)[0];
+    const firstKeyByUpper = new Map<string, string>();
+    const result: EnvironmentVariables = {};
+    for (const key of Object.keys(env)) {
+        const upper = key.toUpperCase();
+        const existingKey = firstKeyByUpper.get(upper);
+        if (existingKey === undefined) {
+            firstKeyByUpper.set(upper, key);
+            result[key] = env[key];
+            continue;
+        }
+        const previous = result[existingKey];
+        const current = env[key];
+        let merged = current;
+        if (upper === 'PATH' && typeof previous === 'string' && typeof current === 'string') {
+            const entries = [...previous.split(';'), ...current.split(';')].filter(
+                (entry, index, all) => entry.length > 0 && all.indexOf(entry) === index,
+            );
+            merged = entries.join(';');
+        }
+        delete result[existingKey];
+        const finalKey = upper === 'PATH' ? preferredPathName : key;
+        firstKeyByUpper.set(upper, finalKey);
+        result[finalKey] = merged;
+    }
+    return result;
+}
 
 export async function getDebugEnvironmentVariables(args: LaunchRequestArguments): Promise<EnvironmentVariables> {
     const pathVariableName = getSearchPathEnvVarNames()[0];
@@ -67,7 +109,7 @@ export async function getDebugEnvironmentVariables(args: LaunchRequestArguments)
         env.GEVENT_SUPPORT = 'True'; // this is read in pydevd_constants.py
     }
 
-    return env;
+    return normalizeEnvironmentVariableCase(env);
 }
 
 export function getProgram(): string | undefined {
