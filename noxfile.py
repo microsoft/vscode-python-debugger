@@ -161,9 +161,11 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
     work_dir.mkdir(parents=True, exist_ok=True)
     previous_libs = work_dir / "previous"
     if previous_libs.exists():
-        raise FileExistsError(
-            f"Recover or remove the previous debugger bundle at {previous_libs} before retrying."
-        )
+        if not libs_dir.is_dir():
+            raise FileExistsError(
+                f"Recover or remove the previous debugger bundle at {previous_libs} before retrying."
+            )
+        shutil.rmtree(previous_libs)
     with tempfile.TemporaryDirectory(prefix="debugpy_wheels_", dir=work_dir) as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
 
