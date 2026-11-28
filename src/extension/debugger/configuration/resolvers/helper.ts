@@ -15,8 +15,9 @@ import * as envParser from '../../../common/variables/environment';
 /**
  * Environment variable names are case-insensitive on Windows, but debugpy rejects an "env"
  * that contains keys differing only in case (e.g. both "Path" and "PATH"). Collapse such keys
- * into one entry. For the executable search path the distinct entries of all variants are
- * merged; for any other variable the last value wins.
+ * within a single source into one entry. All spellings of the executable search path are
+ * renamed to the canonical one and their distinct entries merged in order; for any other
+ * variable the last value wins.
  */
 export function normalizeEnvironmentVariableCase(
     env: EnvironmentVariables,
@@ -25,30 +26,31 @@ export function normalizeEnvironmentVariableCase(
     if (ostype !== OSType.Windows) {
         return env;
     }
-    const preferredPathName = getSearchPathEnvVarNames(ostype)[0];
-    const firstKeyByUpper = new Map<string, string>();
+    const canonicalPathName = getSearchPathEnvVarNames(ostype)[0];
+    const keyByUpper = new Map<string, string>();
     const result: EnvironmentVariables = {};
     for (const key of Object.keys(env)) {
         const upper = key.toUpperCase();
-        const existingKey = firstKeyByUpper.get(upper);
+        const isPath = upper === canonicalPathName.toUpperCase();
+        const finalKey = isPath ? canonicalPathName : key;
+        const existingKey = keyByUpper.get(upper);
+        const current = env[key];
         if (existingKey === undefined) {
-            firstKeyByUpper.set(upper, key);
-            result[key] = env[key];
+            keyByUpper.set(upper, finalKey);
+            result[finalKey] = current;
             continue;
         }
         const previous = result[existingKey];
-        const current = env[key];
-        let merged = current;
-        if (upper === 'PATH' && typeof previous === 'string' && typeof current === 'string') {
+        delete result[existingKey];
+        keyByUpper.set(upper, finalKey);
+        if (isPath && typeof previous === 'string' && typeof current === 'string') {
             const entries = [...previous.split(';'), ...current.split(';')].filter(
                 (entry, index, all) => entry.length > 0 && all.indexOf(entry) === index,
             );
-            merged = entries.join(';');
+            result[finalKey] = entries.join(';');
+        } else {
+            result[finalKey] = current;
         }
-        delete result[existingKey];
-        const finalKey = upper === 'PATH' ? preferredPathName : key;
-        firstKeyByUpper.set(upper, finalKey);
-        result[finalKey] = merged;
     }
     return result;
 }
@@ -57,12 +59,13 @@ export async function getDebugEnvironmentVariables(args: LaunchRequestArguments)
     const pathVariableName = getSearchPathEnvVarNames()[0];
 
     // Merge variables from both .env file and env json variables.
-    const debugLaunchEnvVars: Record<string, string> =
-        args.env && Object.keys(args.env).length > 0
-            ? ({ ...args.env } as Record<string, string>)
-            : ({} as Record<string, string>);
+    // On Windows, names that differ only in case (e.g. "PATH" vs "Path") are the same variable, so
+    // canonicalize each source before combining them to keep launch > env file > system precedence.
+    const debugLaunchEnvVars = normalizeEnvironmentVariableCase(
+        args.env && Object.keys(args.env).length > 0 ? { ...args.env } : {},
+    ) as Record<string, string>;
     const envFileVars = await envParser.parseFile(args.envFile, debugLaunchEnvVars);
-    const env = envFileVars ? { ...envFileVars } : {};
+    const env = envFileVars ? normalizeEnvironmentVariableCase({ ...envFileVars }) : {};
 
     // "overwrite: true" to ensure that debug-configuration env variable values
     // take precedence over env file.
