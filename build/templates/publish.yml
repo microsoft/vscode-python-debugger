@@ -21,7 +21,7 @@
 # - Azure DevOps Marketplace resource GUID (499b84ac-1321-427f-aa17-267ca6975798) is hardcoded in publish script.
 # - Each publish step uses the managed identity's AAD token through VSCE_PAT.
 # - Requires extension artifacts already signed (signature file present).
-# - Node & vsce expected to be prepared by parent pipeline; omit local installation here.
+# - The parent pipeline prepares Node and the npm registry; no source checkout is required.
 # - Artifacts are expected at: $(Build.ArtifactStagingDirectory)/publishFolder/{platform}/
 
 parameters:
@@ -47,9 +47,9 @@ parameters:
     default: ''
 
 steps:
-  # Node & vsce expected to be prepared by parent pipeline; omit local installation.
-
-  # Assumes files already present at $(Build.ArtifactStagingDirectory)/publishFolder/{platform}/
+  # Install once, before the Marketplace credential exists on the publish agent.
+  - pwsh: npm install --global --prefix "$(Agent.TempDirectory)/marketplace-vsce" @vscode/vsce@4.1.1 --no-audit --no-fund
+    displayName: Install Marketplace publisher
 
   # Step 1: Acquire token only (store secret variable MarketplaceAADToken)
   - task: AzureCLI@2
@@ -106,10 +106,10 @@ steps:
 
             if ('${{ parameters.preRelease }}' -eq 'True') {
               Write-Host 'Publishing as pre-release'
-              npx @vscode/vsce@latest publish --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify --pre-release
+              & "$(Agent.TempDirectory)/marketplace-vsce/vsce.cmd" publish --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify --pre-release
             } else {
               Write-Host 'Publishing as stable release'
-              npx @vscode/vsce@latest publish --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify
+              & "$(Agent.TempDirectory)/marketplace-vsce/vsce.cmd" publish --packagePath $vsixPath --manifestPath $manifestPath --signaturePath $signaturePath --no-verify
             }
 
             if ($LASTEXITCODE -ne 0) {
