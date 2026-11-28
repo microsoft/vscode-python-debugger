@@ -7,6 +7,7 @@ import os
 import pathlib
 import re
 import shutil
+import sys
 import tempfile
 import zipfile
 
@@ -120,6 +121,17 @@ def lint(session: nox.Session) -> None:
 @nox.session()
 def tests(session: nox.Session) -> None:
     """Runs all the tests for the extension."""
+    session.run(
+        sys.executable,
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "build",
+        "-p",
+        "test_bundled_libs.py",
+        external=True,
+    )
     session.run("npm", "run", "test")
 
 
@@ -145,10 +157,14 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
         raise ValueError("No debugpy wheel requests were provided.")
     version = requests[0]["version"]
 
-    libs_dir.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(
-        prefix="debugpy_wheels_", dir=libs_dir.parent
-    ) as tmp_dir:
+    work_dir = libs_dir.parent / ".debugpy-build"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    previous_libs = work_dir / "previous"
+    if previous_libs.exists():
+        raise FileExistsError(
+            f"Recover or remove the previous debugger bundle at {previous_libs} before retrying."
+        )
+    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_", dir=work_dir) as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
 
         for req in requests:
@@ -217,10 +233,18 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
                     print("\t" + zip_info.filename)
                     wheel.extract(zip_info.filename, staged_libs)
 
-        # Replace the generated bundle only after all wheels have been extracted.
-        if libs_dir.exists():
-            shutil.rmtree(libs_dir)
-        staged_libs.rename(libs_dir)
+        # Keep the backup outside tmp_dir so even a failed rollback can't discard it.
+        if not libs_dir.exists():
+            staged_libs.rename(libs_dir)
+            return
+
+        libs_dir.rename(previous_libs)
+        try:
+            staged_libs.rename(libs_dir)
+        except OSError:
+            previous_libs.rename(libs_dir)
+            raise
+        shutil.rmtree(previous_libs)
 
 
 @nox.session()
