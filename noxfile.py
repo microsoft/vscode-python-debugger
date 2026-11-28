@@ -6,6 +6,8 @@ import json
 import os
 import pathlib
 import re
+import shutil
+import sys
 import tempfile
 import zipfile
 
@@ -119,29 +121,23 @@ def lint(session: nox.Session) -> None:
 @nox.session()
 def tests(session: nox.Session) -> None:
     """Runs all the tests for the extension."""
-    session.install("-r", "./requirements.txt")
+    session.run(
+        sys.executable,
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "build",
+        "-p",
+        "test_bundled_libs.py",
+        external=True,
+    )
     session.run("npm", "run", "test")
 
 
 @nox.session()
 def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
-    session.install("wheel")
-    session.install(
-        "-t",
-        "./bundled/libs",
-        "--no-cache-dir",
-        "--implementation",
-        "py",
-        "--no-deps",
-        "--require-hashes",
-        "--only-binary",
-        ":all:",
-        "-r",
-        "./requirements.txt",
-    )
-    session.install("packaging")
-
     target = os.environ.get("VSCETARGET", "")
     print("target:", target)
 
@@ -156,13 +152,21 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
     index URLs (e.g., Azure Artifacts feed) instead of direct PyPI URLs.
     """
     libs_dir = pathlib.Path.cwd() / "bundled" / "libs"
-    libs_dir.mkdir(parents=True, exist_ok=True)
 
     if not requests:
         raise ValueError("No debugpy wheel requests were provided.")
     version = requests[0]["version"]
 
-    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_") as tmp_dir:
+    work_dir = libs_dir.parent / ".debugpy-build"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    previous_libs = work_dir / "previous"
+    if previous_libs.exists():
+        if not libs_dir.is_dir():
+            raise FileExistsError(
+                f"Recover or remove the previous debugger bundle at {previous_libs} before retrying."
+            )
+        shutil.rmtree(previous_libs)
+    with tempfile.TemporaryDirectory(prefix="debugpy_wheels_", dir=work_dir) as tmp_dir:
         tmp_path = pathlib.Path(tmp_dir)
 
         for req in requests:
@@ -223,12 +227,26 @@ def download_debugpy_via_pip(session: nox.Session, requests: list[dict]) -> None
                 f"pip download produced no debugpy wheels for version {version}."
             )
 
+        staged_libs = tmp_path / "libs"
         for wheel_path in wheel_paths:
             print("Downloaded:", wheel_path.name)
             with zipfile.ZipFile(wheel_path, "r") as wheel:
                 for zip_info in wheel.infolist():
                     print("\t" + zip_info.filename)
-                    wheel.extract(zip_info.filename, libs_dir)
+                    wheel.extract(zip_info.filename, staged_libs)
+
+        # Keep the backup outside tmp_dir so even a failed rollback can't discard it.
+        if not libs_dir.exists():
+            staged_libs.rename(libs_dir)
+            return
+
+        libs_dir.rename(previous_libs)
+        try:
+            staged_libs.rename(libs_dir)
+        except OSError:
+            previous_libs.rename(libs_dir)
+            raise
+        shutil.rmtree(previous_libs)
 
 
 @nox.session()
