@@ -13,8 +13,7 @@ jobs:
     name: 'Ensure Required Labels'
     runs-on: ubuntu-latest
     permissions:
-      issues: write
-      pull-requests: write
+      pull-requests: read
     steps:
       - name: 'PR impact specified'
         uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5.6.0
