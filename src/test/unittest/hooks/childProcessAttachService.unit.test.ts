@@ -235,4 +235,33 @@ suite('Debug - Attach to Child Process', () => {
         // The original data object must not be mutated.
         expect(data).to.have.property('purpose').deep.equal(['debug-test']);
     });
+    test('Child process attach keeps pytest launch fields while removing debug-test purpose', async () => {
+        const pytestArgs = ['-s', '/workspace/tests/test_multiproc.py'];
+        const data: AttachRequestArguments = {
+            request: 'attach',
+            type: debuggerTypeName,
+            name: 'Attach',
+            port: 1234,
+            subProcessId: 2,
+            purpose: ['debug-test'],
+            module: 'pytest',
+            args: pytestArgs,
+            console: 'integratedTerminal',
+        };
+        const session: any = {};
+
+        getWorkspaceFoldersStub.returns(undefined);
+        startDebuggingStub.resolves(true);
+
+        await attachService.attach(data, session);
+
+        sinon.assert.calledOnce(startDebuggingStub);
+        const [, secondArg] = startDebuggingStub.args[0];
+        expect(secondArg).to.include({
+            module: 'pytest',
+            console: 'integratedTerminal',
+        });
+        expect(secondArg).to.have.property('args').deep.equal(pytestArgs);
+        expect(secondArg).to.not.have.property('purpose');
+    });
 });
