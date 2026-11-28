@@ -6,6 +6,7 @@ import * as path from 'path';
 import { sendTelemetryEvent } from '../../telemetry';
 import { EventName } from '../../telemetry/constants';
 import { traceError } from '../log/logging';
+import { getOSType, OSType } from '../platform';
 import { getSearchPathEnvVarNames } from '../utils/exec';
 import { EnvironmentVariables } from './types';
 
@@ -46,17 +47,34 @@ export function mergeVariables(
     source: EnvironmentVariables,
     target: EnvironmentVariables,
     options?: { overwrite?: boolean },
+    ostype: OSType = getOSType(),
 ) {
     if (!target) {
         return;
     }
-    const settingsNotToMerge = ['PYTHONPATH', getSearchPathEnvVarNames()[0]];
+    // Variable names are case-insensitive on Windows, so match them that way there. Otherwise
+    // "foo" and "FOO" would both end up in the target and be rejected by debugpy.
+    const caseInsensitive = ostype === OSType.Windows;
+    const normalize = (name: string) => (caseInsensitive ? name.toUpperCase() : name);
+    const settingsNotToMerge = ['PYTHONPATH', getSearchPathEnvVarNames(ostype)[0]].map(normalize);
+    const targetKeys = new Map<string, string>();
+    Object.keys(target).forEach((key) => targetKeys.set(normalize(key), key));
+
     Object.keys(source).forEach((setting) => {
-        if (settingsNotToMerge.indexOf(setting) >= 0) {
+        const normalized = normalize(setting);
+        if (settingsNotToMerge.indexOf(normalized) >= 0) {
             return;
         }
-        if (target[setting] === undefined || options?.overwrite) {
+        const existingKey = targetKeys.get(normalized);
+        if (existingKey === undefined || target[existingKey] === undefined) {
             target[setting] = source[setting];
+            targetKeys.set(normalized, setting);
+        } else if (options?.overwrite) {
+            if (existingKey !== setting) {
+                delete target[existingKey];
+            }
+            target[setting] = source[setting];
+            targetKeys.set(normalized, setting);
         }
     });
 }
