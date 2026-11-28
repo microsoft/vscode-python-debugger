@@ -2,18 +2,24 @@
 // Licensed under the MIT License.
 
 import { TelemetryReporter } from '@vscode/extension-telemetry';
-import { AppinsightsKey, isTestExecution } from '../common/constants';
+import { AppinsightsKey } from '../common/constants';
 
-export function getTelemetryReporter(telemetryReporter: TelemetryReporter | undefined) {
-    if (!isTestExecution() && telemetryReporter) {
-        return telemetryReporter;
+let telemetryReporter: TelemetryReporter | undefined;
+
+export function getTelemetryReporter(): TelemetryReporter {
+    if (!telemetryReporter) {
+        telemetryReporter = new TelemetryReporter(AppinsightsKey, [
+            {
+                lookup: /(errorName|errorMessage|errorStack)/g,
+            },
+        ]);
     }
 
-    telemetryReporter = new TelemetryReporter(AppinsightsKey, [
-        {
-            lookup: /(errorName|errorMessage|errorStack)/g,
-        },
-    ]);
-
     return telemetryReporter;
+}
+
+export async function clearTelemetryReporter(): Promise<void> {
+    const reporter = telemetryReporter;
+    telemetryReporter = undefined;
+    await reporter?.dispose();
 }
